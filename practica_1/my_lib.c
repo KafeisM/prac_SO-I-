@@ -1,39 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include "my_lib.h"
 
-size_t my_strlen(const char *str);
-int my_strcmp(const char *str1, const char *str2);
-char *my_strcpy(char *dest, const char *src);
-char *my_strncpy(char *dest, const char *src, size_t n);
-char *my_strcat(char *dest, const char *src);
-char *my_strchr(const char *str, int c);
+size_t my_strlen(const char *str){
+  
+    long res = 0;
+    int cont = 0;
 
-// PRUEBAS TEMPORALES
-void main()
-{
-    char *str1 = {"mundo"};
-    char *str2;
-    char aux[15] = {"hola "};
-    str2 = aux;
+    char aux = str[cont];
+    while(aux!='\0'){
+        if(aux!=' '){
+            res++;
+        }
+        cont++;
+        aux = str[cont];
+    }
+    return res;
+}
 
-    // test STRCMP
-    /* int prueba = my_strcmp(str1,str2);
-    if(prueba  < 0){
-        printf("El string 2 es mayor al string 1\n");
-    }else if(prueba > 0){
-        printf("El string 1 es mayor al string 2\n");
-    }else{
-        printf("Los stirngs son iguales\n");
-    } */
+char *my_strchr(const char *str, int c){
 
-    // test my_strcpy
+    while (*str != '\0'){
+      if (*str == c){
+        return (char *)str;
+      }
+      str++;
+    }
 
-    // test my_strncpy
-
-    // test my_strcat
-    str2 = my_strcat(str2, str1);
-    printf("%s\n", str2);
+    return NULL;
 }
 
 int my_strcmp(const char *str1, const char *str2)
@@ -56,7 +50,13 @@ int my_strcmp(const char *str1, const char *str2)
 
 char *my_strcpy(char *dest, const char *src){
 
-    int aux = 0;
+    int aux= 0;
+    int aux2= 0;
+
+    while(dest[aux2] != '\0'){
+        dest[aux2++] = '\0';
+    }
+
     while (src[aux] != '\0')
     {
         dest[aux] = src[aux];
@@ -101,7 +101,10 @@ char *my_strcat(char *dest, const char *src){
 
     int posD = 0;
     int posS = 0;
-    for (posD; dest[posD] != '\0'; posD++){
+    
+
+    while(dest[posD] != '\0'){
+        posD++;
     }
 
     while(src[posS] != '\0'){
