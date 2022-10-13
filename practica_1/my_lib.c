@@ -68,10 +68,8 @@ char *my_strcpy(char *dest, const char *src){
 
 char *my_strncpy(char *dest, const char *src, size_t n){
 
-    int len;
-    for (len = 0; src[len] != '\0'; len++)
-    {
-    }
+    int len = my_strlen(src);
+    
 
     if (len < n)
     {
