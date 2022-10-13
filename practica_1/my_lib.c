@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "my_lib.h"
 
+//FUNCIONS STRINGS
+
 size_t my_strlen(const char *str){
   
     long res = 0;
@@ -113,3 +115,32 @@ char *my_strcat(char *dest, const char *src){
 
     return dest;
 }
+
+//FUNCIONS GESTOR PILA
+
+struct my_stack *my_stack_init(int size){
+    struct my_stack top;
+    top.size = size;
+    top.top = NULL;
+
+    return &top;
+}
+
+int my_stack_push (struct my_stack *stack, void *data){
+    struct my_stack_node node;
+    
+
+    int res = malloc(stack->size);
+    node.data = data;
+
+    node.next = stack->top;
+    *stack->top = node;
+
+    if(res == NULL){
+        return -1;
+    }else{
+        return 0;
+    }  
+
+}
+
