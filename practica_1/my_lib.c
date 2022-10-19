@@ -119,30 +119,33 @@ char *my_strcat(char *dest, const char *src){
 //FUNCIONS GESTOR PILA
 
 struct my_stack *my_stack_init(int size){
-    struct my_stack stack;
-    stack.size = size;
-    stack.top = NULL;
+    struct my_stack *stack;
 
-    return &stack;
+    stack = malloc(size);
+    stack->size = size;
+    stack->top = NULL;
+
+    return stack;
 }
 
 int my_stack_push (struct my_stack *stack, void *data){
-    struct my_stack_node node;
-    
+    struct my_stack_node *node;
 
-    int res = malloc(stack->size);
-    node.data = data;
-
-    node.next = stack->top;
-    *stack->top = node;
-
-    if(res == NULL){
+    if(stack == NULL | stack->size < 0){
         return -1;
     }else{
+        node = malloc(stack->size);
+        stack->top = &node;
+        node->data = data;
         return 0;
-    }  
-
+    }
 }
+
+int my_stack_purge(struct my_stack *stack){
+    
+}
+
+
 
 int my_stack_len (struct my_stack *stack){
     struct my_stack_node *aux;
@@ -161,19 +164,6 @@ int my_stack_len (struct my_stack *stack){
     }
 
 }
-void *my_stack_pop (struct my_stack *stack){
-    
-    struct my_stack *aux;
-    
-    if (stack->top == NULL){
-        return NULL;
-    }else{
-        aux->top = stack->top;
-        stack->top = stack->top->next;
-        free(aux->top);
-    }
-    
-}
 
 void *my_stack_pop (struct my_stack *stack){
     
@@ -188,3 +178,4 @@ void *my_stack_pop (struct my_stack *stack){
     }
     
 }
+
