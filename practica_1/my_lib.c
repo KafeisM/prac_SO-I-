@@ -131,18 +131,44 @@ struct my_stack *my_stack_init(int size){
 int my_stack_push (struct my_stack *stack, void *data){
     struct my_stack_node *node;
 
-    if(stack == NULL | stack->size < 0){
+    if(stack == NULL || stack->size < 0){
         return -1;
     }else{
         node = malloc(stack->size);
-        stack->top = &node;
+        node->next = stack->top;
+        stack->top = node;
         node->data = data;
+        
         return 0;
     }
 }
 
 int my_stack_purge(struct my_stack *stack){
-    
+    int num_mem = sizeof(struct my_stack);
+    int len =  my_stack_len(stack);
+    //struct my_stack_node *aux,*aux2;
+
+    if(stack->top == NULL){ 
+        return num_mem;
+
+    }else{
+        num_mem = (len * sizeof(struct my_stack_node)) + (stack->size * len) + num_mem;
+
+        /*aux = stack->top;
+        aux2 = aux;
+        while(aux2->next != NULL){
+            aux2 = aux;
+            free(aux->data);
+            free(aux);
+            aux = aux2->next;
+        }
+
+        free(stack); */
+
+    }
+
+   
+    return num_mem;
 }
 
 
@@ -155,9 +181,11 @@ int my_stack_len (struct my_stack *stack){
         return 0;
     }else{
         aux = stack->top;
+
         while(aux->next != NULL){
             cont++;
             aux = aux->next;
+           
         }
 
         return cont;
@@ -167,14 +195,14 @@ int my_stack_len (struct my_stack *stack){
 
 void *my_stack_pop (struct my_stack *stack){
     
-    struct my_stack *aux;
-    
+    struct my_stack_node *aux = NULL;
+
     if (stack->top == NULL){
         return NULL;
     }else{
-        aux->top = stack->top;
-        stack->top = stack->top->next;
-        free(aux->top);
+        aux = stack->top;
+        stack->top = aux->next;
+        return aux->data;
     }
     
 }
