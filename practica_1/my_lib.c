@@ -119,11 +119,11 @@ char *my_strcat(char *dest, const char *src){
 //FUNCIONS GESTOR PILA
 
 struct my_stack *my_stack_init(int size){
-    struct my_stack top;
-    top.size = size;
-    top.top = NULL;
+    struct my_stack stack;
+    stack.size = size;
+    stack.top = NULL;
 
-    return &top;
+    return &stack;
 }
 
 int my_stack_push (struct my_stack *stack, void *data){
@@ -144,3 +144,47 @@ int my_stack_push (struct my_stack *stack, void *data){
 
 }
 
+int my_stack_len (struct my_stack *stack){
+    struct my_stack_node *aux;
+    int cont = 1;
+
+    if(stack->top == NULL){
+        return 0;
+    }else{
+        aux = stack->top;
+        while(aux->next != NULL){
+            cont++;
+            aux = aux->next;
+        }
+
+        return cont;
+    }
+
+}
+void *my_stack_pop (struct my_stack *stack){
+    
+    struct my_stack *aux;
+    
+    if (stack->top == NULL){
+        return NULL;
+    }else{
+        aux->top = stack->top;
+        stack->top = stack->top->next;
+        free(aux->top);
+    }
+    
+}
+
+void *my_stack_pop (struct my_stack *stack){
+    
+    struct my_stack *aux;
+    
+    if (stack->top == NULL){
+        return NULL;
+    }else{
+        aux->top = stack->top;
+        stack->top = stack->top->next;
+        free(aux->top);
+    }
+    
+}
