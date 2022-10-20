@@ -187,7 +187,7 @@ int my_stack_len (struct my_stack *stack){
             aux = aux->next;
            
         }
-
+        //d,sfjbvlisdufjbvnlisnjvflinsfv
         return cont;
     }
 
