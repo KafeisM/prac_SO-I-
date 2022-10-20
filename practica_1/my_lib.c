@@ -148,28 +148,27 @@ int my_stack_push (struct my_stack *stack, void *data){
 int my_stack_purge(struct my_stack *stack){
     int num_mem = sizeof(struct my_stack);
     int len =  my_stack_len(stack);
-    //struct my_stack_node *aux,*aux2;
+    struct my_stack_node *aux;
 
     if(stack->top == NULL){ 
         return num_mem;
 
     }else{
-        num_mem = (len * sizeof(struct my_stack_node)) + (stack->size * len) + num_mem;
-
-        /*aux = stack->top;
-        aux2 = aux;
-        while(aux2->next != NULL){
-            aux2 = aux;
+        num_mem = (len * sizeof(struct my_stack_node)) + (stack->size * len) + num_mem;   
+        aux = stack->top;
+        
+        while(aux->next != NULL){
+            stack->top = aux->next;
             free(aux->data);
             free(aux);
-            aux = aux2->next;
-        }
+            aux = stack->top;
+        }    
 
-        free(stack); */
+        free(stack); 
 
     }
 
-   
+
     return num_mem;
 }
 
@@ -189,7 +188,7 @@ int my_stack_len (struct my_stack *stack){
             aux = aux->next;
            
         }
-        //d,sfjbvlisdufjbvnlisnjvflinsfv
+
         return cont;
     }
 
