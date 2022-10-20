@@ -122,6 +122,7 @@ struct my_stack *my_stack_init(int size){
     struct my_stack *stack;
 
     stack = malloc(size);
+    //mirar error
     stack->size = size;
     stack->top = NULL;
 
@@ -135,6 +136,7 @@ int my_stack_push (struct my_stack *stack, void *data){
         return -1;
     }else{
         node = malloc(stack->size);
+        //mirar error
         node->next = stack->top;
         stack->top = node;
         node->data = data;
