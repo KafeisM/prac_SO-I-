@@ -232,12 +232,22 @@ struct my_stack *my_stack_read(char *filename){
 
     int fd = 0;
     int size;
+    int push;
     struct my_stack *stack_aux;
     FILE *f = fopen(filename, "rb");
+
     fd = fread(size,sizeof(int),1,filename);
     stack_aux = my_stack_init(size);
+    void *data;
 
-    while (fread())
+    while (fd = fread(data,sizeof(void),1,f)){
+        if (fd == -1){
+            return NULL;
+        }
+        push = my_stack_push(stack_aux,data);
+    }
+
+    return stack_aux;
     //size_t  fread(void *p, size_t size, size_t n, FILE *pf)    
     
 }
