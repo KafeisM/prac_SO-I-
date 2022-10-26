@@ -231,9 +231,13 @@ int my_stack_write(struct my_stack *stack, char *filename){
 struct my_stack *my_stack_read(char *filename){
 
     int fd = 0;
+    int size;
     struct my_stack *stack_aux;
     FILE *f = fopen(filename, "rb");
-    
+    fd = fread(size,sizeof(int),1,filename);
+    stack_aux = my_stack_init(size);
+
+    while (fread())
     //size_t  fread(void *p, size_t size, size_t n, FILE *pf)    
     
 }
