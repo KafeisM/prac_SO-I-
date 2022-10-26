@@ -208,3 +208,16 @@ void *my_stack_pop (struct my_stack *stack){
     
 }
 
+int my_stack_write(struct my_stack *stack, char *filename){
+    int cont = 0;
+    struct my_stack *stack_aux = my_stack_init(stack->size);
+    FILE *f = fopen(filename, "wb");
+    void *data;
+    while (stack_aux->top != NULL){
+        cont++;
+        fwrite(my_stack_pop(stack_aux),1,sizeof(stack_aux->top->data),f);
+    }
+    fclose(f);
+    return cont;
+}
+
