@@ -209,50 +209,48 @@ void *my_stack_pop (struct my_stack *stack){
 }
 
 int my_stack_write(struct my_stack *stack, char *filename){
-
+    FILE *F;
     int cont = 0;
-    int fd = 0;
+    
     struct my_stack *stack_aux = my_stack_init(stack->size);
 
-    fd = open(filename,O_WRONLY);
-    if(fd == -1){
+    F = fopen(filename,"wb");
+    if(F == NULL){
         return -1;
-    }else{
-        FILE *f = fopen(filename, "wb");
-        while ((stack_aux->top != NULL) && (cont != -1)){
+    }
+
+    while ((stack_aux->top != NULL) && (cont != -1)){
         cont++;
-        fd = fwrite(my_stack_pop(stack_aux),1,sizeof(stack_aux->top->data),f);      
+        fwrite(my_stack_pop(stack_aux), 1, sizeof(stack_aux->top->data), F);
     }
-    fclose(f);
-    }
-    
-    
+
+    fflush(F);
+    fclose(F);
+
     return cont;
     
 }
 
 struct my_stack *my_stack_read(char *filename){
-    FILE *buffer;
-    int fd = 0;
-    int size;
-    int push;
+    FILE *F;
+    int *size_aux = NULL;
     struct my_stack *stack_aux;
-    void *data;
+    //struct my_stack_node *node_aux;
+    void *data = NULL;
 
-    
-    if(fopen_s(&buffer,filename,"rb") == 0){
-        int aux = read(filename,size,sizeof(int));
-        stack_aux = my_stack_init(size);
-   
-        while (fread(data,sizeof(void),1,filename)){
-            if (fd == -1){
-                return NULL;
-            }
-            push = my_stack_push(stack_aux,data);
-        }
-    }else{
+    F = fopen(filename, "rb");
+    if(F == NULL){
         return NULL;
     }
+
+    fread(size_aux, sizeof(int), 1, F);
+    stack_aux = my_stack_init(*size_aux);
+
+    while (fread(data, sizeof(void), 1, F)){
+         my_stack_push(stack_aux, data);
+    }
+
+    fclose(F);
 
     return stack_aux;
     //size_t  fread(void *p, size_t size, size_t n, FILE *pf)    
