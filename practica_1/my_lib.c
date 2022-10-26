@@ -209,15 +209,22 @@ void *my_stack_pop (struct my_stack *stack){
 }
 
 int my_stack_write(struct my_stack *stack, char *filename){
+
     int cont = 0;
+    int fd = 0;
     struct my_stack *stack_aux = my_stack_init(stack->size);
-    FILE *f = fopen(filename, "wb");
-    void *data;
-    while (stack_aux->top != NULL){
+    FILE *f = fopen(filename, "w");
+    
+    while ((stack_aux->top != NULL) && (cont != -1)){
         cont++;
-        fwrite(my_stack_pop(stack_aux),1,sizeof(stack_aux->top->data),f);
+        fd = fwrite(my_stack_pop(stack_aux),1,sizeof(stack_aux->top->data),f);
+        if (fd = open(filename,O_WRONLY) == -1){
+            cont = -1;
+        }
     }
+
     fclose(f);
     return cont;
+    
 }
 
