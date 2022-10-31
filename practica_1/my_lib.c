@@ -225,7 +225,8 @@ int my_stack_write(struct my_stack *stack, char *filename){
     if(fd == -1){
         return -1;
     }
-    else{
+    else{       
+        write(fd,&stack_aux->size,sizeof(int));
         while ((stack_aux->top != NULL)){
             cont++;
             write(fd, my_stack_pop(stack_aux), stack->size);     
@@ -252,11 +253,11 @@ struct my_stack *my_stack_read(char *filename){
     }else{
         read(fd, &size_aux, sizeof(int));
         stack_aux = my_stack_init(size_aux);
+        printf("%d\n",size_aux);
 
         data = malloc(size_aux);
         while (read(fd,data, size_aux) > 0){
             my_stack_push(stack_aux,data);
-            printf("ffff");
         }
     }
 
