@@ -266,7 +266,6 @@ struct my_stack *my_stack_read2(char *filename){
     int fd;
     int size_aux;
     void *data;
-    fd = open(filename,O_RDONLY);
     struct my_stack *stack_aux;
 
     if(fd == -1){
@@ -275,10 +274,16 @@ struct my_stack *my_stack_read2(char *filename){
         read(fd,size_aux,sizeof(int));
         stack_aux = my_stack_init(size_aux);
 
-        while(read(fd,data,sizeof(void))>0){
+        data = malloc(size_aux);
+        while (read(fd,data, size_aux) > 0){
             my_stack_push(stack_aux,data);
+            printf("ffff");
         }
     }
+
+    printf("%d\n",my_stack_len(stack_aux));
+  
+    close(fd);
 
 }
 
