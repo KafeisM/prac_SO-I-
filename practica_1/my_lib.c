@@ -240,7 +240,7 @@ int my_stack_write(struct my_stack *stack, char *filename){
 
 struct my_stack *my_stack_read(char *filename){
     int fd = 0;
-    int *size_aux = NULL;
+    int size_aux;
     void *data = NULL;
     struct my_stack *stack_aux;
     
@@ -249,10 +249,10 @@ struct my_stack *my_stack_read(char *filename){
     if(fd == -1){
         return NULL;
     }else{
-        read(fd, size_aux, sizeof(int));
-        stack_aux = my_stack_init(*size_aux);
+        read(fd, &size_aux, sizeof(int));
+        stack_aux = my_stack_init(size_aux);
 
-        while (read(fd, data, *size_aux) > 0){
+        while (read(fd, data, size_aux) > 0){
             my_stack_push(stack_aux, data);
         }
     }
