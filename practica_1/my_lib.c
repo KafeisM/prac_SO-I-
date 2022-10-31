@@ -208,64 +208,127 @@ void *my_stack_pop (struct my_stack *stack){
     
 }
 
+
+
 int my_stack_write(struct my_stack *stack, char *filename){
-    int cont = 0;
-    int fd= 0;
-    
-    struct my_stack *stack_aux = my_stack_init(stack->size);
-    struct my_stack_node *node_aux = stack->top;
 
-    while(node_aux != NULL){
-        my_stack_push(stack_aux,node_aux->data);
-        node_aux = node_aux->next;
-    }
-
-    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-
-    if(fd == -1){
+    if (stack == NULL) {
+        printf("Error! La pila no existe.");
         return -1;
     }
-    else{       
-        write(fd,&stack_aux->size,sizeof(int));
-        while ((stack_aux->top != NULL)){
-            cont++;
-            write(fd, my_stack_pop(stack_aux), stack->size);     
+
+    int fd;
+    int errorControl;
+    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0666); //Abrir fichero
+
+    if (fd == -1) {
+        perror("Error al abrir el fichero!!!");
+        return -1;
+    }
+
+    //Pila Original -> 2 1 0 (valores a modo de ejemplo)
+
+    //Pila auxiliar -> 0 1 2
+
+    //Escritura de la pila auxiliar en fichero -> 0 1 2
+
+    //Lectura de fichero para crear pila -> 2 1 0
+
+    struct my_stack* aux = my_stack_init(stack->size); //Creamos pila auxiliar
+
+    //Guardamos valores de pila original en pila auxiliar
+    struct my_stack_node* top = stack->top;
+    while (stack->top != NULL)
+    {
+        my_stack_push(aux, stack->top->data);
+        stack->top = stack->top->next;
+       
+    }
+    stack->top = top;
+
+
+    size_t writtenElements = 0;
+
+    //Escribimos en el fichero
+    errorControl = write(fd, &(stack->size), sizeof(stack->size));
+   
+    if (errorControl == -1) {
+            perror("Error al escribir en el fichero!!!");
+            return -1;
+    }
+
+    while (aux->top != NULL) {
+        errorControl = write(fd, my_stack_pop(aux), (stack->size));
+        //fd = fichero
+        //my_stack_pop(aux) = data (a escribir);
+        //(stack->size) = tamaño de la estructura en bytes <-> sizeof(struct my_data)
+        if (errorControl == -1) {
+            perror("Error al escribir en el fichero!!!");
+            return -1;
         }
+        writtenElements++;
     }
     
-    close(fd);
 
-    // printf("%d\n",cont);
+
+    //Cerramos fichero
+    errorControl = close(fd);
     
-    return cont;
+    if (errorControl == -1) {
+        perror("Error al cerrar el fichero!!!");
+        return -1;
+    }
+
+
+    return writtenElements; //Devolvemos número de elementos escritos
 }
 
 struct my_stack *my_stack_read(char *filename){
-    int fd = 0;
-    int size_aux;
-    void *data;
-    struct my_stack *stack_aux;
-    
+    int fd;
+    int fe;
+    int size;
 
-    fd = open(filename,O_RDONLY);
-    if(fd == -1){
-        return NULL;
-    }else{
-        read(fd, &size_aux, sizeof(int));
-        stack_aux = my_stack_init(size_aux);
-        printf("%d\n",size_aux);
-
-        data = malloc(size_aux);
-        while (read(fd,data, size_aux) > 0){
-            my_stack_push(stack_aux,data);
-        }
+    fd = open(filename,O_RDONLY); //Abrir fichero
+    if (fd == -1) {
+        perror("Error al abrir el fichero!!!");
     }
+    
+    fe = read(fd, &size, sizeof(int)); 
+    
+    if (fe == -1) {
+        perror("Error al leer el fichero!!!");      
+    }
+    
+    //Creamos pila
+    struct my_stack *s = my_stack_init(size);
+    void* data;
 
-    printf("%d\n",my_stack_len(stack_aux));
-  
+    //Leemos  
+    while (fe > 0) {
+           
+
+        data = malloc(s->size);
+
+        if (data == NULL) {
+            printf("No se pudo reservar memoria.\n");
+            
+        }
+
+        fe = read(fd, data, s->size);
+
+        if (fe == -1) {
+            perror("Error al leer el fichero!!!");
+        }
+
+
+        if (fe > 0) {
+            my_stack_push(s, data);
+        }
+            
+     }
+       
     close(fd);
-
-    return stack_aux;
+    return s;
     
 }
 
