@@ -209,13 +209,13 @@ void *my_stack_pop (struct my_stack *stack){
 }
 
 int my_stack_write(struct my_stack *stack, char *filename){
-    int cont = 1;
+    int cont = 0;
     int fd= 0;
     
     struct my_stack *stack_aux = my_stack_init(stack->size);
     struct my_stack_node *node_aux = stack->top;
 
-    while(node_aux->next != NULL){
+    while(node_aux != NULL){
         my_stack_push(stack_aux,node_aux->data);
         node_aux = node_aux->next;
     }
@@ -228,12 +228,13 @@ int my_stack_write(struct my_stack *stack, char *filename){
     else{
         while ((stack_aux->top != NULL)){
             cont++;
-            write(fd, my_stack_pop(stack_aux), stack->size);
-            
+            write(fd, my_stack_pop(stack_aux), stack->size);     
         }
     }
     
     close(fd);
+
+    // printf("%d\n",cont);
     
     return cont;
 }
