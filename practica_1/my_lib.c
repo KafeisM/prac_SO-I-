@@ -213,17 +213,34 @@ int my_stack_write(struct my_stack *stack, char *filename){
     int fd= 0;
     
     struct my_stack *stack_aux = my_stack_init(stack->size);
-    struct my_stack_node *node_aux = stack->top;
 
     while(node_aux != NULL){
         my_stack_push(stack_aux,node_aux->data);
         node_aux = node_aux->next;
     }
 
-    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    while ((stack_aux->top != NULL) && (cont != -1)){
+        cont++;
+        fwrite(my_stack_pop(stack_aux), 1, sizeof(stack_aux->top->data), F);
+    }
 
-    if(fd == -1){
-        return -1;
+    fflush(F);
+    fclose(F);
+
+    return cont;
+    
+}
+
+struct my_stack *my_stack_read(char *filename){
+    FILE *F;
+    int *size_aux = NULL;
+    struct my_stack *stack_aux;
+    //struct my_stack_node *node_aux;
+    void *data = NULL;
+
+    F = fopen(filename, "rb");
+    if(F == NULL){
+        return NULL;
     }
     else{       
         write(fd,&stack_aux->size,sizeof(int));
@@ -232,6 +249,11 @@ int my_stack_write(struct my_stack *stack, char *filename){
             write(fd, my_stack_pop(stack_aux), stack->size);     
         }
     }
+
+    fclose(F);
+
+    return stack_aux;
+    //size_t  fread(void *p, size_t size, size_t n, FILE *pf)    
     
     close(fd);
 
@@ -240,18 +262,17 @@ int my_stack_write(struct my_stack *stack, char *filename){
     return cont;
 }
 
-struct my_stack *my_stack_read(char *filename){
-    int fd = 0;
+struct my_stack *my_stack_read2(char *filename){
+
+    int fd;
     int size_aux;
     void *data;
     struct my_stack *stack_aux;
-    
 
-    fd = open(filename,O_RDONLY);
     if(fd == -1){
         return NULL;
     }else{
-        read(fd, &size_aux, sizeof(int));
+        read(fd,size_aux,sizeof(int));
         stack_aux = my_stack_init(size_aux);
         printf("%d\n",size_aux);
 
@@ -265,8 +286,6 @@ struct my_stack *my_stack_read(char *filename){
   
     close(fd);
 
-    return stack_aux;
-    
 }
 
 
