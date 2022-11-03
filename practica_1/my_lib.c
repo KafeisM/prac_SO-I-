@@ -77,7 +77,6 @@ char *my_strncpy(char *dest, const char *src, size_t n){
 
     int len = my_strlen(src);
     
-
     if (len < n)
     {
         for (int i = 0; i < len; i++)
