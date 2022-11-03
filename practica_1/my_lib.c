@@ -1,11 +1,18 @@
+/*PRÀCTICA 1 SISTEMAS OPERATIVOS
+-JORDI FLORIT ENSENYAT
+-PAU GIRÓN RODRÍGUEZ
+-JOSEP GABRIEL FORNÉS REYNÉS*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "my_lib.h"
 
-//FUNCIONS STRINGS
+//FUNCIONES STRINGS-------------------------------------------------------------------------------------
 
 size_t my_strlen(const char *str){
-  
+   
+   
     long res = 0;
     int cont = 0;
 
@@ -32,11 +39,9 @@ char *my_strchr(const char *str, int c){
     return NULL;
 }
 
-int my_strcmp(const char *str1, const char *str2)
-{
-
-    /*mentre no final de cadena i els elements siguin igual, seguir avançant
-    si 2 elements ja no son iguals, mirar quin es major
+int my_strcmp(const char *str1, const char *str2){
+    
+    /*mientras no final de cadena i los elemntos sean iguales, seguir avanzando
     retun > 0 si str1 > str2
     retun < 0 si str2 > str1
     retun = 0 si str1 = str2*/
@@ -115,7 +120,8 @@ char *my_strcat(char *dest, const char *src){
     return dest;
 }
 
-//FUNCIONS GESTOR PILA
+//FUNCIONES GESTOR PILA-------------------------------------------------------------------------------------
+
 
 struct my_stack *my_stack_init(int size){
 
