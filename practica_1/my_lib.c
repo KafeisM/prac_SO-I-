@@ -8,19 +8,23 @@
 #include <stdlib.h>
 #include "my_lib.h"
 
-//FUNCIONES STRINGS-------------------------------------------------------------------------------------
+// FUNCIONES STRINGS -------------------------------------------------------------------------------------
 
 size_t my_strlen(const char *str){
-   
-   
+    
+    //variables resultado y contador de caracteres como indice del string
     long res = 0;
     int cont = 0;
 
+    //caracter auxiliar que iremos analizando
     char aux = str[cont];
     while(aux!='\0'){
+
+        //aumentamos el resultado en 1 si el caracter no es un espacio
         if(aux!=' '){
             res++;
         }
+        //incrementamos el índice y modificamos el caracter auxiliar
         cont++;
         aux = str[cont];
     }
@@ -29,11 +33,14 @@ size_t my_strlen(const char *str){
 
 char *my_strchr(const char *str, int c){
 
+    //recorremos el string con el puntero
     while (*str != '\0'){
-      if (*str == c){
-        return (char *)str;
-      }
-      str++;
+
+        //si encontramos el caracter devolvemos lo que falta de string
+        if (*str == c){
+            return (char *)str;
+        }
+        str++;
     }
 
     return NULL;
@@ -41,7 +48,7 @@ char *my_strchr(const char *str, int c){
 
 int my_strcmp(const char *str1, const char *str2){
     
-    /*mientras no final de cadena i los elemntos sean iguales, seguir avanzando
+    /*mientras no final de cadena y los elemntos sean iguales, seguir avanzando
     retun > 0 si str1 > str2
     retun < 0 si str2 > str1
     retun = 0 si str1 = str2*/
@@ -57,13 +64,17 @@ int my_strcmp(const char *str1, const char *str2){
 
 char *my_strcpy(char *dest, const char *src){
 
+    //indice para recorrer los conjuntos de char's
     int aux= 0;
-    int aux2= 0;
 
-    while(dest[aux2] != '\0'){
-        dest[aux2++] = '\0';
+    //vaciamos dest
+    while(dest[aux] != '\0'){
+        dest[aux++] = '\0';
     }
 
+    aux = 0;
+
+    //pasamos todos los caracteres de src a dest
     while (src[aux] != '\0')
     {
         dest[aux] = src[aux];
@@ -75,10 +86,16 @@ char *my_strcpy(char *dest, const char *src){
 
 char *my_strncpy(char *dest, const char *src, size_t n){
 
+    //obtenemos la longitud de src
     int len = my_strlen(src);
     
+    //separamos el problema en los dos posibles casos
     if (len < n)
     {
+        //para un tamaño mayor que el de *src:
+
+        //ponemos el contenido de *src en *dest y llenamos
+        //lo restante de 0's
         for (int i = 0; i < len; i++)
         {
             dest[i] = src[i];
@@ -90,6 +107,9 @@ char *my_strncpy(char *dest, const char *src, size_t n){
     }
     else
     {
+        //para un tamaño menor o igual que el de *src
+
+        //añadimos los n primeros caracteres de *src en *dest
         for (int i = 0; i < n; i++)
         {
             dest[i] = src[i];
@@ -119,7 +139,7 @@ char *my_strcat(char *dest, const char *src){
     return dest;
 }
 
-//FUNCIONES GESTOR PILA-------------------------------------------------------------------------------------
+// FUNCIONES GESTOR PILA -------------------------------------------------------------------------------------
 
 
 struct my_stack *my_stack_init(int size){
