@@ -10,6 +10,12 @@
 
 // FUNCIONES STRINGS -------------------------------------------------------------------------------------
 
+/*---------------------------------------------------------------------------------------------------------
+* Devuelve la longitud del string pasado por parámetro  
+* Input:    str: puntero a la cadena de texto
+* Output:   Valor entero con la lognitud de la cadena 
+---------------------------------------------------------------------------------------------------------*/
+
 size_t my_strlen(const char *str){
     
     //variables resultado y contador de caracteres como indice del string
@@ -31,6 +37,13 @@ size_t my_strlen(const char *str){
     return res;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Escanea la cadena apuntada por str buscando la primera ocurrencia del carácter c
+* Input:    str: apunta a la cadena a escanear | c : es el carácter buscado.
+* Output:   Devuelve el puntero a la primera ocurrencia del carácter c en la cadena str o 
+* NULL si el carácter no se encuentra
+---------------------------------------------------------------------------------------------------------*/
+
 char *my_strchr(const char *str, int c){
 
     //recorremos el string con el puntero
@@ -46,13 +59,19 @@ char *my_strchr(const char *str, int c){
     return NULL;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Compara dos cadenas de texto pasadas por parámetro
+* Input:    str1: apunta a la 1ª cadena a comparar | str2: apunta a la 2ª cadena a comparar.
+* Output:   Valor entero que asigna:
+*            retun > 0 si str1 > str2
+*            retun < 0 si str2 > str1
+*            retun = 0 si str1 = str2
+---------------------------------------------------------------------------------------------------------*/
+
 int my_strcmp(const char *str1, const char *str2){
     
-    /*mientras no final de cadena y los elemntos sean iguales, seguir avanzando
-    retun > 0 si str1 > str2
-    retun < 0 si str2 > str1
-    retun = 0 si str1 = str2*/
-
+    //mientras no final de cadena y los elemntos sean iguales, seguir avanzando
+  
     while (*str1 && (*str1 == *str2))
     {
         str1++;
@@ -61,6 +80,12 @@ int my_strcmp(const char *str1, const char *str2){
 
     return *str1 - *str2;
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Copia la cadena apuntada por src en el espacio de memoria apuntado por dest, después de vaciarlo.
+* Input:    dest: puntero a la cadena destino | src: puntero a la cadena origen
+* Output:   Puntero a la cadena destino 
+---------------------------------------------------------------------------------------------------------*/
 
 char *my_strcpy(char *dest, const char *src){
 
@@ -83,6 +108,14 @@ char *my_strcpy(char *dest, const char *src){
 
     return dest;
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Copia los caracteres indicados por parámetro de la cadena apuntada por src en la cadena apuntada por dest
+* Rellenar con 0's en los carácteres que sobren.
+* Input:    dest: puntero a la cadena destino | src: puntero a la cadena origen | n: nº de carácteres que
+*           copiamos en dest
+* Output:   puntero a la cadena destino 
+---------------------------------------------------------------------------------------------------------*/
 
 char *my_strncpy(char *dest, const char *src, size_t n){
 
@@ -117,6 +150,12 @@ char *my_strncpy(char *dest, const char *src, size_t n){
     }
     return dest;
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Se pasan 2 cadenas por parametro y las concatena, la cadena src la añadire al final de dest
+* Input:    dest: es el puntero a la cadena destino | src: apunta a la cadena a concatenar.
+* Output:   puntero a la cadena destino 
+---------------------------------------------------------------------------------------------------------*/
 
 char *my_strcat(char *dest, const char *src){
 
