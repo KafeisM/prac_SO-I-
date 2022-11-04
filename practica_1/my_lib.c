@@ -193,7 +193,12 @@ struct my_stack *my_stack_init(int size){
     struct my_stack *stack;
 
     //reserva de memoria e inicialización de sus elementos
-    stack = malloc(size);
+    stack = malloc(sizeof(struct my_stack));
+
+    if(stack == NULL){
+        printf("NO SE PUEDE RESERVAR MEMORIA\n");
+    }
+
     stack->size = size;
     stack->top = NULL;
 
@@ -208,6 +213,12 @@ struct my_stack *my_stack_init(int size){
 
 int my_stack_push (struct my_stack *stack, void *data){
 
+    //comprovación si existe la pila 
+    if(stack == NULL){
+        printf("PILA NO EXISTENTE\n");
+        return -1;
+    }
+
     //nodo que se añadirá a la pila
     struct my_stack_node *node;
 
@@ -216,8 +227,13 @@ int my_stack_push (struct my_stack *stack, void *data){
         return -1;
     }else{
 
-        //reserva de memoria para el nodo
+        //reserva de memoria para el nodo (y control error)
         node = malloc(stack->size);
+
+        if(node == NULL){
+            printf("ERROR PARA CREACION NUEVO NODO\n");
+            return -1;
+        }
 
         //introducción del nuevo nodo y ponemos el data
         node->next = stack->top;
@@ -235,6 +251,11 @@ int my_stack_push (struct my_stack *stack, void *data){
 ---------------------------------------------------------------------------------------------------------*/
 
 void *my_stack_pop (struct my_stack *stack){
+
+    //comprovacion pila vacia
+    if(stack->top == NULL){
+        return NULL;
+    }
     
     //nodo auxiliar
     struct my_stack_node *aux = NULL;
