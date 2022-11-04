@@ -178,8 +178,14 @@ char *my_strcat(char *dest, const char *src){
     return dest;
 }
 
-// FUNCIONES GESTOR PILA -------------------------------------------------------------------------------------
+// ---------- FUNCIONES GESTOR PILA -------------------------------------------------------------------------
 
+/*---------------------------------------------------------------------------------------------------------
+* Reserva espacio para una variable de tipo "struct my_stack", que contendrá el puntero top, que apuntará
+* al nodo superior de la pila, y el tamaño de los datos size.
+* Input:    size: tamaño de los datos
+* Output:   puntero a la pila inicializada
+---------------------------------------------------------------------------------------------------------*/
 
 struct my_stack *my_stack_init(int size){
 
@@ -193,6 +199,12 @@ struct my_stack *my_stack_init(int size){
 
     return stack;
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Inserta un nuevo nodo a la pila dada.
+* Input:    stack: puntero de la pila  | data: puntero a los datos del nodo
+* Output:   0 si ha ido bien, o -1 si no.
+---------------------------------------------------------------------------------------------------------*/
 
 int my_stack_push (struct my_stack *stack, void *data){
 
@@ -215,6 +227,64 @@ int my_stack_push (struct my_stack *stack, void *data){
         return 0;
     }
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Elimina el nodo superior de la pila dada y libera la memoria que ocupaba ese nodo
+* Input:    stack: puntero de la pila
+* Output:   puntero a los datos del elemento eliminado
+---------------------------------------------------------------------------------------------------------*/
+
+void *my_stack_pop (struct my_stack *stack){
+    
+    //nodo auxiliar
+    struct my_stack_node *aux = NULL;
+
+    //control de pila vacía y pop del nodo apuntado por top
+    if (stack->top == NULL){
+        return NULL;
+    }else{
+        aux = stack->top;
+        stack->top = aux->next;
+        return aux->data;
+    }
+    
+}
+
+/*---------------------------------------------------------------------------------------------------------
+* Mide la longitud de la pila contando los nodos que hay
+* Input:    stack: puntero de la pila
+* Output:   número de nodos totales que hay en los elementos de la pila
+---------------------------------------------------------------------------------------------------------*/
+
+int my_stack_len (struct my_stack *stack){
+
+    //nodo auxiliar y contador para el resultado
+    struct my_stack_node *aux;
+    int cont = 1;
+
+    //control de pila vacía y bucle para aumentar el contador
+    if(stack->top == NULL){
+        return 0;
+    }else{
+
+        aux = stack->top;
+        while(aux->next != NULL){
+            cont++;
+            aux = aux->next;
+           
+        }
+
+        return cont;
+    }
+
+}
+
+/*---------------------------------------------------------------------------------------------------------
+* Libera la memoria que habíamos reservado para cada uno de los datos y la 
+* de cada nodo. Además, libera también la memoria que ocupa el "struck my_stack".
+* Input:    stack: puntero de la pila
+* Output:   número de bytes liberados
+---------------------------------------------------------------------------------------------------------*/
 
 int my_stack_purge(struct my_stack *stack){
 
@@ -248,48 +318,11 @@ int my_stack_purge(struct my_stack *stack){
     return num_mem;
 }
 
-
-
-int my_stack_len (struct my_stack *stack){
-
-    //nodo auxiliar y contador para el resultado
-    struct my_stack_node *aux;
-    int cont = 1;
-
-    //control de pila vacía y bucle para aumentar el contador
-    if(stack->top == NULL){
-        return 0;
-    }else{
-
-        aux = stack->top;
-        while(aux->next != NULL){
-            cont++;
-            aux = aux->next;
-           
-        }
-
-        return cont;
-    }
-
-}
-
-void *my_stack_pop (struct my_stack *stack){
-    
-    //nodo auxiliar
-    struct my_stack_node *aux = NULL;
-
-    //control de pila vacía y pop del nodo apuntado por top
-    if (stack->top == NULL){
-        return NULL;
-    }else{
-        aux = stack->top;
-        stack->top = aux->next;
-        return aux->data;
-    }
-    
-}
-
-
+/*---------------------------------------------------------------------------------------------------------
+* Almacena los datos de la pila en un fichero.
+* Input:    stack: puntero de la pila | filname: puntero del fichero al qual tenemos que almacenar los datos
+* Output:   número de elementos almacenados o, -1 si hubo error.
+---------------------------------------------------------------------------------------------------------*/
 
 int my_stack_write(struct my_stack *stack, char *filename){
 
@@ -348,6 +381,12 @@ int my_stack_write(struct my_stack *stack, char *filename){
 
     return res;
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Lee los datos almacenados en el fitchero
+* Input:    filname: puntero del fichero al qual tenemos que almacenar los datos
+* Output:   puntero a la pila creada, y si hubo error, retorna NULL.
+---------------------------------------------------------------------------------------------------------*/
 
 struct my_stack *my_stack_read(char *filename){
 
