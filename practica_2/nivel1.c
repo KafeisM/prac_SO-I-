@@ -1,5 +1,22 @@
 #define COMMAND_LINE_SIZE 1024
-#define PROMPT ‘$’
+#define ARGS_SIZE 64
+#define COMMAND_LINE_SIZE 1024
+
+//colores para prompt y errores
+#define RESET "\033[0m"
+#define NEGRO_T "\x1b[30m"
+#define NEGRO_F "\x1b[40m"
+#define GRIS_T "\x1b[94m"
+#define ROJO_T "\x1b[31m"
+#define VERDE_T "\x1b[32m"
+#define AMARILLO_T "\x1b[33m"
+#define AZUL_T "\x1b[34m"
+#define MAGENTA_T "\x1b[35m"
+#define CYAN_T "\x1b[36m"
+#define BLANCO_T "\x1b[97m"
+#define NEGRITA "\x1b[1m"
+
+char const PROMPT = '$';
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,21 +24,44 @@
 #include <string.h>
 
 char *read_line(char *line); 
+int execute_line(char *line);
+
 
 int main(){
     char line[COMMAND_LINE_SIZE];  
     while(true){
         if(read_line(line)){
             execute_line(line);
+            fflush(stdout);
         }
     }
 }
 
 char *read_line(char *line){
-    
 
+    //temporal (implementar metodo imprimirpromt())
+    printf(BLANCO_T NEGRITA"%c: "RESET,PROMPT);
+    
+    //si la linea es diferente a null, cambiamos el salto de linea (\n) por un fin de linea (\0)
+    if (fgets(line,COMMAND_LINE_SIZE,stdin) != NULL){
+        char *salto;
+        salto = strchr(line, '\n');
+        if (salto){
+            *salto = '\0';
+        }
+        //sino, miramos si hay final de fichero y salimos
+    }else{
+        if(feof(stdin)){
+            printf(GRIS_T NEGRITA"saliendo del minishell...\n");
+            exit(0);
+        }
+    }
+
+    fflush(stdin);
+    return line; 
 }
 
+int execute_line(char *line){
 
-
-
+    fprintf(stderr,GRIS_T"EJEMPLO EJECUCION DE : %s\n"RESET,line);
+}
