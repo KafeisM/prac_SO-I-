@@ -25,6 +25,7 @@ char const PROMPT = '$';
 
 char *read_line(char *line); 
 int execute_line(char *line);
+int parse_args(char **args,char *line);
 
 
 int main(){
@@ -64,4 +65,32 @@ char *read_line(char *line){
 int execute_line(char *line){
 
     fprintf(stderr,GRIS_T"EJEMPLO EJECUCION DE : %s\n"RESET,line);
+}
+
+int parse_args(char **args,char *line){
+
+    int res = 0;
+    const char s[2] = " ";
+    char *token = strtok(line,s);
+    bool salir = false;
+
+    while((!salir) || (token != NULL)){
+        if(args[res][0] != '#'){
+            printf(GRIS_T NEGRITA"Token %i: %s\n",res,token);
+            args[res++] = token;
+            token = strtok(NULL,s);            
+        }else{
+            token = NULL;
+            salir = true;
+        }
+    }
+
+    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
+
+    return res;
+
+}
+
+int check_internal(char **args){
+    
 }
