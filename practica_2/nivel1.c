@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200112L
 #define COMMAND_LINE_SIZE 1024
 #define ARGS_SIZE 64
 #define COMMAND_LINE_SIZE 1024
@@ -26,6 +27,12 @@ char const PROMPT = '$';
 char *read_line(char *line); 
 int execute_line(char *line);
 int parse_args(char **args,char *line);
+int internal_cd(char **args);
+int internal_export(char **args);
+int internal_source(char **args);
+int internal_jobs(char **args);
+int internal_fg(char **args);
+int internal_bg(char **args);
 
 
 int main(){
@@ -62,26 +69,20 @@ char *read_line(char *line){
     return line; 
 }
 
-int execute_line(char *line){
-
-    fprintf(stderr,GRIS_T"EJEMPLO EJECUCION DE : %s\n"RESET,line);
-}
-
 int parse_args(char **args,char *line){
 
     int res = 0;
     const char s[2] = " ";
-    char *token = strtok(line,s);
-    bool salir = false;
+    char *token;
+    token = strtok(line,s);
 
-    while((!salir) || (token != NULL)){
+    while((token != NULL)){
         if(args[res][0] != '#'){
             printf(GRIS_T NEGRITA"Token %i: %s\n",res,token);
             args[res++] = token;
             token = strtok(NULL,s);            
         }else{
             token = NULL;
-            salir = true;
         }
     }
 
@@ -92,5 +93,81 @@ int parse_args(char **args,char *line){
 }
 
 int check_internal(char **args){
-    
+
+    if(strcmp(args[0],"cd") == 0){
+        internal_cd(args);
+        return 1;
+    }else if(strcmp(args[0],"export") == 0){
+        internal_export(args);
+        return 1;
+    }else if(strcmp(args[0],"source")== 0){
+        internal_source(args);
+        return 1;
+    }else if(strcmp(args[0],"jobs")== 0){
+        internal_jobs(args);
+        return 1;
+    }else if(strcmp(args[0],"fg")== 0){
+        internal_fg(args);
+        return 1;
+    }else if(strcmp(args[0],"bg")== 0){
+        internal_bg(args);
+        return 1;
+    }else if(strcmp(args[0],"exit")== 0){
+        exit(0);
+    }else{  
+        printf("No es un comando interno\n");
+        return 0;
+    }
+}
+
+int internal_cd(char **args){
+    fprintf(stderr, GRIS_T "[internal_cd()→ Esta función cambiará de directorio]\n" RESET);
+    return 1;
+}
+
+int internal_export(char **args)
+{
+
+    fprintf(stderr, GRIS_T "[internal_export()→ Esta función indica cual es el intérprete de comando que se esta usando]\n" RESET);
+    return 1;
+}
+
+int internal_source(char **args)
+{
+
+    fprintf(stderr, GRIS_T "[internal_source()→ Esta función hace que el proceso se ejecute sin crear ningún proceso hijo]\n" RESET);
+
+    return -1;
+}
+
+int internal_jobs(char **args)
+{
+
+    fprintf(stderr, GRIS_T "[internal_jobs()→ Esta función nos muestra los trabajos vinculados a la terminal desde donde se ejecuta]\n" RESET);
+
+    return 1;
+}
+
+int internal_fg(char **args)
+{
+
+    fprintf(stderr, GRIS_T "[internal_fg()→ Esta función lleva los procesos más recientes a primer plano]\n" RESET);
+
+    return 1;
+}
+
+int internal_bg(char **args)
+{
+
+    fprintf(stderr, GRIS_T "[internal_bg()→ Esta función enseña los procesos parados o en segundo plano]\n" RESET);
+
+    return 1;
+}
+
+int execute_line(char *line){
+    char *args[ARGS_SIZE];
+    int num_tokens;
+    int interno;
+    num_tokens = parse_args(args, line);
+    interno = check_internal(args);
 }
