@@ -86,8 +86,8 @@ int parse_args(char **args,char *line){
         }
     }
     args[res] = NULL;
-    //printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
-    //printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
+    printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
+    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
 
     return res;
 
