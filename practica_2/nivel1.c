@@ -1,7 +1,6 @@
 #define _POSIX_C_SOURCE 200112L
 #define COMMAND_LINE_SIZE 1024
 #define ARGS_SIZE 64
-#define COMMAND_LINE_SIZE 1024
 
 //colores para prompt y errores
 #define RESET "\033[0m"
