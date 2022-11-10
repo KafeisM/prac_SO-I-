@@ -86,16 +86,17 @@ int parse_args(char **args,char *line){
         }
     }
     args[res] = NULL;
-    printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
-    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
+    //printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
+    //printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
 
     return res;
 
 }
 
 int check_internal(char **args){
-
-    if(strcmp(args[0],"cd") == 0){
+    if(args[0] == NULL){
+        return 0;
+    }else if(strcmp(args[0],"cd") == 0){
         internal_cd(args);
         return 1;
     }else if(strcmp(args[0],"export") == 0){
