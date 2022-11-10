@@ -76,7 +76,7 @@ int parse_args(char **args,char *line){
     char *token;
     token = strtok(line,s);
 
-    while((token != NULL)){
+    while(token != NULL){
         if(args[res][0] != '#'){
             printf(GRIS_T NEGRITA"Token %i: %s\n",res,token);
             args[res++] = token;
