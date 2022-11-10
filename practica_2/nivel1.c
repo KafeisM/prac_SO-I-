@@ -130,14 +130,14 @@ int internal_cd(char **args){
 int internal_export(char **args)
 {
 
-    fprintf(stderr, GRIS_T "[internal_export()→ Esta función indica cual es el intérprete de comando que se esta usando]\n" RESET);
+    fprintf(stderr, GRIS_T "[internal_export()→ EEsta función asignará valores a variables de entorno\n" RESET);
     return 1;
 }
 
 int internal_source(char **args)
 {
 
-    fprintf(stderr, GRIS_T "[internal_source()→ Esta función hace que el proceso se ejecute sin crear ningún proceso hijo]\n" RESET);
+    fprintf(stderr, GRIS_T "[internal_source()→ Esta función ejecutará un fichero de líneas de comandos]\n" RESET);
 
     return -1;
 }
@@ -145,7 +145,7 @@ int internal_source(char **args)
 int internal_jobs(char **args)
 {
 
-    fprintf(stderr, GRIS_T "[internal_jobs()→ Esta función nos muestra los trabajos vinculados a la terminal desde donde se ejecuta]\n" RESET);
+    fprintf(stderr, GRIS_T "[internal_jobs()→ Esta función mostrará el PID de los procesos que no estén en foreground]\n" RESET);
 
     return 1;
 }
