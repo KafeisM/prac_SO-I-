@@ -21,6 +21,8 @@
 #define PWD
 
 char const PROMPT = '$';
+char *user;
+char *home;
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,7 +39,7 @@ int internal_source(char **args);
 int internal_jobs(char **args);
 int internal_fg(char **args);
 int internal_bg(char **args);
-
+void imprimir_prompt();
 
 int main(){
     char line[COMMAND_LINE_SIZE];  
@@ -49,10 +51,19 @@ int main(){
     }
 }
 
+void imprimir_prompt(){
+    //queda implementar el PWD en niveles posteriores
+    user = getenv("USER");
+    home = getenv("HOME");
+
+    printf(BLANCO_T NEGRITA"%s:"RESET,user);
+    printf(CYAN_T "-%s%c" RESET, home,PROMPT);
+
+}
+
 char *read_line(char *line){
 
-    //temporal (implementar metodo imprimirpromt())
-    printf(BLANCO_T NEGRITA"%c: "RESET,PROMPT);
+    imprimir_prompt();
     
     //si la linea es diferente a null, cambiamos el salto de linea (\n) por un fin de linea (\0)
     if (fgets(line,COMMAND_LINE_SIZE,stdin) != NULL){
