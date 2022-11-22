@@ -15,6 +15,10 @@
 #define CYAN_T "\x1b[36m"
 #define BLANCO_T "\x1b[97m"
 #define NEGRITA "\x1b[1m"
+#define SUCCES 0
+#define FAILURE -1
+#define COMMAND_LINE_SIZE 1024
+#define PWD
 
 char const PROMPT = '$';
 
@@ -22,6 +26,7 @@ char const PROMPT = '$';
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 
 char *read_line(char *line); 
 int execute_line(char *line);
@@ -123,8 +128,29 @@ int check_internal(char **args){
 }
 
 int internal_cd(char **args){
-    fprintf(stderr, GRIS_T "[internal_cd()→ Esta función cambiará de directorio]\n" RESET);
-    return 1;
+
+    
+    
+    if(args[1] == NULL){
+        if(chdir("/home") != 0){
+            perror("chdir(): ");
+        }
+    }else{        
+
+        if(chdir(args[1]) != 0){
+            perror("chdir(): ");
+        }
+    }
+  
+    
+    char cwd[COMMAND_LINE_SIZE];
+    if (getcwd(cwd, COMMAND_LINE_SIZE) != NULL) {
+        fprintf(stderr, GRIS_T "[internal_cd()→ PWD: %s\n" RESET, cwd);
+    } else {
+        perror("getcwd() error\n");
+        return FAILURE;
+    }
+    return SUCCES;
 }
 
 int internal_export(char **args)
