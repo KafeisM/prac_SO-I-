@@ -187,9 +187,48 @@ int internal_cd(char **args){
 
 int internal_export(char **args)
 {
+    const char s[2] = "=";
+    char *token;
+    char *aux = args[1];
 
-    fprintf(stderr, GRIS_T "[internal_export()→ EEsta función asignará valores a variables de entorno\n" RESET);
-    return 1;
+    char *nombre = NULL;
+    char *valor = NULL;
+    int cont = 0;
+    token = strtok(aux,s);
+
+    while(token != NULL){
+        cont++;
+        if (cont == 1){
+            nombre = token;
+        }else{
+            valor = token;
+        }
+        token = strtok(NULL,s);
+    }
+
+    if(valor != NULL && nombre != NULL){
+        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
+        if (getenv(nombre) != NULL){
+            fprintf(stderr,GRIS_T "[internal_export()→ antiguo valor para USER: %s\n"RESET,getenv(nombre));
+            setenv(nombre,valor,1);
+            fprintf(stderr,GRIS_T "[internal_export()→ nuevo valor para USER: %s\n"RESET,getenv(nombre));
+            return SUCCES;
+        }else{
+            fprintf(stderr,ROJO_T "Error: Nombre no existente\n"RESET);
+            return FAILURE;
+        }
+    }else if(valor != NULL || nombre != NULL){
+        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
+        fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
+        return FAILURE;
+    }else{
+        fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
+        return FAILURE;
+    }
+    
+    //fprintf(stderr, GRIS_T "[internal_export()→ EEsta función asignará valores a variables de entorno\n"RESET);
 }
 
 int internal_source(char **args)
