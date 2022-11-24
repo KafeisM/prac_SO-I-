@@ -53,7 +53,7 @@ void imprimir_prompt(){
 
     printf(BLANCO_T NEGRITA"%s:"RESET,user);
     printf(CYAN_T "~%s" RESET, home);
-    printf(BLANCO_T"%c ",PROMPT)
+    printf(BLANCO_T"%c ",PROMPT);
 
 }
 
