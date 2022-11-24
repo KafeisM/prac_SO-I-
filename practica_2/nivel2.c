@@ -147,11 +147,31 @@ int internal_cd(char **args){
         if(chdir("/home") != 0){
             perror("chdir(): ");
         }
-    }else{        
-
+    }else{  
         if(chdir(args[1]) != 0){
             perror("chdir(): ");
         }
+
+        if(strchr(args[1],"'"||34) != NULL){
+            int j = 2;
+            bool trobat = false;
+            char *aux = args[1];
+            while((!trobat) && (args[j] != NULL)){
+                if(strchr(args[j],"'"||34)){
+                    trobat = true;
+                }  
+                strcat(aux,args[j]);
+                args[j] == NULL;
+                j++;
+            }
+
+            args[1] = aux;
+            
+        }else if(strchr(args[1],92) != NULL){
+            int i = 0;
+            strchr(args[1],92) == " ";
+        }
+        
     }
   
     
