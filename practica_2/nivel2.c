@@ -57,7 +57,8 @@ void imprimir_prompt(){
     home = getenv("HOME");
 
     printf(BLANCO_T NEGRITA"%s:"RESET,user);
-    printf(CYAN_T "-%s%c" RESET, home,PROMPT);
+    printf(CYAN_T "~%s" RESET, home);
+    printf(BLANCO_T"%c ",PROMPT);
 
 }
 
@@ -75,7 +76,7 @@ char *read_line(char *line){
         //sino, miramos si hay final de fichero y salimos
     }else{
         if(feof(stdin)){
-            printf(GRIS_T NEGRITA"saliendo del minishell...\n");
+            printf(GRIS_T NEGRITA"\nsaliendo del minishell...\n");
             exit(0);
         }
     }

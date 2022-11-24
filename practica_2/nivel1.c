@@ -52,7 +52,8 @@ void imprimir_prompt(){
     home = getenv("HOME");
 
     printf(BLANCO_T NEGRITA"%s:"RESET,user);
-    printf(CYAN_T "-%s%c" RESET, home,PROMPT);
+    printf(CYAN_T "~%s" RESET, home);
+    printf(BLANCO_T"%c ",PROMPT)
 
 }
 
