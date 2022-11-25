@@ -94,6 +94,13 @@ int parse_args(char **args,char *line){
 
     while(token != NULL){
         args[res] = token;
+        if(strchr(args[res],92) != NULL){
+            char *ret;
+            ret = strchr(args[res],92);
+            int i = 0;
+            //strchr(res,92) = ' ';
+            printf("hi ha 92");
+        }
         printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
         if(args[res][0] != '#'){
             token = strtok(NULL,s);
@@ -170,6 +177,7 @@ int internal_cd(char **args){
         }else if(strchr(args[1],92) != NULL){
             int i = 0;
             strchr(args[1],92) == " ";
+            printf("hi ha 92");
         }
         
     }
