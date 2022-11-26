@@ -93,14 +93,26 @@ int parse_args(char **args,char *line){
     token = strtok(line,s);
 
     while(token != NULL){
-        args[res] = token;
-        if(strchr(args[res],92) != NULL){
-            char *ret;
-            ret = strchr(args[res],92);
+        if(strchr(token,92) != NULL){
             int i = 0;
-            //strchr(res,92) = ' ';
-            printf("hi ha 92");
+            while(i < strlen(token)){
+                if(token[i] == 92){
+                    token[i] = ' ';
+                }
+                i++;
+            }
+        }else if(strchr(token,"'"||34) != NULL){
+            while(strchr(token,"'"||34) == NULL){
+                strcat(token," ");
+                char *aux = strtok(NULL,s);
+                strcat(token,aux);                
+            }
+            strcat(token," ");
+            char *aux = strtok(NULL,s);
+            strcat(token,aux);
+
         }
+        args[res] = token;
         printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
         if(args[res][0] != '#'){
             token = strtok(NULL,s);
