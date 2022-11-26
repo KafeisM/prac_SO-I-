@@ -93,7 +93,8 @@ int parse_args(char **args,char *line){
     token = strtok(line,s);
 
     while(token != NULL){
-        if(strchr(token,92) != NULL){
+
+        if(strchr(token,92) != NULL){ //Miramos si hay " \ " para substituirla por un espacio
             int i = 0;
             while(i < strlen(token)){
                 if(token[i] == 92){
@@ -101,15 +102,57 @@ int parse_args(char **args,char *line){
                 }
                 i++;
             }
-        }else if(strchr(token,"'"||34) != NULL){
-            while(strchr(token,"'"||34) == NULL){
-                strcat(token," ");
-                char *aux = strtok(NULL,s);
-                strcat(token,aux);                
+        }else if(strchr(token,34) != NULL){ //Miramos si hay " " para coger lo de dentro y que se junte en un solo token
+
+            printf("%s\n",token);
+            char *token2;
+            token2 = strtok(NULL,s);
+            printf("%s\n",token2);
+
+            while(strchr(token2,34) == NULL){
+                token[strlen(token)] = ' ';
+                token2 = strtok(NULL,s);
+                   
             }
-            strcat(token," ");
-            char *aux = strtok(NULL,s);
-            strcat(token,aux);
+            token[strlen(token)] = ' ';
+            //strcat(token,token2);
+            printf("%s\n",token);
+
+            int i = 0;
+            while(i < strlen(token)){
+                if(i == (strlen(token) - 2)){
+                    token[i] = '\0';
+                }else{
+                    token[i] = token[i+1];
+                }
+                i++;
+            }
+
+        }else if(strchr(token,39) != NULL){ //Miramos si hay ' ' para coger lo de dentro y que se junte en un solo token
+
+            printf("%s\n",token);
+            char *token2;
+            token2 = strtok(NULL,s);
+            printf("%s\n",token2);
+
+            while(strchr(token2,39) == NULL){
+                token[strlen(token)] = ' ';
+                token2 = strtok(NULL,s);
+                   
+            }
+            token[strlen(token)] = ' ';
+            //strcat(token,token2);
+            printf("%s\n",token);
+
+            int i = 0;
+            while(i < strlen(token)){
+                if(i == (strlen(token) - 2)){
+                    token[i] = '\0';
+                }else{
+                    token[i] = token[i+1];
+                }
+                i++;
+            }
 
         }
         args[res] = token;
@@ -166,32 +209,8 @@ int internal_cd(char **args){
         if(chdir("/home") != 0){
             perror("chdir(): ");
         }
-    }else{  
-        if(chdir(args[1]) != 0){
-            perror("chdir(): ");
-        }
-
-        if(strchr(args[1],"'"||34) != NULL){
-            int j = 2;
-            bool trobat = false;
-            char *aux = args[1];
-            while((!trobat) && (args[j] != NULL)){
-                if(strchr(args[j],"'"||34)){
-                    trobat = true;
-                }  
-                strcat(aux,args[j]);
-                args[j] == NULL;
-                j++;
-            }
-
-            args[1] = aux;
-            
-        }else if(strchr(args[1],92) != NULL){
-            int i = 0;
-            strchr(args[1],92) == " ";
-            printf("hi ha 92");
-        }
-        
+    }else if(chdir(args[1]) != 0){
+        perror("chdir(): ");   
     }
   
     
