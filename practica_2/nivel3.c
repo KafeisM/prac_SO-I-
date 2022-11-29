@@ -76,6 +76,10 @@ int main(int argc, char *argv[]){
     }
 }
 
+int internal_source(char **args){
+    FILE *fopen( const char * filename, const char * r);//r porq queremos solo leer
+}
+
 void imprimir_prompt(){
     //queda implementar el PWD en niveles posteriores
     user = getenv("USER");

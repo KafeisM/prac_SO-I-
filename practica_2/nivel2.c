@@ -107,7 +107,6 @@ int parse_args(char **args,char *line){
             printf("%s\n",token);
             char *token2;
             token2 = strtok(NULL,s);
-            printf("%s\n",token2);
 
             while(strchr(token2,34) == NULL){
                 token[strlen(token)] = ' ';
@@ -115,8 +114,6 @@ int parse_args(char **args,char *line){
                    
             }
             token[strlen(token)] = ' ';
-            //strcat(token,token2);
-            printf("%s\n",token);
 
             int i = 0;
             while(i < strlen(token)){
@@ -130,10 +127,8 @@ int parse_args(char **args,char *line){
 
         }else if(strchr(token,39) != NULL){ //Miramos si hay ' ' para coger lo de dentro y que se junte en un solo token
 
-            printf("%s\n",token);
             char *token2;
             token2 = strtok(NULL,s);
-            printf("%s\n",token2);
 
             while(strchr(token2,39) == NULL){
                 token[strlen(token)] = ' ';
@@ -141,8 +136,6 @@ int parse_args(char **args,char *line){
                    
             }
             token[strlen(token)] = ' ';
-            //strcat(token,token2);
-            printf("%s\n",token);
 
             int i = 0;
             while(i < strlen(token)){
@@ -156,7 +149,6 @@ int parse_args(char **args,char *line){
 
         }
         args[res] = token;
-        printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
         if(args[res][0] != '#'){
             token = strtok(NULL,s);
             res++;           
@@ -165,8 +157,6 @@ int parse_args(char **args,char *line){
         }
     }
     args[res] = NULL;
-    printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
-    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
 
     return res;
 
@@ -207,10 +197,10 @@ int internal_cd(char **args){
     
     if(args[1] == NULL){
         if(chdir("/home") != 0){
-            perror("chdir(): ");
+            perror("chdir()");
         }
     }else if(chdir(args[1]) != 0){
-        perror("chdir(): ");   
+        perror("chdir()");   
     }
   
     
