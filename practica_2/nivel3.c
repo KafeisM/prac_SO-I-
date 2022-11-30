@@ -76,10 +76,6 @@ int main(int argc, char *argv[]){
     }
 }
 
-int internal_source(char **args){
-    FILE *fopen( const char * filename, const char * r);//r porq queremos solo leer
-}
-
 void imprimir_prompt(){
     //queda implementar el PWD en niveles posteriores
     user = getenv("USER");
@@ -242,7 +238,12 @@ int internal_export(char **args)
 int internal_source(char **args)
 {
 
-    fprintf(stderr, GRIS_T "[internal_source()→ Esta función ejecutará un fichero de líneas de comandos]\n" RESET);
+    FILE *fp = fopen(args[1],"r");//r porq queremos solo leer
+    if( fp == NULL ) {
+      fprintf(stderr, ROJO_T "Error de sintaxis. Uso: source <nombre fichero>\n"RESET);
+      return(-1);
+    }
+
 
     return -1;
 }
