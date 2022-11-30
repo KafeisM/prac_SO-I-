@@ -26,6 +26,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 char *read_line(char *line); 
 int execute_line(char *line);
@@ -118,62 +120,8 @@ int parse_args(char **args,char *line){
     token = strtok(line,s);
 
     while(token != NULL){
-
-        if(strchr(token,92) != NULL){ //Miramos si hay " \ " para substituirla por un espacio
-            int i = 0;
-            while(i < strlen(token)){
-                if(token[i] == 92){
-                    token[i] = ' ';
-                }
-                i++;
-            }
-        }else if(strchr(token,34) != NULL){ //Miramos si hay " " para coger lo de dentro y que se junte en un solo token
-
-            printf("%s\n",token);
-            char *token2;
-            token2 = strtok(NULL,s);
-
-            while(strchr(token2,34) == NULL){
-                token[strlen(token)] = ' ';
-                token2 = strtok(NULL,s);
-                   
-            }
-            token[strlen(token)] = ' ';
-
-            int i = 0;
-            while(i < strlen(token)){
-                if(i == (strlen(token) - 2)){
-                    token[i] = '\0';
-                }else{
-                    token[i] = token[i+1];
-                }
-                i++;
-            }
-
-        }else if(strchr(token,39) != NULL){ //Miramos si hay ' ' para coger lo de dentro y que se junte en un solo token
-
-            char *token2;
-            token2 = strtok(NULL,s);
-
-            while(strchr(token2,39) == NULL){
-                token[strlen(token)] = ' ';
-                token2 = strtok(NULL,s);
-                   
-            }
-            token[strlen(token)] = ' ';
-
-            int i = 0;
-            while(i < strlen(token)){
-                if(i == (strlen(token) - 2)){
-                    token[i] = '\0';
-                }else{
-                    token[i] = token[i+1];
-                }
-                i++;
-            }
-
-        }
         args[res] = token;
+        printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
         if(args[res][0] != '#'){
             token = strtok(NULL,s);
             res++;           
@@ -182,6 +130,8 @@ int parse_args(char **args,char *line){
         }
     }
     args[res] = NULL;
+    printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
+    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
 
     return res;
 
@@ -217,13 +167,18 @@ int check_internal(char **args){
 }
 
 int internal_cd(char **args){
+
+    
     
     if(args[1] == NULL){
         if(chdir("/home") != 0){
-            perror("chdir()");
+            perror("chdir(): ");
         }
-    }else if(chdir(args[1]) != 0){
-        perror("chdir()");   
+    }else{        
+
+        if(chdir(args[1]) != 0){
+            perror("chdir(): ");
+        }
     }
   
     
@@ -239,6 +194,7 @@ int internal_cd(char **args){
 
 int internal_export(char **args)
 {
+
     const char s[2] = "=";
     char *token;
     char *aux = args[1];
@@ -279,13 +235,10 @@ int internal_export(char **args)
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
     }
-    
-    //fprintf(stderr, GRIS_T "[internal_export()→ EEsta función asignará valores a variables de entorno\n"RESET);
 }
 
 int internal_source(char **args)
 {
-    char *str[COMMAND_LINE_SIZE];
 
     FILE *fp = fopen(args[1],"r");//r porq queremos solo leer
     if( fp == NULL ) {
@@ -293,17 +246,6 @@ int internal_source(char **args)
       return(-1);
     }
 
-    while( fgets (str, COMMAND_LINE_SIZE, fp)!=NULL ) {
-      for (size_t i = 0; i < COMMAND_LINE_SIZE; i++){
-        if(str[i] == '\n'){
-            str[i] = '\0';
-        }
-      }
-      fflush(fp);
-      execute_line(str);
-      
-    }
-    fclose(fp);
 
     return -1;
 }
@@ -337,5 +279,27 @@ int execute_line(char *line){
     int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
-    interno = check_internal(args);
+
+    if ((args[0] != "cd")||(args[0] != "export")||(args[0] != "source")||
+    (args[0] != "jobs")||(args[0] != "exit")||(args[0] != "fg")||(args[0] != "exit")){
+        int id = fork();
+        if (id > 0){
+            fprintf(stderr,"Soy el padre: %d | (%s)\n"RESET,getpid(),mi_shell);
+            jobs_list[0].status = 'E';
+            strcpy(jobs_list[0].cmd,line);
+            wait(NULL);
+            jobs_list[0].status = 'N';
+            strcpy(jobs_list[0].cmd,"");
+            jobs_list[0].pid = 0;
+        }else if(id == 0){
+            fprintf(stderr,"Soy el hijo: %d | (%s)\n"RESET,getpid(),jobs_list[0].cmd);
+            execvp(args[0],args);
+        }else{
+            fprintf(stderr,"Error en el comando\n");
+            exit(-1);
+        }
+    }else{
+        interno = check_internal(args);
+    }
+    
 }
