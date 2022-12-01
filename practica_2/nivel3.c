@@ -275,6 +275,8 @@ int internal_bg(char **args)
 }
 
 int execute_line(char *line){
+    //guardar line
+    //declarar status (no tabla) wait(&status)
     char *args[ARGS_SIZE];
     int num_tokens;
     int interno;
@@ -287,9 +289,10 @@ int execute_line(char *line){
             fprintf(stderr,"Soy el padre: %d | (%s)\n"RESET,getpid(),mi_shell);
             jobs_list[0].status = 'E';
             strcpy(jobs_list[0].cmd,line);
+            jobs_list[0].pid = id;
             wait(NULL);
             jobs_list[0].status = 'N';
-            //strcpy(jobs_list[0].cmd,"");
+            strcpy(jobs_list[0].cmd,"");
             jobs_list[0].pid = 0;
         }else if(id == 0){
             fprintf(stderr,"Soy el hijo: %d | (%s)\n"RESET,getpid(),jobs_list[0].cmd);
