@@ -79,14 +79,19 @@ int main(int argc, char *argv[]){
 }
 
 void imprimir_prompt(){
-    //queda implementar el PWD en niveles posteriores
     user = getenv("USER");
     home = getenv("HOME");
 
-    printf(BLANCO_T NEGRITA"%s:"RESET,user);
-    printf(CYAN_T "~%s" RESET, home);
-    printf(BLANCO_T"%c ",PROMPT);
-
+    char cwd[COMMAND_LINE_SIZE];
+    if(getcwd(cwd,COMMAND_LINE_SIZE)!=NULL){
+        printf(BLANCO_T NEGRITA"%s:"RESET,user);
+        printf(CYAN_T "~%s" RESET, cwd);
+        printf(BLANCO_T"%c ",PROMPT);
+    }else{
+        perror("getcwd() error");
+        
+    }
+   
 }
 
 char *read_line(char *line){
