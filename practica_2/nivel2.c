@@ -241,8 +241,8 @@ int internal_export(char **args)
     }
 
     if(valor != NULL && nombre != NULL){
-        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
-        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
+        fprintf(stderr,GRIS_T"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,GRIS_T"[internal_export()→ valor: %s\n"RESET,valor);
         if (getenv(nombre) != NULL){
             fprintf(stderr,GRIS_T "[internal_export()→ antiguo valor para USER: %s\n"RESET,getenv(nombre));
             setenv(nombre,valor,1);
