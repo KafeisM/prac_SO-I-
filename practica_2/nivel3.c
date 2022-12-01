@@ -275,8 +275,8 @@ int internal_bg(char **args)
 }
 
 int execute_line(char *line){
-    //guardar line
-    //declarar status (no tabla) wait(&status)
+    char *gurdamLine = line;
+    int status;
     char *args[ARGS_SIZE];
     int num_tokens;
     int interno;
@@ -290,7 +290,7 @@ int execute_line(char *line){
             jobs_list[0].status = 'E';
             strcpy(jobs_list[0].cmd,line);
             jobs_list[0].pid = id;
-            wait(NULL);
+            wait(&status);
             jobs_list[0].status = 'N';
             strcpy(jobs_list[0].cmd,"");
             jobs_list[0].pid = 0;
