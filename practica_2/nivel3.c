@@ -125,8 +125,62 @@ int parse_args(char **args,char *line){
     token = strtok(line,s);
 
     while(token != NULL){
+
+        if(strchr(token,92) != NULL){ //Miramos si hay " \ " para substituirla por un espacio
+            int i = 0;
+            while(i < strlen(token)){
+                if(token[i] == 92){
+                    token[i] = ' ';
+                }
+                i++;
+            }
+        }else if(strchr(token,34) != NULL){ //Miramos si hay " " para coger lo de dentro y que se junte en un solo token
+
+            printf("%s\n",token);
+            char *token2;
+            token2 = strtok(NULL,s);
+
+            while(strchr(token2,34) == NULL){
+                token[strlen(token)] = ' ';
+                token2 = strtok(NULL,s);
+                   
+            }
+            token[strlen(token)] = ' ';
+
+            int i = 0;
+            while(i < strlen(token)){
+                if(i == (strlen(token) - 2)){
+                    token[i] = '\0';
+                }else{
+                    token[i] = token[i+1];
+                }
+                i++;
+            }
+
+        }else if(strchr(token,39) != NULL){ //Miramos si hay ' ' para coger lo de dentro y que se junte en un solo token
+
+            char *token2;
+            token2 = strtok(NULL,s);
+
+            while(strchr(token2,39) == NULL){
+                token[strlen(token)] = ' ';
+                token2 = strtok(NULL,s);
+                   
+            }
+            token[strlen(token)] = ' ';
+
+            int i = 0;
+            while(i < strlen(token)){
+                if(i == (strlen(token) - 2)){
+                    token[i] = '\0';
+                }else{
+                    token[i] = token[i+1];
+                }
+                i++;
+            }
+
+        }
         args[res] = token;
-        printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
         if(args[res][0] != '#'){
             token = strtok(NULL,s);
             res++;           
@@ -135,8 +189,6 @@ int parse_args(char **args,char *line){
         }
     }
     args[res] = NULL;
-    printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
-    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
 
     return res;
 
