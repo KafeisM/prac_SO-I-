@@ -383,9 +383,37 @@ int internal_bg(char **args)
 }
 
 int execute_line(char *line){
+    char *lineaux = line;
+    int status;
     char *args[ARGS_SIZE];
     int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
-    interno = check_internal(args);
+    fprintf(stderr,"args[0]: %s\n",args[0]);
+
+    if ((strcmp(args[0],"cd") == 0)||(strcmp(args[0],"export") == 0)||(strcmp(args[0],"source") == 0)||
+    (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
+        interno = check_internal(args);
+    }else{
+        strcpy(jobs_list[0].cmd,lineaux);
+        jobs_list[0].status = 'E';
+        pid_t id = fork();
+        if (id > 0){
+            fprintf(stderr,"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
+            //fprintf(stderr,"args[0]: %s\n",args[0]);
+            jobs_list[0].pid = id;
+        }else if(id == 0){
+            fprintf(stderr,"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
+            execvp(args[0],args);
+            exit(0);
+        }else{
+            fprintf(stderr,"Error en el comando\n");
+            exit(-1);
+        }
+        wait(&status);
+        jobs_list[0].status = 'N';
+        strcpy(jobs_list[0].cmd,"");
+        jobs_list[0].pid = 0;
+    }
+    
 }
