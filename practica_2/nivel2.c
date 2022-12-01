@@ -109,47 +109,76 @@ int parse_args(char **args,char *line){
             }
         }else if(strchr(token,34) != NULL){ //Miramos si hay " " para coger lo de dentro y que se junte en un solo token
 
-            printf("%s\n",token);
             char *token2;
             token2 = strtok(NULL,s);
 
-            while(strchr(token2,34) == NULL){
-                token[strlen(token)] = ' ';
-                token2 = strtok(NULL,s);
-                   
-            }
-            token[strlen(token)] = ' ';
-
-            int i = 0;
-            while(i < strlen(token)){
-                if(i == (strlen(token) - 2)){
-                    token[i] = '\0';
-                }else{
-                    token[i] = token[i+1];
+            if(token[strlen(token) - 1] == 34){ //Si solo hay una palabra dentro de las " "
+                int i = 0;
+                while(i < strlen(token)){
+                    if(i == (strlen(token) - 2)){
+                        token[i] = '\0';
+                    }else{
+                        token[i] = token[i+1];
+                    }
+                    i++;
                 }
-                i++;
+            }else if(token2 == NULL){ //Si solo hay una "
+                fprintf(stderr,ROJO_T "ERROR\n" RESET);
+            }else{
+                while(strchr(token2,34) == NULL){
+                    token[strlen(token)] = ' ';
+                    token2 = strtok(NULL,s);
+                    
+                }
+                token[strlen(token)] = ' ';
+
+                int i = 0;
+                while(i < strlen(token)){
+                    if(i == (strlen(token) - 2)){
+                        token[i] = '\0';
+                    }else{
+                        token[i] = token[i+1];
+                    }
+                    i++;
+                }
             }
+
+            
 
         }else if(strchr(token,39) != NULL){ //Miramos si hay ' ' para coger lo de dentro y que se junte en un solo token
 
             char *token2;
             token2 = strtok(NULL,s);
 
-            while(strchr(token2,39) == NULL){
-                token[strlen(token)] = ' ';
-                token2 = strtok(NULL,s);
-                   
-            }
-            token[strlen(token)] = ' ';
-
-            int i = 0;
-            while(i < strlen(token)){
-                if(i == (strlen(token) - 2)){
-                    token[i] = '\0';
-                }else{
-                    token[i] = token[i+1];
+            if(token[strlen(token) - 1] == 39){ //Si solo hay una palabra dentro de las ' '
+                int i = 0;
+                while(i < strlen(token)){
+                    if(i == (strlen(token) - 2)){
+                        token[i] = '\0';
+                    }else{
+                        token[i] = token[i+1];
+                    }
+                    i++;
                 }
-                i++;
+            }else if(token2 == NULL){ //Si solo hay una '
+                fprintf(stderr,ROJO_T "ERROR\n" RESET);
+            }else{
+                while(strchr(token2,39) == NULL){
+                    token[strlen(token)] = ' ';
+                    token2 = strtok(NULL,s);
+                    
+                }
+                token[strlen(token)] = ' ';
+
+                int i = 0;
+                while(i < strlen(token)){
+                    if(i == (strlen(token) - 2)){
+                        token[i] = '\0';
+                    }else{
+                        token[i] = token[i+1];
+                    }
+                    i++;
+                }
             }
 
         }
