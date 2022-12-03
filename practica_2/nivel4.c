@@ -409,25 +409,15 @@ int execute_line(char *line){
             fprintf(stderr,GRIS_T"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
             int err = execvp(args[0],args);
             if (err == -1){
-                exit(EXIT_FAILURE);
+                exit(-1);
             }
         }else{
             fprintf(stderr,ROJO_T"Error con la creación del hijo\n"RESET);
-            exit(EXIT_FAILURE);
+            exit(-1);
         }
 
         while(jobs_list[0].pid > 0){
             pause();
-        }
-
-        if (WIFEXITED(status)){
-            int statuscode = WEXITSTATUS(status);
-            if (statuscode == 0){
-                fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
-            }else{
-                fprintf(stderr,ROJO_T"(%s): no se encontró la orden\n"RESET,jobs_list[0].cmd);
-                fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
-            }
         }
         
     }
