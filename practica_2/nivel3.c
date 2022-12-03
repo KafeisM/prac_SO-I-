@@ -377,18 +377,32 @@ int execute_line(char *line){
         jobs_list[0].status = 'E';
         pid_t id = fork();
         if (id > 0){
-            fprintf(stderr,"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
+            fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
             //fprintf(stderr,"args[0]: %s\n",args[0]);
             jobs_list[0].pid = id;
         }else if(id == 0){
-            fprintf(stderr,"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
-            execvp(args[0],args);
-            exit(0);
+            fprintf(stderr,GRIS_T"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
+            int err = execvp(args[0],args);
+            if (err == -1){
+                exit(-1);
+            }
         }else{
-            fprintf(stderr,"Error en el comando\n");
-            exit(-1);
+            fprintf(stderr,ROJO_T"Error con la creación del hijo\n"RESET);
+            exit(-2);
         }
+
         wait(&status);
+
+        if (WIFEXITED(status)){
+            int statuscode = WEXITSTATUS(status);
+            if (statuscode == 0){
+                fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
+            }else{
+                fprintf(stderr,ROJO_T"(%s): no se encontró la orden\n"RESET,jobs_list[0].cmd);
+                fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
+            }
+        }
+        
         jobs_list[0].status = 'N';
         strcpy(jobs_list[0].cmd,"");
         jobs_list[0].pid = 0;
