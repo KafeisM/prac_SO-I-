@@ -399,21 +399,26 @@ int execute_line(char *line){
         jobs_list[0].status = 'E';
         pid_t id = fork();
         if (id > 0){
+            signal(SIGINT,ctrlc);
             fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
             //fprintf(stderr,"args[0]: %s\n",args[0]);
             jobs_list[0].pid = id;
         }else if(id == 0){
+            signal(SIGCHLD,SIG_DFL);
+            signal(SIGINT,SIG_IGN);
             fprintf(stderr,GRIS_T"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
             int err = execvp(args[0],args);
             if (err == -1){
-                exit(-1);
+                exit(EXIT_FAILURE);
             }
         }else{
             fprintf(stderr,ROJO_T"Error con la creación del hijo\n"RESET);
-            exit(-2);
+            exit(EXIT_FAILURE);
         }
 
-        wait(&status);
+        while(jobs_list[0].pid > 0){
+            pause();
+        }
 
         if (WIFEXITED(status)){
             int statuscode = WEXITSTATUS(status);
@@ -425,9 +430,6 @@ int execute_line(char *line){
             }
         }
         
-        jobs_list[0].status = 'N';
-        strcpy(jobs_list[0].cmd,"");
-        jobs_list[0].pid = 0;
     }
     
 }
