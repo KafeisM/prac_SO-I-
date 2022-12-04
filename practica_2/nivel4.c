@@ -85,6 +85,20 @@ int main(int argc, char *argv[]){
 }
 
 void reaper(int signum){
+    int numeroSenhal;
+    pid_t ended;
+    int status;
+
+    signal(numeroSenhal, SIG_DFL);
+
+    jobs_list[0].pid = 0;
+    jobs_list[0].status = 'F';
+    memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
+
+    //while ((ended=waitpid(-1, &status, WNOHANG)) > 0 {     //si ended es el pid del hijo en primer plano entonces reseteat jobs_list[0]
+
+    //}
+
 
 }
 
