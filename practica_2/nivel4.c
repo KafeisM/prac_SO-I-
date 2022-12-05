@@ -103,7 +103,8 @@ void reaper(int signum){
 }
 
 void ctrlc(int signum){
-
+    signal(SIGINT, ctrlc);
+    puts("\nCtrl+C pulsado");
 }
 
 void imprimir_prompt(){
