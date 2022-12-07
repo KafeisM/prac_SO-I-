@@ -326,12 +326,25 @@ int internal_export(char **args)
 int internal_source(char **args)
 {
 
+    char *str[COMMAND_LINE_SIZE];
+
     FILE *fp = fopen(args[1],"r");//r porq queremos solo leer
     if( fp == NULL ) {
       fprintf(stderr, ROJO_T "Error de sintaxis. Uso: source <nombre fichero>\n"RESET);
       return(-1);
     }
 
+    while( fgets (*str, COMMAND_LINE_SIZE, fp)!=NULL ) {
+      for (size_t i = 0; i < COMMAND_LINE_SIZE; i++){
+        if(*str[i] == '\n'){
+            *str[i] = '\0';
+        }
+      }
+      fflush(fp);
+      execute_line(*str);
+      
+    }
+    fclose(fp);
 
     return -1;
 }

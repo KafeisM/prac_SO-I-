@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 char *read_line(char *line); 
 int execute_line(char *line);
@@ -58,6 +59,9 @@ char const PROMPT = '$';
 char *user;
 char *home;
 
+//variables para el reaper
+static int acabados=0; //contabilizar procesos acabados
+
 
 int main(int argc, char *argv[]){
 
@@ -86,7 +90,6 @@ int main(int argc, char *argv[]){
 
 void reaper(int signum){
     signal(SIGCHLD,reaper);
-    int numeroSenhal;
     pid_t ended;
     int status;
 
@@ -94,9 +97,12 @@ void reaper(int signum){
     jobs_list[0].status = 'F';
     memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
 
-    //while ((ended=waitpid(-1, &status, WNOHANG)) > 0 {     //si ended es el pid del hijo en primer plano entonces reseteat jobs_list[0]
+    printf("[reaper()→ Recibida señal %d]\n", signum); // la señal 17 es SIGCHILD
+          
+    while ((ended=waitpid(-1, &status , WNOHANG))>0) {
+        printf("[reaper()→ Proceso hijo %d (%s) finalizado por la señal %d]\n", ended, mi_shell, status);
+    }  
 
-    //}
 
 
 }
