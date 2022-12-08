@@ -92,15 +92,16 @@ void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
-
-    jobs_list[0].pid = 0;
-    jobs_list[0].status = 'F';
-    memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
-
-    printf("[reaper()→ Recibida señal %d]\n", signum); // la señal 17 es SIGCHILD
           
     while ((ended=waitpid(-1, &status , WNOHANG))>0) {
-        printf("[reaper()→ Proceso hijo %d (%s) finalizado por la señal %d]\n", ended, mi_shell, status);
+        //if ended es el pid del hijo en primer plano
+        if (jobs_list[0].pid > 0){
+            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+            jobs_list[0].pid = 0;
+            jobs_list[0].status = 'F';
+            memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
+        }
+
     }  
 
 
@@ -423,7 +424,7 @@ int execute_line(char *line){
     int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
-    fprintf(stderr,"args[0]: %s\n",args[0]);
+    //fprintf(stderr,"args[0]: %s\n",args[0]);
 
     if ((strcmp(args[0],"cd") == 0)||(strcmp(args[0],"export") == 0)||(strcmp(args[0],"source") == 0)||
     (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
