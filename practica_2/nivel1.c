@@ -82,10 +82,12 @@ char *read_line(char *line){
 
 int parse_args(char **args,char *line){
 
+    char lineaux[strlen(line)+1];
+    strcpy(lineaux,line);
     int res = 0;
     const char s[2] = " ";
     char *token;
-    token = strtok(line,s);
+    token = strtok(lineaux,s);
 
     while(token != NULL){
         args[res] = token;
@@ -184,4 +186,5 @@ int execute_line(char *line){
     int interno;
     num_tokens = parse_args(args, line);
     interno = check_internal(args);
+    printf("line: %s\n",line);
 }

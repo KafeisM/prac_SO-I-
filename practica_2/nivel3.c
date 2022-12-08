@@ -387,6 +387,7 @@ int execute_line(char *line){
         interno = check_internal(args);
     }else{
         strcpy(jobs_list[0].cmd,lineaux);
+        fprintf(stderr,GRIS_T"[(%s)]\n"RESET,line);
         jobs_list[0].status = 'E';
         pid_t id = fork();
         if (id > 0){

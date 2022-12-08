@@ -168,11 +168,12 @@ char *read_line(char *line){
 
 int parse_args(char **args,char *line){
 
+    char lineaux[strlen(line)+1];
+    strcpy(lineaux,line);
     int res = 0;
     const char s[2] = " ";
     char *token;
-    token = strtok(line,s);
-
+    token = strtok(lineaux,s);
     while(token != NULL){
 
         if(strchr(token,92) != NULL){ //Miramos si hay " \ " para substituirla por un espacio
@@ -425,7 +426,6 @@ int execute_line(char *line){
     int interno;
     num_tokens = parse_args(args, line);
     //fprintf(stderr,"args[0]: %s\n",args[0]);
-
     if ((strcmp(args[0],"cd") == 0)||(strcmp(args[0],"export") == 0)||(strcmp(args[0],"source") == 0)||
     (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
         interno = check_internal(args);
