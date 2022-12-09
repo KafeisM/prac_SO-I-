@@ -41,6 +41,7 @@ int internal_fg(char **args);
 int internal_bg(char **args);
 void imprimir_prompt();
 void ctrlc(int signum);
+void ctrlz(int signum);
 void reaper(int signum);
 
 //tabla datos de los procesos 
@@ -70,6 +71,7 @@ int main(int argc, char *argv[]){
     //associar señales con sus funciones
     signal(SIGCHLD,reaper);
     signal(SIGINT,ctrlc);
+    signal (SIGTSTP, ctrlz);
 
     //inicializar datos tabla
     jobs_list[0].pid = 0;
@@ -114,7 +116,8 @@ void ctrlc(int signum){
     fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
     if(jobs_list[0].pid > 0){
         if(strcmp(jobs_list[0].cmd,"./nivel4") != 0){
-            fprintf(stderr,GRIS_T"el proceso foreground es %d (%s) \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
+           fprintf(stderr,GRIS_T"el proceso foreground es %d (%s) \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
+            fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal 2 (SIGINT)]");
             kill(jobs_list[0].pid,SIGTERM);
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
         }else{
@@ -125,6 +128,33 @@ void ctrlc(int signum){
     }
     printf("\n");
     fflush(stdout);
+}
+
+void ctrlz(int signum){
+    signal (SIGTSTP, ctrlz);
+    printf("\n");
+    fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
+    if(jobs_list[0].pid > 0){
+        if(strcmp(jobs_list[0].cmd,"./nivel4") != 0){
+            fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
+            fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal 20 (SIGTSTP)]");
+            kill(jobs_list[0].pid,SIGSTOP);
+            //cambiar estados del proceso del jobs_lits cuando este la funcion find
+            //añadir llamada a jobs_list_add
+            jobs_list[0].pid = 0;
+            jobs_list[0].status = 'N';
+            memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
+            fprintf(stderr,GRIS_T"[ctrlz()--> Señal 19 (SIGSTOP) enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
+        }else{
+            fprintf(stderr,GRIS_T"[ctrlz()--> Señal SIGSTOP NO enviada a %d (%s) debido a que su proceso en foreground es el shell"RESET,getpid(),mi_shell);
+        }
+    }else{
+        fprintf(stderr,GRIS_T"\n[ctrlz()--> Señal SIGSTOP NO enviada por %d (%s) debido a que no hay proceso en foreground"RESET,getpid(),mi_shell);
+    }
+    printf("\n");
+    fflush(stdout);
+
+
 }
 
 void imprimir_prompt(){
@@ -393,6 +423,10 @@ int internal_source(char **args)
 
 int internal_jobs(char **args)
 {
+    //Recorrerá jobs_list[] imprimiendo por pantalla el identificador de trabajo entre corchetes 
+    //(a partir del 1), su PID, la línea de comandos y el status (D de Detenido, E de Ejecutando).
+    int longitud = sizeof(jobs_list) / sizeof(jobs_list[0]);
+    printf("longitud array: %d \n",longitud);
 
     fprintf(stderr, GRIS_T "[internal_jobs()→ Esta función mostrará el PID de los procesos que no estén en foreground]\n" RESET);
 
