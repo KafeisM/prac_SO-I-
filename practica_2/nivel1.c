@@ -186,5 +186,4 @@ int execute_line(char *line){
     int interno;
     num_tokens = parse_args(args, line);
     interno = check_internal(args);
-    printf("line: %s\n",line);
 }

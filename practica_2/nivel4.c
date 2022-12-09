@@ -168,12 +168,10 @@ char *read_line(char *line){
 
 int parse_args(char **args,char *line){
 
-    char lineaux[strlen(line)+1];
-    strcpy(lineaux,line);
     int res = 0;
     const char s[2] = " ";
     char *token;
-    token = strtok(lineaux,s);
+    token = strtok(line,s);
     while(token != NULL){
 
         if(strchr(token,92) != NULL){ //Miramos si hay " \ " para substituirla por un espacio
@@ -268,7 +266,6 @@ int parse_args(char **args,char *line){
         }
     }
     args[res] = NULL;
-
     return res;
 
 }
@@ -419,7 +416,9 @@ int internal_bg(char **args)
 }
 
 int execute_line(char *line){
-    char *lineaux = line;
+
+    char lineaux[strlen(line)+1];
+    strcpy(lineaux,line);
     int status;
     char *args[ARGS_SIZE];
     int num_tokens;

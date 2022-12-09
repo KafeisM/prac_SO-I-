@@ -92,10 +92,12 @@ char *read_line(char *line){
 
 int parse_args(char **args,char *line){
 
+    char lineaux[strlen(line)+1];
+    strcpy(lineaux,line);
     int res = 0;
     const char s[2] = " ";
     char *token;
-    token = strtok(line,s);
+    token = strtok(lineaux,s);
 
     while(token != NULL){
 
