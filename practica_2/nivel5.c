@@ -45,6 +45,7 @@ void ctrlz(int signum);
 void reaper(int signum);
 int jobs_list_find(pid_t pid);
 int  jobs_list_remove(int pos);
+int jobs_list_add(pid_t pid,char status, char *cmd);
 
 
 //tabla datos de los procesos 
@@ -162,8 +163,8 @@ void ctrlz(int signum){
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
             fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal 20 (SIGTSTP)]");
             kill(jobs_list[0].pid,SIGSTOP);
-            //cambiar estados del proceso del jobs_lits cuando este la funcion find
-            //añadir llamada a jobs_list_add
+            jobs_list[jobs_list_find(jobs_list[0].pid)].status = 'D';
+            jobs_list_add(jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd);
             jobs_list[0].pid = 0;
             jobs_list[0].status = 'N';
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
@@ -171,13 +172,23 @@ void ctrlz(int signum){
         }else{
             fprintf(stderr,GRIS_T"[ctrlz()--> Señal SIGSTOP NO enviada a %d (%s) debido a que su proceso en foreground es el shell"RESET,getpid(),mi_shell);
         }
-    }else{
+    }else{ 
         fprintf(stderr,GRIS_T"\n[ctrlz()--> Señal SIGSTOP NO enviada por %d (%s) debido a que no hay proceso en foreground"RESET,getpid(),mi_shell);
     }
     printf("\n");
     fflush(stdout);
 
 
+}
+
+int jobs_list_add(pid_t pid,char status, char *cmd){
+    n_pids++;
+
+    if(n_pids < N_JOBS){
+        jobs_list[n_pids].status = status;
+        jobs_list[n_pids].pid = pid;
+         memset(jobs_list[0].cmd,*cmd,COMMAND_LINE_SIZE);
+    }
 }
 
 int jobs_list_find(pid_t pid){
@@ -467,12 +478,10 @@ int internal_source(char **args)
 
 int internal_jobs(char **args)
 {
-    //Recorrerá jobs_list[] imprimiendo por pantalla el identificador de trabajo entre corchetes 
-    //(a partir del 1), su PID, la línea de comandos y el status (D de Detenido, E de Ejecutando).
-    int longitud = sizeof(jobs_list) / sizeof(jobs_list[0]);
-    printf("longitud array: %d \n",longitud);
 
-    fprintf(stderr, GRIS_T "[internal_jobs()→ Esta función mostrará el PID de los procesos que no estén en foreground]\n" RESET);
+    for(int i = 1; i<= n_pids; i++){
+        printf("[%d] %d     %c      %s\n",i,jobs_list[i].pid,jobs_list[i].status,jobs_list[i].cmd);
+    }
 
     return 1;
 }
