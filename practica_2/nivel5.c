@@ -93,6 +93,16 @@ int main(int argc, char *argv[]){
     }
 }
 
+int is_background(char **args){
+    for (int i=0; i < ARGS_SIZE; i++){
+        if (args[i] == "&"){
+            args[i] = NULL;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
@@ -507,17 +517,25 @@ int execute_line(char *line){
     (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
         interno = check_internal(args);
     }else{
-        strcpy(jobs_list[0].cmd,lineaux);
-        jobs_list[0].status = 'E';
+        bool isbg = is_background(args);
+        if(isbg){
+            strcpy(jobs_list[0].cmd,lineaux);
+            jobs_list[0].status = 'E';
+        }
         pid_t id = fork();
         if (id > 0){
-            signal(SIGINT,ctrlc);
-            fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
-            //fprintf(stderr,"args[0]: %s\n",args[0]);
-            jobs_list[0].pid = id;
+            if(isbg){
+                signal(SIGINT,ctrlc);
+                fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
+                //fprintf(stderr,"args[0]: %s\n",args[0]);
+                jobs_list[0].pid = id;
+            }else{
+                jobs_list_add(getpid(),'E',lineaux);
+            } 
         }else if(id == 0){
             signal(SIGCHLD,SIG_DFL);
             signal(SIGINT,SIG_IGN);
+            signal(SIGTSTP, SIG_IGN);
             fprintf(stderr,GRIS_T"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
             int err = execvp(args[0],args);
             if (err == -1){
