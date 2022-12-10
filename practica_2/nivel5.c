@@ -43,6 +43,9 @@ void imprimir_prompt();
 void ctrlc(int signum);
 void ctrlz(int signum);
 void reaper(int signum);
+int jobs_list_find(pid_t pid);
+int  jobs_list_remove(int pos);
+
 
 //tabla datos de los procesos 
 struct info_job {
@@ -60,8 +63,8 @@ char const PROMPT = '$';
 char *user;
 char *home;
 
-//variables para el reaper
-static int acabados=0; //contabilizar procesos acabados
+//cantidad de trabajos (en background y/o detenidos) que hay en jobs_list[ ]
+int n_pids = 0;
 
 
 int main(int argc, char *argv[]){
@@ -94,17 +97,37 @@ void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
+
+    fprintf(stderr,GRIS_T"[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
           
     while ((ended=waitpid(-1, &status , WNOHANG))>0) {
         //if ended es el pid del hijo en primer plano
-        if (jobs_list[0].pid > 0){
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+        if (jobs_list[0].pid > 0){ //foreground
+            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foregground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
             jobs_list[0].pid = 0;
             jobs_list[0].status = 'F';
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
+        }else{ //background
+            int pos = jobs_list_find(ended);
+            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+            jobs_list_remove(pos);
         }
 
     }  
+
+
+    /*ended=waitpid(-1, &status , WNOHANG);
+        //if ended es el pid del hijo en primer plano
+        if (ended > 0){ //foreground
+            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+            jobs_list[0].pid = 0;
+            jobs_list[0].status = 'F';
+            memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
+        }else{ //background
+            int pos = jobs_list_find(ended);
+            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+            jobs_list_remove(pos);
+        } */
 
 
 
@@ -155,6 +178,27 @@ void ctrlz(int signum){
     fflush(stdout);
 
 
+}
+
+int jobs_list_find(pid_t pid){
+    int final;
+    bool trobat = false;
+    for (size_t i = 0; (!final) && (i < n_pids); i++){
+        if(jobs_list[i].pid == pid){
+            final = i;
+            trobat = true;
+        }
+    }
+    
+    return final;
+}
+
+int  jobs_list_remove(int pos){
+    jobs_list[pos] = jobs_list[n_pids - 1];
+    jobs_list[n_pids-1].pid = 0;
+    jobs_list[n_pids-1].status = '\0';
+    memset(jobs_list[n_pids-1].cmd,'\0',COMMAND_LINE_SIZE);
+    n_pids--;
 }
 
 void imprimir_prompt(){
