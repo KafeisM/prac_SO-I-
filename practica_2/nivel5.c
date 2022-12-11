@@ -113,8 +113,8 @@ void reaper(int signum){
           
     while ((ended=waitpid(-1, &status , WNOHANG))>0) {
         //if ended es el pid del hijo en primer plano
-        if (jobs_list[0].pid > 0){ //foreground
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foregground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+        if (ended == jobs_list[0].pid){ //foreground
+            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
             jobs_list[0].pid = 0;
             jobs_list[0].status = 'F';
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
@@ -125,21 +125,6 @@ void reaper(int signum){
         }
 
     }  
-
-
-    /*ended=waitpid(-1, &status , WNOHANG);
-        //if ended es el pid del hijo en primer plano
-        if (ended > 0){ //foreground
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
-            jobs_list[0].pid = 0;
-            jobs_list[0].status = 'F';
-            memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
-        }else{ //background
-            int pos = jobs_list_find(ended);
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
-            jobs_list_remove(pos);
-        } */
-
 
 
 }
