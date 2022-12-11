@@ -416,7 +416,7 @@ int internal_bg(char **args)
 }
 
 int execute_line(char *line){
-
+    
     char lineaux[strlen(line)+1];
     strcpy(lineaux,line);
     int status;
