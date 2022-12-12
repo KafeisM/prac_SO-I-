@@ -270,16 +270,19 @@ int parse_args(char **args,char *line){
 
     int res = 0;
     char *token;
+    char *aux;
     token = strtok(line, " \t\n\r");
 
     while(token != NULL){
         args[res] = token;
+        printf("ARGS %i : %s\n",res,args[res]);
         if(args[res][0] != '#'){
             token = strtok(NULL," \t\n\r");
             res++;           
         }else{
             token = NULL;
         }
+        printf("ARGS %i: %s\n",res,args[res]);
     }
     args[res] = NULL;
 
