@@ -379,16 +379,104 @@ int check_internal(char **args){
     }
 }
 
+int cd_avanzado(char **args){
+
+    char *token = args[1];
+
+    if(strchr(token,92) != NULL){ //Miramos si hay " \ " para substituirla por un espacio
+        int i = 0;
+        while(i < strlen(token)){
+            if(token[i] == 92){
+                token[i] = ' ';
+            }
+            i++;
+        }
+    }else if(strchr(token,34) != NULL){ //Miramos si hay " " para coger lo de dentro y que se junte en un solo token
+        char *token2;
+        token2 = args[2];
+        if(token[strlen(token) - 1] == 34){ //Si solo hay una palabra dentro de las " "
+            int i = 0;
+            while(i < strlen(token)){
+                if(i == (strlen(token) - 2)){
+                    token[i] = '\0';
+                }else{
+                    token[i] = token[i+1];
+                }
+                i++;
+            }
+        }else if(token2 == NULL){ //Si solo hay una "
+            fprintf(stderr,ROJO_T "ERROR\n" RESET);
+        }else{
+            int cont = 3;
+            while(strchr(token2,34) == NULL){
+                token[strlen(token)] = ' ';
+                token2 = args[cont];
+                cont++;
+               
+            }
+            token[strlen(token)] = ' ';
+            int i = 0;
+            while(i < strlen(token)){
+                if(i == (strlen(token) - 2)){
+                    token[i] = '\0';
+                }else{
+                    token[i] = token[i+1];
+                }
+                i++;
+            }
+        }
+           
+
+    }else if(strchr(token,39) != NULL){ //Miramos si hay ' ' para coger lo de dentro y que se junte en un solo token
+        char *token2;
+        token2 = args[2];
+        if(token[strlen(token) - 1] == 39){ //Si solo hay una palabra dentro de las ' '
+            int i = 0;
+            while(i < strlen(token)){
+                if(i == (strlen(token) - 2)){
+                    token[i] = '\0';
+                }else{
+                    token[i] = token[i+1];
+                }
+                i++;
+            }
+        }else if(token2 == NULL){ //Si solo hay una '
+            fprintf(stderr,ROJO_T "ERROR\n" RESET);
+        }else{
+            int cont = 3;
+            while(strchr(token2,39) == NULL){
+                token[strlen(token)] = ' ';
+                token2 = args[cont];
+                cont++;
+               
+            }
+            token[strlen(token)] = ' ';
+            int i = 0;
+            while(i < strlen(token)){
+                if(i == (strlen(token) - 2)){
+                    token[i] = '\0';
+                }else{
+                    token[i] = token[i+1];
+                }
+                i++;
+            }
+        }
+
+    }
+}
+
 int internal_cd(char **args){
     
     if(args[1] == NULL){
         if(chdir("/home") != 0){
             perror("chdir()");
         }
-    }else if(chdir(args[1]) != 0){
-        perror("chdir()");   
+    }else {
+        cd_avanzado(args);
+        if(chdir(args[1]) != 0){
+            perror("chdir()");   
+        }
     }
-  
     
     char cwd[COMMAND_LINE_SIZE];
     if (getcwd(cwd, COMMAND_LINE_SIZE) != NULL) {
