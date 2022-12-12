@@ -282,8 +282,8 @@ int internal_export(char **args)
             return FAILURE;
         }
     }else if(valor != NULL || nombre != NULL){
-        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
-        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
+        fprintf(stderr,GRIS_T"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,GRIS_T"[internal_export()→ valor: %s\n"RESET,valor);
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
     }else{
