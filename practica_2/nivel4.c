@@ -212,7 +212,9 @@ int check_internal(char **args){
         return 1;
     }else if(strcmp(args[0],"exit")== 0){
         exit(0);
-    }else{  
+    }else if(strcmp(args[0],"^C")){
+        return 1;
+    }else{ 
         //printf("No es un comando interno\n");
         return 0;
     }

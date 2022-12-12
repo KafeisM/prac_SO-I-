@@ -518,7 +518,9 @@ int execute_line(char *line){
     num_tokens = parse_args(args, line);
     interno = check_internal(args);
     fprintf("interno: %i\n",interno);
-    if (interno == 0){
+
+    if (num_tokens > 0){
+        if (interno == 0){
         bool isbg = is_background(args);
         if(isbg){
             strcpy(jobs_list[0].cmd,lineaux);
@@ -552,6 +554,7 @@ int execute_line(char *line){
             pause();
         }
         
+    }
     }
     
 }
