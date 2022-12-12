@@ -96,8 +96,12 @@ int main(int argc, char *argv[]){
 }
 
 int is_background(char **args){
-    for (int i=0; i < ARGS_SIZE; i++){
-        if (args[i] == "&"){
+    
+    int longitud = sizeof(args) / sizeof(args[0]);
+    fprintf(stderr,"tamaño args: %d\n",longitud);
+
+    for (int i=0; i < longitud; i++){
+        if (strcmp(args[i],"&") == 0){
             args[i] = NULL;
             return 1;
         }
@@ -135,9 +139,9 @@ void ctrlc(int signum){
     printf("\n");
     fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
     if(jobs_list[0].pid > 0){
-        if(strcmp(jobs_list[0].cmd,"./nivel4") != 0){
+        if(strcmp(jobs_list[0].cmd,mi_shell) != 0){
            fprintf(stderr,GRIS_T"el proceso foreground es %d (%s) \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
-            fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal 2 (SIGINT)]");
+            fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal 2 (SIGINT)]\n");
             kill(jobs_list[0].pid,SIGTERM);
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
         }else{
@@ -507,7 +511,7 @@ int internal_bg(char **args)
 }
 
 int execute_line(char *line){
-
+    
     char lineaux[strlen(line)+1];
     strcpy(lineaux,line);
     int status;
@@ -515,45 +519,46 @@ int execute_line(char *line){
     int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
-    interno = check_internal(args);
-    fprintf("interno: %i\n",interno);
 
     if (num_tokens > 0){
-        if (interno == 0){
-        bool isbg = is_background(args);
-        if(isbg){
-            strcpy(jobs_list[0].cmd,lineaux);
-            jobs_list[0].status = 'E';
-        }
+      if (check_internal(args) == 1){
+        return 1;
+      }else{
+        
+        fprintf(stderr,"antes bg\n");
+        bool is_bg = is_background(args);
+        fprintf(stderr,"despres bg\n");
+
         pid_t id = fork();
         if (id > 0){
-            if(isbg){
-                signal(SIGINT,ctrlc);
-                fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
-                //fprintf(stderr,"args[0]: %s\n",args[0]);
+            if(!is_bg){
+                strcpy(jobs_list[0].cmd, lineaux);
+                jobs_list[0].status = 'E';
+                fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
                 jobs_list[0].pid = id;
             }else{
-                jobs_list_add(getpid(),'E',lineaux);
-            } 
-        }else if(id == 0){
-            signal(SIGCHLD,SIG_DFL);
-            signal(SIGINT,SIG_IGN);
-            signal(SIGTSTP, SIG_IGN);
-            fprintf(stderr,GRIS_T"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
-            int err = execvp(args[0],args);
-            if (err == -1){
-                exit(-1);
+                jobs_list_add(jobs_list[0].pid,jobs_list[0].status,lineaux);
             }
+            
+        }else if (id == 0){
+            signal(SIGCHLD, SIG_DFL);
+            signal(SIGINT, SIG_IGN);
+            signal(SIGTSTP,SIG_IGN);
+            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, getpid(), jobs_list[0].cmd);
+            sleep(0.1);
+            int err = execvp(args[0], args);
+            if (err == -1){
+                    exit(-1);
+                }
         }else{
-            fprintf(stderr,ROJO_T"Error con la creación del hijo\n"RESET);
+            fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
         }
 
-        while(jobs_list[0].pid > 0){
+        while (jobs_list[0].pid > 0){
             pause();
         }
-        
-    }
+      }
     }
     
 }

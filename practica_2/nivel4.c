@@ -114,7 +114,7 @@ void ctrlc(int signum){
     printf("\n");
     fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
     if(jobs_list[0].pid > 0){
-        if(strcmp(jobs_list[0].cmd,"./nivel4") != 0){
+        if(strcmp(jobs_list[0].cmd,mi_shell) != 0){
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s) \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
             kill(jobs_list[0].pid,SIGTERM);
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
@@ -441,7 +441,7 @@ int execute_line(char *line){
         jobs_list[0].status = 'E';
         pid_t id = fork();
         if (id > 0){
-            signal(SIGINT, ctrlc);
+            //signal(SIGINT, ctrlc);
             fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
             jobs_list[0].pid = id;
         }else if (id == 0){
