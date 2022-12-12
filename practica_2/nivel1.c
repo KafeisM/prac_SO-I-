@@ -83,15 +83,14 @@ char *read_line(char *line){
 int parse_args(char **args,char *line){
 
     int res = 0;
-    const char s[2] = " ";
     char *token;
-    token = strtok(line,s);
+    token = strtok(line, " \t\n\r");
 
     while(token != NULL){
         args[res] = token;
         printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
         if(args[res][0] != '#'){
-            token = strtok(NULL,s);
+            token = strtok(NULL," \t\n\r");
             res++;           
         }else{
             token = NULL;

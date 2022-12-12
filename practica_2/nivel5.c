@@ -220,6 +220,8 @@ void imprimir_prompt(){
         perror("getcwd() error");
         
     }
+    sleep(0.4);
+    fflush(stdout);
    
 }
 
@@ -241,8 +243,6 @@ char *read_line(char *line){
             exit(0);
         }
     }
-
-    fflush(stdin);
     return line; 
 }
 

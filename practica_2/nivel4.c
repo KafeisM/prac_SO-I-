@@ -168,7 +168,7 @@ char *read_line(char *line){
 
 int parse_args(char **args,char *line){
 
-    int res = 0;
+    /*int res = 0;
     const char s[2] = " ";
     char *token;
     token = strtok(line,s);
@@ -266,6 +266,23 @@ int parse_args(char **args,char *line){
         }
     }
     args[res] = NULL;
+    return res; */
+
+    int res = 0;
+    char *token;
+    token = strtok(line, " \t\n\r");
+
+    while(token != NULL){
+        args[res] = token;
+        if(args[res][0] != '#'){
+            token = strtok(NULL," \t\n\r");
+            res++;           
+        }else{
+            token = NULL;
+        }
+    }
+    args[res] = NULL;
+
     return res;
 
 }
@@ -424,7 +441,7 @@ int execute_line(char *line){
     int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
-    //fprintf(stderr,"args[0]: %s\n",args[0]);
+
     if(num_tokens > 0){
     if ((strcmp(args[0],"cd") == 0)||(strcmp(args[0],"export") == 0)||(strcmp(args[0],"source") == 0)||
     (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
@@ -436,7 +453,6 @@ int execute_line(char *line){
         if (id > 0){
             signal(SIGINT,ctrlc);
             fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
-            //fprintf(stderr,"args[0]: %s\n",args[0]);
             jobs_list[0].pid = id;
         }else if(id == 0){
             signal(SIGCHLD,SIG_DFL);
