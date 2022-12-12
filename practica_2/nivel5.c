@@ -182,7 +182,7 @@ int jobs_list_add(pid_t pid,char status, char *cmd){
     if(n_pids < N_JOBS){
         jobs_list[n_pids].status = status;
         jobs_list[n_pids].pid = pid;
-         memset(jobs_list[0].cmd,*cmd,COMMAND_LINE_SIZE);
+        strcpy(jobs_list[n_pids].cmd,cmd);
     }
 }
 
