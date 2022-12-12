@@ -95,11 +95,9 @@ int main(int argc, char *argv[]){
     }
 }
 
-int is_background(char **args){
+int is_background(char **args, int num_tokens){
     
-    int longitud = sizeof(args) / sizeof(args[0]);
-    fprintf(stderr,"tamaño args: %d\n",longitud);
-
+    int longitud = num_tokens;
     for (int i=0; i < longitud; i++){
         if (strcmp(args[i],"&") == 0){
             args[i] = NULL;
@@ -107,6 +105,7 @@ int is_background(char **args){
         }
     }
     return 0;
+    
 }
 
 void reaper(int signum){
@@ -523,19 +522,19 @@ int execute_line(char *line){
     if (num_tokens > 0){
       if (check_internal(args) == 1){
         return 1;
-      }else{
+      }else{     
+        jobs_list[0].status = 'E';   
+        strcpy(jobs_list[0].cmd, lineaux);
         
-        fprintf(stderr,"antes bg\n");
-        bool is_bg = is_background(args);
-        fprintf(stderr,"despres bg\n");
 
+        int is_bg = is_background(args,num_tokens);
         pid_t id = fork();
         if (id > 0){
-            if(!is_bg){
+            if(is_bg == 0){
+                jobs_list[0].status = 'E';   
                 strcpy(jobs_list[0].cmd, lineaux);
-                jobs_list[0].status = 'E';
-                fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
                 jobs_list[0].pid = id;
+                fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
             }else{
                 jobs_list_add(jobs_list[0].pid,jobs_list[0].status,lineaux);
             }
