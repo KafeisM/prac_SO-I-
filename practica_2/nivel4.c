@@ -140,7 +140,8 @@ void imprimir_prompt(){
         perror("getcwd() error");
         
     }
-   
+    sleep(0.4);
+   fflush(stdout);
 }
 
 char *read_line(char *line){
@@ -162,7 +163,6 @@ char *read_line(char *line){
         }
     }
 
-    fflush(stdin);
     return line; 
 }
 
@@ -425,6 +425,7 @@ int execute_line(char *line){
     int interno;
     num_tokens = parse_args(args, line);
     //fprintf(stderr,"args[0]: %s\n",args[0]);
+    if(num_tokens > 0){
     if ((strcmp(args[0],"cd") == 0)||(strcmp(args[0],"export") == 0)||(strcmp(args[0],"source") == 0)||
     (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
         interno = check_internal(args);
@@ -454,6 +455,8 @@ int execute_line(char *line){
             pause();
         }
         
+    }
+
     }
     
 }
