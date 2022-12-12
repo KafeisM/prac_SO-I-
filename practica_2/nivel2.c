@@ -33,6 +33,7 @@ char *home;
 char *read_line(char *line); 
 int execute_line(char *line);
 int parse_args(char **args,char *line);
+int cd_avanzado(char **args);
 int internal_cd(char **args);
 int internal_export(char **args);
 int internal_source(char **args);

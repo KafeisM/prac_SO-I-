@@ -33,6 +33,7 @@
 char *read_line(char *line); 
 int execute_line(char *line);
 int parse_args(char **args,char *line);
+int cd_avanzado(char **args);
 int internal_cd(char **args);
 int internal_export(char **args);
 int internal_source(char **args);
@@ -448,11 +449,17 @@ int execute_line(char *line){
         }else if (id == 0){
             signal(SIGCHLD, SIG_DFL);
             signal(SIGINT, SIG_IGN);
-            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, getpid(), jobs_list[0].cmd);
-            int err = execvp(args[0], args);
-            if (err == -1){
-                    exit(-1);
+            if (SIGINT){
+                return 1;
+            }else{
+                fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, getpid(), jobs_list[0].cmd);
+                sleep(0.1);
+                int err = execvp(args[0], args);
+                if (err == -1){
+                        exit(-1);
+                }
             }
+            
         }else{
             fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
