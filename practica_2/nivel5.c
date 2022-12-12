@@ -373,7 +373,9 @@ int check_internal(char **args){
         return 1;
     }else if(strcmp(args[0],"exit")== 0){
         exit(0);
-    }else{  
+    }else if(strcmp(args[0],"^C")==0){
+        return 1;
+    }else{
         printf("No es un comando interno\n");
         return 0;
     }
@@ -594,11 +596,9 @@ int execute_line(char *line){
     int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
-    //fprintf(stderr,"args[0]: %s\n",args[0]);
-    if ((strcmp(args[0],"cd") == 0)||(strcmp(args[0],"export") == 0)||(strcmp(args[0],"source") == 0)||
-    (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
-        interno = check_internal(args);
-    }else{
+    interno = check_internal(args);
+    fprintf("interno: %i\n",interno);
+    if (interno == 0){
         bool isbg = is_background(args);
         if(isbg){
             strcpy(jobs_list[0].cmd,lineaux);
