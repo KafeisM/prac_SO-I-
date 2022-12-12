@@ -174,14 +174,14 @@ int parse_args(char **args,char *line){
 
     while(token != NULL){
         args[res] = token;
-        printf("ARGS %i : %s\n",res,args[res]);
+       // printf("ARGS %i : %s\n",res,args[res]);
         if(args[res][0] != '#'){
             token = strtok(NULL," \t\n\r");
             res++;           
         }else{
             token = NULL;
         }
-        printf("ARGS %i: %s\n",res,args[res]);
+       // printf("ARGS %i: %s\n",res,args[res]);
     }
     args[res] = NULL;
 
@@ -213,7 +213,7 @@ int check_internal(char **args){
     }else if(strcmp(args[0],"exit")== 0){
         exit(0);
     }else{  
-        printf("No es un comando interno\n");
+        //printf("No es un comando interno\n");
         return 0;
     }
 }
@@ -432,37 +432,33 @@ int execute_line(char *line){
     int interno;
     num_tokens = parse_args(args, line);
 
-    if(num_tokens > 0){
-    if ((strcmp(args[0],"cd") == 0)||(strcmp(args[0],"export") == 0)||(strcmp(args[0],"source") == 0)||
-    (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
-        interno = check_internal(args);
-    }else{
-        strcpy(jobs_list[0].cmd,lineaux);
+    if (num_tokens > 0){
+      if (check_internal(args) == 1){
+        return 1;
+      }else{
+        strcpy(jobs_list[0].cmd, lineaux);
         jobs_list[0].status = 'E';
         pid_t id = fork();
         if (id > 0){
-            signal(SIGINT,ctrlc);
-            fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
+            signal(SIGINT, ctrlc);
+            fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
             jobs_list[0].pid = id;
-        }else if(id == 0){
-            signal(SIGCHLD,SIG_DFL);
-            signal(SIGINT,SIG_IGN);
-            fprintf(stderr,GRIS_T"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
-            int err = execvp(args[0],args);
+        }else if (id == 0){
+            signal(SIGCHLD, SIG_DFL);
+            signal(SIGINT, SIG_IGN);
+            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, getpid(), jobs_list[0].cmd);
+            int err = execvp(args[0], args);
             if (err == -1){
-                exit(-1);
+                    exit(-1);
             }
         }else{
-            fprintf(stderr,ROJO_T"Error con la creación del hijo\n"RESET);
+            fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
         }
 
-        while(jobs_list[0].pid > 0){
+        while (jobs_list[0].pid > 0){
             pause();
         }
-        
+      }
     }
-
-    }
-    
 }
