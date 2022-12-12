@@ -294,7 +294,7 @@ int check_internal(char **args){
     }else if(strcmp(args[0],"exit")== 0){
         exit(0);
     }else if(strcmp(args[0],"^C")==0){
-        return 1;
+        return 0;
     }else{
         printf("No es un comando interno\n");
         return 0;
