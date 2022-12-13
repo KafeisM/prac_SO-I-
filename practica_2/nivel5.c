@@ -125,7 +125,9 @@ void reaper(int signum){
         }else{ //background
             int pos = jobs_list_find(ended);
             fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+            fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[0].cmd,pos,status);
             jobs_list_remove(pos);
+            
         }
 
     }  
@@ -192,10 +194,11 @@ int jobs_list_add(pid_t pid,char status, char *cmd){
 int jobs_list_find(pid_t pid){
     int final;
     bool trobat = false;
-    for (size_t i = 0; (!final) && (i < n_pids); i++){
+    for (int i = 0; (!final) && (i < n_pids); i++){
         if(jobs_list[i].pid == pid){
             final = i;
             trobat = true;
+            fprintf(stderr,"%d\n"RESET,i);
         }
     }
     
@@ -239,6 +242,7 @@ char *read_line(char *line){
         if (salto){
             *salto = '\0';
         }
+        return line;
         //sino, miramos si hay final de fichero y salimos
     }else{
         if(feof(stdin)){
@@ -246,7 +250,7 @@ char *read_line(char *line){
             exit(0);
         }
     }
-    return line; 
+    return NULL; 
 }
 
 int parse_args(char **args,char *line){
