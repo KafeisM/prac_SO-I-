@@ -84,7 +84,7 @@ int main(int argc, char *argv[]){
     while(true){
         if(read_line(line)){
             execute_line(line);
-            fflush(stdin);
+            fflush(stdout);
         }
     }
 }
@@ -114,7 +114,7 @@ void ctrlc(int signum){
     printf("\n");
     fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
     if(jobs_list[0].pid > 0){
-        if(strcmp(jobs_list[0].cmd,mi_shell) != 0){
+        if(strcmp(jobs_list[0].cmd,"./nivel4") != 0){
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s) \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
             kill(jobs_list[0].pid,SIGTERM);
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
@@ -213,8 +213,10 @@ int check_internal(char **args){
         return 1;
     }else if(strcmp(args[0],"exit")== 0){
         exit(0);
+    }else if(strcmp(args[0],"^C") == 0){
+        return 1;
     }else{ 
-        //printf("No es un comando interno\n");
+        printf("No es un comando interno\n");
         return 0;
     }
 }
@@ -441,18 +443,23 @@ int execute_line(char *line){
         jobs_list[0].status = 'E';
         pid_t id = fork();
         if (id > 0){
-            //signal(SIGINT, ctrlc);
+            signal(SIGINT, ctrlc);
             fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
             jobs_list[0].pid = id;
         }else if (id == 0){
             signal(SIGCHLD, SIG_DFL);
             signal(SIGINT, SIG_IGN);
-            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, getpid(), jobs_list[0].cmd);
-            sleep(0.1);
-            int err = execvp(args[0], args);
-            if (err == -1){
-                    exit(-1);
+            if (SIGINT){
+                return 1;
+            }else{
+                fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, getpid(), jobs_list[0].cmd);
+                sleep(0.1);
+                int err = execvp(args[0], args);
+                if (err == -1){
+                        exit(-1);
                 }
+            }
+            
         }else{
             fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
