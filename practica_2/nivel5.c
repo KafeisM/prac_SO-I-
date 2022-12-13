@@ -177,7 +177,6 @@ void ctrlz(int signum){
     printf("\n");
     fflush(stdout);
 
-
 }
 
 int jobs_list_add(pid_t pid,char status, char *cmd){
@@ -534,21 +533,24 @@ int execute_line(char *line){
                 jobs_list[0].status = 'E';   
                 strcpy(jobs_list[0].cmd, lineaux);
                 jobs_list[0].pid = id;
+                fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
                 fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
             }else{
-                jobs_list_add(jobs_list[0].pid,jobs_list[0].status,lineaux);
+                fprintf(stderr, GRIS_T "[execute_line(): background\n" RESET);
+                sleep(0.4);
+                jobs_list_add(id,jobs_list[0].status,lineaux);
             }
             
         }else if (id == 0){
-            signal(SIGCHLD, SIG_DFL);
+            //signal(SIGCHLD, SIG_DFL);
             signal(SIGINT, SIG_IGN);
             signal(SIGTSTP,SIG_IGN);
             fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, getpid(), jobs_list[0].cmd);
             sleep(0.1);
             int err = execvp(args[0], args);
             if (err == -1){
-                    exit(-1);
-                }
+                exit(-1);
+            }
         }else{
             fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
