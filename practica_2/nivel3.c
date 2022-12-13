@@ -163,7 +163,7 @@ int check_internal(char **args){
     }else if(strcmp(args[0],"exit")== 0){
         exit(0);
     }else{  
-        printf("No es un comando interno\n");
+        //printf("No es un comando interno\n");
         return 0;
     }
 }
@@ -325,7 +325,7 @@ int internal_export(char **args)
 int internal_source(char **args)
 {
 
-    char *str[COMMAND_LINE_SIZE];
+    char str[COMMAND_LINE_SIZE];
 
     FILE *fp = fopen(args[1],"r");//r porq queremos solo leer
     if( fp == NULL ) {
@@ -333,14 +333,16 @@ int internal_source(char **args)
       return(-1);
     }
 
-    while( fgets (*str, COMMAND_LINE_SIZE, fp)!=NULL ) {
-      for (size_t i = 0; i < COMMAND_LINE_SIZE; i++){
-        if(*str[i] == '\n'){
-            *str[i] = '\0';
+    while( fgets (str, COMMAND_LINE_SIZE, fp)!=NULL ) {
+        for (size_t i = 0; i < COMMAND_LINE_SIZE; i++){
+            if(str[i] == '\n'){
+                str[i] = '\0';
+            }
         }
-      }
-      fflush(fp);
-      execute_line(*str);
+        fprintf(stderr,"\n");
+        fprintf(stderr, GRIS_T "[internal_source()→ LINE: %s]\n"RESET,str);
+        fflush(fp);
+        execute_line(str);
       
     }
     fclose(fp);
@@ -380,46 +382,47 @@ int execute_line(char *line){
     int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
-    fprintf(stderr,"args[0]: %s\n",args[0]);
+    //fprintf(stderr,"args[0]: %s\n",args[0]);
 
-    if ((strcmp(args[0],"cd") == 0)||(strcmp(args[0],"export") == 0)||(strcmp(args[0],"source") == 0)||
-    (strcmp(args[0],"jobs") == 0)||(strcmp(args[0],"exit") == 0)||(strcmp(args[0],"fg") == 0)||(strcmp(args[0],"exit") == 0)){
-        interno = check_internal(args);
-    }else{
-        strcpy(jobs_list[0].cmd,lineaux);
-        fprintf(stderr,GRIS_T"[(%s)]\n"RESET,line);
-        jobs_list[0].status = 'E';
-        pid_t id = fork();
-        if (id > 0){
-            fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
-            //fprintf(stderr,"args[0]: %s\n",args[0]);
-            jobs_list[0].pid = id;
-        }else if(id == 0){
-            fprintf(stderr,GRIS_T"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
-            int err = execvp(args[0],args);
-            if (err == -1){
-                exit(-1);
-            }
+    if (num_tokens > 0){
+        if (check_internal(args) == 1){
+            return 1;
         }else{
-            fprintf(stderr,ROJO_T"Error con la creación del hijo\n"RESET);
-            exit(-2);
-        }
-
-        wait(&status);
-
-        if (WIFEXITED(status)){
-            int statuscode = WEXITSTATUS(status);
-            if (statuscode == 0){
-                fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
+            strcpy(jobs_list[0].cmd,lineaux);
+            //fprintf(stderr,GRIS_T"[(%s)]\n"RESET,line);
+            jobs_list[0].status = 'E';
+            pid_t id = fork();
+            if (id > 0){
+                fprintf(stderr,GRIS_T"[execute_line(): PID padre: %d | (%s)]\n"RESET,getpid(),mi_shell);
+                //fprintf(stderr,"args[0]: %s\n",args[0]);
+                jobs_list[0].pid = id;
+            }else if(id == 0){
+                fprintf(stderr,GRIS_T"[execute_line(): PID hijo: %d | (%s)]\n"RESET,getpid(),jobs_list[0].cmd);
+                int err = execvp(args[0],args);
+                if (err == -1){
+                    exit(-1);
+                }
             }else{
-                fprintf(stderr,ROJO_T"(%s): no se encontró la orden\n"RESET,jobs_list[0].cmd);
-                fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
+                fprintf(stderr,ROJO_T"Error con la creación del hijo\n"RESET);
+                exit(-2);
             }
+
+            wait(&status);
+
+            if (WIFEXITED(status)){
+                int statuscode = WEXITSTATUS(status);
+                if (statuscode == 0){
+                    fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
+                }else{
+                    fprintf(stderr,ROJO_T"(%s): no se encontró la orden\n"RESET,jobs_list[0].cmd);
+                    fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
+                }
+            }
+            
+            jobs_list[0].status = 'N';
+            strcpy(jobs_list[0].cmd,"");
+            jobs_list[0].pid = 0;
         }
-        
-        jobs_list[0].status = 'N';
-        strcpy(jobs_list[0].cmd,"");
-        jobs_list[0].pid = 0;
     }
     
 }
