@@ -549,6 +549,10 @@ int execute_line(char *line){
             exit(SUCCES);
             
         }else if (id > 0){ //si es el padre
+
+            jobs_list[0].status = 'E';   
+            strcpy(jobs_list[0].cmd, lineaux);
+            jobs_list[0].pid = id;
            
            if(is_bg == 0){ //miramos si no esta en background
 
@@ -556,10 +560,6 @@ int execute_line(char *line){
                 fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
                 fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
 
-                jobs_list[0].status = 'E';   
-                strcpy(jobs_list[0].cmd, lineaux);
-                jobs_list[0].pid = id;
-                
                 while (jobs_list[0].pid > 0){
                     pause();
                  }
@@ -568,6 +568,8 @@ int execute_line(char *line){
                 fprintf(stderr, GRIS_T "[execute_line(): background\n" RESET);
                 sleep(0.4);
                 jobs_list_add(id,jobs_list[0].status,lineaux);
+                printf("[%d] %d     %c      %s\n",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso en segundo plano
+
             }
            
         }else{
