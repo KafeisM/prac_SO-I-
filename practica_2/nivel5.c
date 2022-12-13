@@ -124,8 +124,8 @@ void reaper(int signum){
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
         }else{ //background
             int pos = jobs_list_find(ended);
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
-            fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[0].cmd,pos,status);
+            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[pos].cmd,status);
+            fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
             jobs_list_remove(pos);
             
         }
@@ -159,13 +159,14 @@ void ctrlz(int signum){
     signal (SIGTSTP, ctrlz);
     printf("\n");
     fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
-    if(jobs_list[0].pid > 0){
-        if(strcmp(jobs_list[0].cmd,"./nivel4") != 0){
+    if(jobs_list[0].pid > 0){ //si hay un proceso en foreground entonces:
+        if(strcmp(jobs_list[0].cmd,mi_shell) != 0){ // si no es el minishell, entonces:
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
             fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal 20 (SIGTSTP)]");
             kill(jobs_list[0].pid,SIGSTOP);
-            jobs_list[jobs_list_find(jobs_list[0].pid)].status = 'D';
+            jobs_list[0].status = 'D';
             jobs_list_add(jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd);
+            //reseteamos el proceso
             jobs_list[0].pid = 0;
             jobs_list[0].status = 'N';
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
@@ -194,22 +195,23 @@ int jobs_list_add(pid_t pid,char status, char *cmd){
 int jobs_list_find(pid_t pid){
     int final;
     bool trobat = false;
-    for (int i = 0; (!final) && (i < n_pids); i++){
+    for (int i = 1; (!trobat) && (i <= n_pids); i++){
         if(jobs_list[i].pid == pid){
             final = i;
             trobat = true;
-            fprintf(stderr,"%d\n"RESET,i);
+            fprintf(stderr,"jobs_list_find: %i\n"RESET,final);
         }
+        fprintf(stderr,"jobs_list_find (pid): %i\n"RESET,jobs_list[i].pid);
     }
     
     return final;
 }
 
 int  jobs_list_remove(int pos){
-    jobs_list[pos] = jobs_list[n_pids - 1];
-    jobs_list[n_pids-1].pid = 0;
-    jobs_list[n_pids-1].status = '\0';
-    memset(jobs_list[n_pids-1].cmd,'\0',COMMAND_LINE_SIZE);
+    jobs_list[pos] = jobs_list[n_pids];
+    jobs_list[n_pids].pid = 0;
+    jobs_list[n_pids].status = '\0';
+    memset(jobs_list[n_pids].cmd,'\0',COMMAND_LINE_SIZE);
     n_pids--;
 }
 
