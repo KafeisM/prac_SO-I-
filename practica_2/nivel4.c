@@ -55,6 +55,7 @@ struct info_job {
 //variable para control procesos
 static char mi_shell[COMMAND_LINE_SIZE]; 
 static struct info_job jobs_list [N_JOBS];
+static int num_tokens;
 
 //variables para el prompt
 char const PROMPT = '$';
@@ -441,13 +442,12 @@ int execute_line(char *line){
     strcpy(lineaux,line);
     int status;
     char *args[ARGS_SIZE];
-    int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
 
     if (num_tokens > 0){
       if (check_internal(args) == 0){
-        //si es un comando interno hacemos un fork
+        //si es un comando externo hacemos un fork
         pid_t id = fork();
         if (id == 0){ //si es el hijo
 
@@ -465,10 +465,11 @@ int execute_line(char *line){
 
             fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
             fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
+            
             jobs_list[0].pid = id;
             strcpy(jobs_list[0].cmd, lineaux);
             jobs_list[0].status = 'E';
-            // signal(SIGINT, ctrlc);           
+        ;           
              while (jobs_list[0].pid > 0){
                 pause();
              }
