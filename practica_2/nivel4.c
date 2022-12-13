@@ -41,6 +41,7 @@ int internal_jobs(char **args);
 int internal_fg(char **args);
 int internal_bg(char **args);
 void imprimir_prompt();
+void init_jobslist();
 void ctrlc(int signum);
 void reaper(int signum);
 
@@ -73,9 +74,7 @@ int main(int argc, char *argv[]){
     signal(SIGINT,ctrlc);
 
     //inicializar datos tabla
-    jobs_list[0].pid = 0;
-    jobs_list[0].status = 'N';
-    memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
+    init_jobslist();
 
     //obtener comando de ejecucción del minishell
     strcpy(mi_shell,argv[0]);
@@ -89,12 +88,19 @@ int main(int argc, char *argv[]){
     }
 }
 
+void init_jobslist(){
+    jobs_list[0].pid = 0;
+    jobs_list[0].status = 'N';
+    memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
+}
+
 void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
-          
+
     while ((ended=waitpid(-1, &status , WNOHANG))>0) {
+        
         //if ended es el pid del hijo en primer plano
         if (ended == jobs_list[0].pid){
             fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
@@ -103,9 +109,9 @@ void reaper(int signum){
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
         }
 
+        
+
     }  
-
-
 
 }
 
@@ -157,6 +163,7 @@ char *read_line(char *line){
             *salto = '\0';
         }
         //sino, miramos si hay final de fichero y salimos
+        return line;
     }else{
         if(feof(stdin)){
             printf(GRIS_T NEGRITA"\nsaliendo del minishell...\n");
@@ -164,7 +171,7 @@ char *read_line(char *line){
         }
     }
 
-    return line; 
+    return NULL; 
 }
 
 int parse_args(char **args,char *line){
@@ -216,7 +223,7 @@ int check_internal(char **args){
     }else if(strcmp(args[0],"^C") == 0){
         return 1;
     }else{ 
-        printf("No es un comando interno\n");
+        //printf("No es un comando interno\n");
         return 0;
     }
 }
@@ -439,38 +446,38 @@ int execute_line(char *line){
     num_tokens = parse_args(args, line);
 
     if (num_tokens > 0){
-      if (check_internal(args) == 1){
-        return 1;
-      }else{
-        strcpy(jobs_list[0].cmd, lineaux);
-        jobs_list[0].status = 'E';
+      if (check_internal(args) == 0){
+        //si es un comando interno hacemos un fork
         pid_t id = fork();
-        if (id > 0){
-            signal(SIGINT, ctrlc);
-            fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
-            jobs_list[0].pid = id;
-        }else if (id == 0){
+        if (id == 0){ //si es el hijo
+
             signal(SIGCHLD, SIG_DFL);
             signal(SIGINT, SIG_IGN);
-            if (SIGINT){
-                return 1;
-            }else{
-                fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, getpid(), jobs_list[0].cmd);
-                sleep(0.1);
-                int err = execvp(args[0], args);
-                if (err == -1){
-                        exit(-1);
+           
+            int err = execvp(args[0], args);
+            if (err == -1){
+                     exit(-1);
                 }
-            }
-            
+
+            exit(SUCCES);
+
+        }else if (id > 0){ //si es el padre
+
+            fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
+            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
+            jobs_list[0].pid = id;
+            strcpy(jobs_list[0].cmd, lineaux);
+            jobs_list[0].status = 'E';
+            // signal(SIGINT, ctrlc);           
+             while (jobs_list[0].pid > 0){
+                pause();
+             }
+        
         }else{
             fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
         }
 
-        while (jobs_list[0].pid > 0){
-            pause();
-        }
       }
     }
 }
