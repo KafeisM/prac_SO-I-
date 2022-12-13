@@ -267,7 +267,7 @@ int internal_export(char **args)
         }else{
             valor = token;
         }
-        token = strtok(NULL,s);
+        token = strtok(NULL," ");
     }
 
     if(valor != NULL && nombre != NULL){
