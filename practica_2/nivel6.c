@@ -508,8 +508,16 @@ int internal_jobs(char **args)
 
 int internal_fg(char **args)
 {
+    int pos = args[1];
 
-    fprintf(stderr, GRIS_T "[internal_fg()→ Esta función lleva los procesos más recientes a primer plano]\n" RESET);
+    if(pos > n_pids || pos == 0){
+        fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO");
+        return 0;
+    }else if(jobs_list[pos].status == 'D'){
+        kill(jobs_list[pos].pid,SIGCONT);
+        fprintf(stderr,GRIS_T "[internal_fg()-> Señal 18 (SIGCONT) enviada a %d (%s)]",jobs_list[pos].pid,jobs_list[0].cmd);
+        jobs_list_remove(pos);
+    }
 
     return 1;
 }
