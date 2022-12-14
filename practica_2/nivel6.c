@@ -511,10 +511,17 @@ int internal_jobs(char **args)
 
 int internal_fg(char **args)
 {
+    if (args[1] != NULL){
+        int pos = (int)strtol(args[1],NULL,10);
 
-    fprintf(stderr, GRIS_T "[internal_fg()→ Esta función lleva los procesos más recientes a primer plano]\n" RESET);
+        if((pos > n_pids) || (pos == 0)){
+            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO\n");
+            return FAILURE;
+        }else if(jobs_list[pos].status == 'D'){
+            kill(jobs_list[pos].pid,SIGCONT);
+            fprintf(stderr,GRIS_T "[internal_fg()-> Señal 18 (SIGCONT) enviada a %d (%s)]\n",jobs_list[pos].pid,jobs_list[0].cmd);
+        }
 
-<<<<<<< Updated upstream
         jobs_list[pos].status = 'E';
         fprintf(stderr,GRIS_T "(%s)\n",jobs_list[pos].cmd);
         for (int i=0; args[i] != NULL; i++){
@@ -531,16 +538,26 @@ int internal_fg(char **args)
         }
     }
     return SUCCES;
-=======
-    return 1;
->>>>>>> Stashed changes
 }
 
 int internal_bg(char **args)
 {
 
-    fprintf(stderr, GRIS_T "[internal_bg()→ Esta función enseña los procesos parados o en segundo plano]\n" RESET);
-
+    if (args[1] != NULL){
+        int pos = (int)strtol(args[1],NULL,10);
+        if ((pos > n_pids) || (pos == 0)){
+            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO\n");
+            return FAILURE;
+        }else if (jobs_list[pos].status == 'E'){
+            fprintf(stderr,ROJO_T "EL TRABAJO YA ESTÁ EN SEGUNDO PLANO\n");
+            return FAILURE;
+        }
+        jobs_list[pos].status = 'E';
+        strcat(jobs_list[pos].cmd," &");
+        kill(jobs_list[pos].pid,SIGCONT);
+        fprintf(stderr,GRIS_T "[internal_bg() → Señal 18 (SIGCONT) enviada a %d (%s)]\n",jobs_list[pos].pid,jobs_list[pos].cmd);
+        fprintf(stderr,"[%d] %d     %c      %s\n",pos,jobs_list[pos].pid,jobs_list[pos].status,jobs_list[pos].cmd);   
+    }
     return 1;
 }
 
