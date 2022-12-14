@@ -122,18 +122,18 @@ void reaper(int signum){
     pid_t ended;
     int status;
 
-    fprintf(stderr,GRIS_T"[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
+    //fprintf(stderr,GRIS_T"[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
           
     while ((ended=waitpid(-1, &status , WNOHANG))>0) {
         //if ended es el pid del hijo en primer plano
         if (ended == jobs_list[0].pid){ //foreground
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+            //fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
             jobs_list[0].pid = 0;
             jobs_list[0].status = 'F';
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
         }else{ //background
             int pos = jobs_list_find(ended);
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[pos].cmd,status);
+            //fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[pos].cmd,status);
             fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
             jobs_list_remove(pos);
             
@@ -147,11 +147,11 @@ void reaper(int signum){
 void ctrlc(int signum){
     signal(SIGINT, ctrlc);
     printf("\n");
-    fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
+    fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s)\n"RESET,getpid(),mi_shell);
+    fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal %i (SIGINT)]",signum);
     if(jobs_list[0].pid > 0){
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s) \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
-            fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal 2 (SIGINT)]\n");
             kill(jobs_list[0].pid,SIGTERM);
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
         }else{
@@ -167,11 +167,11 @@ void ctrlc(int signum){
 void ctrlz(int signum){
     signal (SIGTSTP, ctrlz);
     printf("\n");
-    fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
+    fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s)\n"RESET,getpid(),mi_shell);
+    fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal %i (SIGTSTP)]",signum);
     if(jobs_list[0].pid > 0){ //si hay un proceso en foreground entonces:
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){ // si no es el minishell, entonces:
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
-            fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal 20 (SIGTSTP)]\n");
             kill(jobs_list[0].pid,SIGSTOP);
             fprintf(stderr,GRIS_T"[ctrlz()--> Señal 19 (SIGSTOP) enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
 
@@ -511,18 +511,33 @@ int internal_jobs(char **args)
 
 int internal_fg(char **args)
 {
-    /*int pos = args[1];
+    if (args[1] != NULL){
+        int pos = (int)strtol(args[1],NULL,10);
 
-    if(pos > n_pids || pos == 0){
-        fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO");
-        return 0;
-    }else if(jobs_list[pos].status == 'D'){
-        kill(jobs_list[pos].pid,SIGCONT);
-        fprintf(stderr,GRIS_T "[internal_fg()-> Señal 18 (SIGCONT) enviada a %d (%s)]",jobs_list[pos].pid,jobs_list[0].cmd);
+        if((pos > n_pids) || (pos == 0)){
+            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO\n");
+            return FAILURE;
+        }else if(jobs_list[pos].status == 'D'){
+            kill(jobs_list[pos].pid,SIGCONT);
+            fprintf(stderr,GRIS_T "[internal_fg()-> Señal 18 (SIGCONT) enviada a %d (%s)]\n",jobs_list[pos].pid,jobs_list[0].cmd);
+        }
+
+        jobs_list[pos].status = 'E';
+        fprintf(stderr,GRIS_T "(%s)\n",jobs_list[pos].cmd);
+        for (int i=0; args[i] != NULL; i++){
+            if (jobs_list[pos].cmd[i] == '&'){
+                fprintf(stderr,"entro\n");
+                jobs_list[pos].cmd[i] = '\0';
+            }
+        }
         jobs_list_remove(pos);
+        fprintf(stderr,GRIS_T "(%s)\n",jobs_list[0].cmd);
+        jobs_list[0] = jobs_list[pos];
+        while(jobs_list[0].pid > 0){
+            pause();
+        }
     }
-
-    return 1;*/
+    return SUCCES;
 }
 
 int internal_bg(char **args)
@@ -531,18 +546,17 @@ int internal_bg(char **args)
     if (args[1] != NULL){
         int pos = (int)strtol(args[1],NULL,10);
         if ((pos > n_pids) || (pos == 0)){
-            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO");
+            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO\n");
             return FAILURE;
         }else if (jobs_list[pos].status == 'E'){
-            fprintf(stderr,ROJO_T "EL TRABAJO YA ESTÁ EN SEGUNDO PLANO");
+            fprintf(stderr,ROJO_T "EL TRABAJO YA ESTÁ EN SEGUNDO PLANO\n");
             return FAILURE;
-        }else{
-            jobs_list[pos].status = 'E';
-            strcat(jobs_list[pos].cmd," &");
-            kill(jobs_list[pos].pid,SIGCONT);
-            fprintf(stderr,GRIS_T "[internal_bg() → Señal 18 (SIGCONT) enviada a %d (%s)]",jobs_list[pos].pid,jobs_list[pos].cmd);
-            fprintf(stderr,"[%d] %d     %c      %s\n",pos,jobs_list[pos].pid,jobs_list[pos].status,jobs_list[pos].cmd);
         }
+        jobs_list[pos].status = 'E';
+        strcat(jobs_list[pos].cmd," &");
+        kill(jobs_list[pos].pid,SIGCONT);
+        fprintf(stderr,GRIS_T "[internal_bg() → Señal 18 (SIGCONT) enviada a %d (%s)]\n",jobs_list[pos].pid,jobs_list[pos].cmd);
+        fprintf(stderr,"[%d] %d     %c      %s\n",pos,jobs_list[pos].pid,jobs_list[pos].status,jobs_list[pos].cmd);   
     }
     return 1;
 }
@@ -599,25 +613,27 @@ int execute_line(char *line){
             
         }else if (id > 0){ //si es el padre
 
-            jobs_list[0].status = 'E';   
-            strcpy(jobs_list[0].cmd, lineaux);
-            jobs_list[0].pid = id;
+            fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
+            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
+ 
            
-           if(is_bg == 0){ //miramos si no esta en background
+            if(is_bg == 0){ //miramos si no esta en background
 
-                fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
-                fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
-                fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
+                //fprintf(stderr, GRIS_T "[execute_line(): not background]\n" RESET);
+
+                jobs_list[0].status = 'E';   
+                strcpy(jobs_list[0].cmd, lineaux);
+                jobs_list[0].pid = id;
 
                 while (jobs_list[0].pid > 0){
                     pause();
                  }
 
             }else{ //si esta en background añadir a jobs_list
-                fprintf(stderr, GRIS_T "[execute_line(): background\n" RESET);
+                fprintf(stderr, GRIS_T "[execute_line(): background]\n" RESET);
                 sleep(0.4);
-                jobs_list_add(id,jobs_list[0].status,lineaux);
-                printf("[%d] %d     %c      %s\n",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso en segundo plano
+                jobs_list_add(id,'E',lineaux);
+                printf("[%d] %d     %c      %s\n",n_pids,jobs_list[n_pids].pid,jobs_list[n_pids].status,jobs_list[n_pids].cmd); //imprimimos el estado del proceso en segundo plano
 
             }
            

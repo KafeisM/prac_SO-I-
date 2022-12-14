@@ -118,10 +118,9 @@ void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
-
-    fprintf(stderr,GRIS_T"[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
           
     while ((ended=waitpid(-1, &status , WNOHANG))>0) {
+        fprintf(stderr,GRIS_T"[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
         //if ended es el pid del hijo en primer plano
         if (ended == jobs_list[0].pid){ //foreground
             fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
@@ -138,17 +137,16 @@ void reaper(int signum){
 
     }  
 
-
 }
 
 void ctrlc(int signum){
     signal(SIGINT, ctrlc);
     printf("\n");
-    fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
+    fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s)\n"RESET,getpid(),mi_shell);
+    fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal %i (SIGINT)]",signum);
     if(jobs_list[0].pid > 0){
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s) \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
-            fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal 2 (SIGINT)]\n");
             kill(jobs_list[0].pid,SIGTERM);
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
         }else{
@@ -164,14 +162,13 @@ void ctrlc(int signum){
 void ctrlz(int signum){
     signal (SIGTSTP, ctrlz);
     printf("\n");
-    fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
+    fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s)\n"RESET,getpid(),mi_shell);
+    fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal %i (SIGTSTP)]",signum);
     if(jobs_list[0].pid > 0){ //si hay un proceso en foreground entonces:
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){ // si no es el minishell, entonces:
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
-            fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal 20 (SIGTSTP)]\n");
             kill(jobs_list[0].pid,SIGSTOP);
             fprintf(stderr,GRIS_T"[ctrlz()--> Señal 19 (SIGSTOP) enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
-
             jobs_list[0].status = 'D';
             jobs_list_add(jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd);
             printf("\n[%d] %d     %c      %s",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso detenido
@@ -548,27 +545,29 @@ int execute_line(char *line){
 
             exit(SUCCES);
             
-        }else if (id > 0){ //si es el padre
+        }else if (id > 0){ //si es el padre 
 
-            jobs_list[0].status = 'E';   
-            strcpy(jobs_list[0].cmd, lineaux);
-            jobs_list[0].pid = id;
+            fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
+            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
            
-           if(is_bg == 0){ //miramos si no esta en background
+            if(is_bg == 0){ //miramos si no esta en background
 
-                fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
-                fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
-                fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
+                //fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
+
+                jobs_list[0].status = 'E';   
+                strcpy(jobs_list[0].cmd, lineaux);
+                jobs_list[0].pid = id;
 
                 while (jobs_list[0].pid > 0){
                     pause();
-                 }
+                }
 
             }else{ //si esta en background añadir a jobs_list
-                fprintf(stderr, GRIS_T "[execute_line(): background\n" RESET);
+
+                //fprintf(stderr, GRIS_T "[execute_line(): background\n" RESET);
                 sleep(0.4);
-                jobs_list_add(id,jobs_list[0].status,lineaux);
-                printf("[%d] %d     %c      %s\n",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso en segundo plano
+                jobs_list_add(id,'E',lineaux);
+                printf("[%d] %d     %c      %s\n",n_pids,jobs_list[n_pids].pid,jobs_list[n_pids].status,jobs_list[n_pids].cmd); //imprimimos el estado del proceso en segundo plano
 
             }
            
