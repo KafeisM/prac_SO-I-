@@ -511,7 +511,7 @@ int internal_jobs(char **args)
 
 int internal_fg(char **args)
 {
-    int pos = args[1];
+    /*int pos = args[1];
 
     if(pos > n_pids || pos == 0){
         fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO");
@@ -522,14 +522,28 @@ int internal_fg(char **args)
         jobs_list_remove(pos);
     }
 
-    return 1;
+    return 1;*/
 }
 
 int internal_bg(char **args)
 {
 
-    fprintf(stderr, GRIS_T "[internal_bg()→ Esta función enseña los procesos parados o en segundo plano]\n" RESET);
-
+    if (args[1] != NULL){
+        int pos = (int)strtol(args[1],NULL,10);
+        if ((pos > n_pids) || (pos == 0)){
+            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO");
+            return FAILURE;
+        }else if (jobs_list[pos].status == 'E'){
+            fprintf(stderr,ROJO_T "EL TRABAJO YA ESTÁ EN SEGUNDO PLANO");
+            return FAILURE;
+        }else{
+            jobs_list[pos].status = 'E';
+            strcat(jobs_list[pos].cmd," &");
+            kill(jobs_list[pos].pid,SIGCONT);
+            fprintf(stderr,GRIS_T "[internal_bg() → Señal 18 (SIGCONT) enviada a %d (%s)]",jobs_list[pos].pid,jobs_list[pos].cmd);
+            fprintf(stderr,"[%d] %d     %c      %s\n",pos,jobs_list[pos].pid,jobs_list[pos].status,jobs_list[pos].cmd);
+        }
+    }
     return 1;
 }
 
@@ -574,21 +588,13 @@ int execute_line(char *line){
             
             signal(SIGINT, SIG_IGN);
             signal(SIGTSTP,SIG_IGN);
-            if(is_out_redirection(args) == 1){
-                int err = execvp(args[0], args);
-                if (err == -1){
-                    exit(-1);
-                }
-                fprintf(stderr,"kdjfvkdfjv");
-            }else{
-                int err = execvp(args[0], args);
-                if (err == -1){
-                    exit(-1);
-                }
-                
+            //int is_out = is_out_redirection(args);
+            //fprintf(stderr,"is_output_red: %i\n",is_out); 
+            int err = execvp(args[0], args);
+            if (err == -1){
+                exit(-1);
             }
-            
-
+               
             exit(SUCCES);
             
         }else if (id > 0){ //si es el padre
