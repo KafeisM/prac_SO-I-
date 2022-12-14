@@ -20,6 +20,7 @@
 #define FAILURE -1
 #define COMMAND_LINE_SIZE 1024
 #define PWD
+#define _GNU_SOURCE
 
 #include <signal.h>
 #include <sys/types.h>
@@ -29,6 +30,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 char *read_line(char *line); 
 int execute_line(char *line);
@@ -48,6 +50,7 @@ void init_jobslist();
 int jobs_list_find(pid_t pid);
 int  jobs_list_remove(int pos);
 int jobs_list_add(pid_t pid,char status, char *cmd);
+int is_out_redirection(char **args);
 
 
 //tabla datos de los procesos 
@@ -530,6 +533,29 @@ int internal_bg(char **args)
     return 1;
 }
 
+int is_out_redirection(char **args){
+
+    int final = 0;
+    int longitud = num_tokens;
+    for (int i=0; i < longitud; i++){
+        if (strcmp(args[i],">") == 0){
+            args[i] = NULL;
+            //args[i] = args[i+1];
+            //args[i+1] = NULL
+            final = 1;
+        }
+    }
+
+    if(final == 1){
+        int fd = open (args[1],  O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
+        dup2 (fd, 1);   /* El descriptor 1, de la salida estándar, pasa a ser un duplicado de fd */
+        close (fd);
+    }
+    
+    return final;
+
+}
+
 int execute_line(char *line){
     
     char lineaux[strlen(line)+1];
@@ -548,11 +574,20 @@ int execute_line(char *line){
             
             signal(SIGINT, SIG_IGN);
             signal(SIGTSTP,SIG_IGN);
-      
-            int err = execvp(args[0], args);
-            if (err == -1){
-                exit(-1);
+            if(is_out_redirection(args) == 1){
+                int err = execvp(args[0], args);
+                if (err == -1){
+                    exit(-1);
+                }
+                fprintf(stderr,"kdjfvkdfjv");
+            }else{
+                int err = execvp(args[0], args);
+                if (err == -1){
+                    exit(-1);
+                }
+                
             }
+            
 
             exit(SUCCES);
             
