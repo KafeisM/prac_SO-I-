@@ -523,10 +523,10 @@ int internal_fg(char **args)
         }
 
         jobs_list[pos].status = 'E';
-        fprintf(stderr,GRIS_T "(%s)\n",jobs_list[pos].cmd);
-        for (int i=0; args[i] != NULL; i++){
+        //fprintf(stderr,GRIS_T "(%s)\n",jobs_list[pos].cmd);
+        for (int i=0; i < strlen(jobs_list[pos].cmd); i++){
             if (jobs_list[pos].cmd[i] == '&'){
-                fprintf(stderr,"entro\n");
+                //fprintf(stderr,"entro\n");
                 jobs_list[pos].cmd[i] = '\0';
             }
         }
@@ -575,9 +575,19 @@ int is_out_redirection(char **args){
     }
 
     if(final == 1){
-        int fd = open (args[1],  O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
-        dup2 (fd, 1);   /* El descriptor 1, de la salida estándar, pasa a ser un duplicado de fd */
-        close (fd);
+        int fd = open (args[2],  O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
+        if (fd == -1){
+            perror(ROJO_T"ERROR EN LA APERTURA DEL ARCHIVO"RESET);
+            return FAILURE;
+        }
+        if (dup2(fd,1) == -1){ /* El descriptor 1, de la salida estándar, pasa a ser un duplicado de fd */
+            perror(ROJO_T"ERROR EN DUP2"RESET);
+            return FAILURE;
+        }
+        if (close(fd) == -1){
+            perror(ROJO_T"ERROR EN EL CLOSE"RESET);
+            return FAILURE;
+        }
     }
     
     return final;
@@ -602,45 +612,37 @@ int execute_line(char *line){
             
             signal(SIGINT, SIG_IGN);
             signal(SIGTSTP,SIG_IGN);
-            fprintf(stderr,"%d\n",is_out_redirection(args));
-            if(is_out_redirection(args) == 1){
-                int err = execvp(args[0], args);
-                if (err == -1){
-                    exit(-1);
-                }
-                fprintf(stderr,"kdjfvkdfjv");
-            }else{
-                int err = execvp(args[0], args);
-                if (err == -1){
-                    exit(-1);
-                }
-                
+            int is_o_red = is_out_redirection(args);
+            fprintf(stderr, GRIS_T "red: %d\n" RESET, is_o_red);
+            int err = execvp(args[0], args);
+            if (err == -1){
+                exit(-1);
             }
-            
 
             exit(SUCCES);
             
-        }else if (id > 0){ //si es el padre
+        }else if (id > 0){ //si es el padre 
 
-            jobs_list[0].status = 'E';   
-            strcpy(jobs_list[0].cmd, lineaux);
-            jobs_list[0].pid = id;
+            fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
+            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
            
-           if(is_bg == 0){ //miramos si no esta en background
+            if(is_bg == 0){ //miramos si no esta en background
 
-                fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
-                fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
-                fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
+                //fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
+                jobs_list[0].status = 'E';   
+                strcpy(jobs_list[0].cmd, lineaux);
+                jobs_list[0].pid = id;
 
                 while (jobs_list[0].pid > 0){
                     pause();
-                 }
+                }
 
             }else{ //si esta en background añadir a jobs_list
-                fprintf(stderr, GRIS_T "[execute_line(): background\n" RESET);
+
+                //fprintf(stderr, GRIS_T "[execute_line(): background\n" RESET);
                 sleep(0.4);
-                jobs_list_add(id,jobs_list[0].status,lineaux);
-                printf("[%d] %d     %c      %s\n",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso en segundo plano
+                jobs_list_add(id,'E',lineaux);
+                printf("[%d] %d     %c      %s\n",n_pids,jobs_list[n_pids].pid,jobs_list[n_pids].status,jobs_list[n_pids].cmd); //imprimimos el estado del proceso en segundo plano
 
             }
            
@@ -648,8 +650,6 @@ int execute_line(char *line){
             fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
         }
-
       }
-    }
-    
+    } 
 }
