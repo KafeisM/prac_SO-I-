@@ -530,9 +530,9 @@ int internal_fg(char **args)
                 jobs_list[pos].cmd[i] = '\0';
             }
         }
-        jobs_list_remove(pos);
-        fprintf(stderr,GRIS_T "(%s)\n",jobs_list[0].cmd);
         jobs_list[0] = jobs_list[pos];
+        fprintf(stderr,GRIS_T "(%s)\n",jobs_list[0].cmd);
+        jobs_list_remove(pos);
         while(jobs_list[0].pid > 0){
             pause();
         }
