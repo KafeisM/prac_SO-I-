@@ -1,3 +1,8 @@
+/*PRÀCTICA 2 SISTEMAS OPERATIVOS
+-JORDI FLORIT ENSENYAT
+-PAU GIRÓN RODRÍGUEZ
+-JOSEP GABRIEL FORNÉS REYNÉS*/
+
 #define _POSIX_C_SOURCE 200112L
 #define COMMAND_LINE_SIZE 1024
 #define ARGS_SIZE 64
@@ -111,8 +116,15 @@ int parse_args(char **args,char *line){ //pau
 
 }
 
-int check_internal(char **args){
-    if(args[0] == NULL){
+/*---------------------------------------------------------------------------------------------------------
+* Función que mira si en args[0] hay un comando interno, si es así, nos va a llevar a la función 
+* que pertenece dicho token
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   Valor entero donde 1 significa que hay comando interno y 0 que no.
+---------------------------------------------------------------------------------------------------------*/
+
+int check_internal(char **args){ //pepbi
+    if(args[0] == NULL){ //Por si no hay elementos dentro de args[0]
         return 0;
     }else if(strcmp(args[0],"cd") == 0){
         internal_cd(args);
@@ -132,7 +144,7 @@ int check_internal(char **args){
     }else if(strcmp(args[0],"bg")== 0){
         internal_bg(args);
         return 1;
-    }else if(strcmp(args[0],"exit")== 0){
+    }else if(strcmp(args[0],"exit")== 0){ //En el caso que escribamos exit, va a salir del minishell
         exit(0);
     }else{  
         printf("No es un comando interno\n");
