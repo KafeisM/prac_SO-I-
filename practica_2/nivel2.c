@@ -42,7 +42,7 @@ int internal_fg(char **args);
 int internal_bg(char **args);
 void imprimir_prompt();
 
-int main(){
+int main(){ //jordi
     char line[COMMAND_LINE_SIZE];  
     while(true){
         if(read_line(line)){
@@ -52,7 +52,7 @@ int main(){
     }
 }
 
-void imprimir_prompt(){
+void imprimir_prompt(){ //jordi
     user = getenv("USER");
     home = getenv("HOME");
 
@@ -68,7 +68,7 @@ void imprimir_prompt(){
    
 }
 
-char *read_line(char *line){
+char *read_line(char *line){ //jordi
 
     imprimir_prompt();
     
@@ -91,7 +91,7 @@ char *read_line(char *line){
     return line; 
 }
 
-int parse_args(char **args,char *line){
+int parse_args(char **args,char *line){ //pau
     int res = 0;
     char *token;
     token = strtok(line, " \t\n\r");
@@ -140,7 +140,7 @@ int check_internal(char **args){
     }
 }
 
-int cd_avanzado(char **args){
+int cd_avanzado(char **args){ //pepbi
 
     char *token = args[1];
 
@@ -226,7 +226,7 @@ int cd_avanzado(char **args){
     }
 }
 
-int internal_cd(char **args){
+int internal_cd(char **args){ //pepbi
     
     if(args[1] == NULL){
         if(chdir("/home") != 0){
@@ -249,8 +249,7 @@ int internal_cd(char **args){
     return SUCCES;
 }
 
-int internal_export(char **args)
-{
+int internal_export(char **args){ //pau
     const char s[2] = "=";
     char *token;
     char *aux = args[1];
@@ -327,7 +326,7 @@ int internal_bg(char **args)
     return 1;
 }
 
-int execute_line(char *line){
+int execute_line(char *line){ //pau
     char *args[ARGS_SIZE];
     int num_tokens;
     int interno;

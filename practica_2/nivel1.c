@@ -36,7 +36,7 @@ int internal_fg(char **args);
 int internal_bg(char **args);
 void imprimir_prompt();
 
-int main(){
+int main(){ //jordi
     char line[COMMAND_LINE_SIZE];  
     while(true){
         if(read_line(line)){
@@ -46,7 +46,7 @@ int main(){
     }
 }
 
-void imprimir_prompt(){
+void imprimir_prompt(){ //jordi
     //queda implementar el PWD en niveles posteriores
     user = getenv("USER");
     home = getenv("HOME");
@@ -57,7 +57,7 @@ void imprimir_prompt(){
 
 }
 
-char *read_line(char *line){
+char *read_line(char *line){ //jordi
 
     imprimir_prompt();
 
@@ -80,7 +80,7 @@ char *read_line(char *line){
     return line; 
 }
 
-int parse_args(char **args,char *line){
+int parse_args(char **args,char *line){ //pau
 
     int res = 0;
     char *token;
@@ -104,7 +104,7 @@ int parse_args(char **args,char *line){
 
 }
 
-int check_internal(char **args){
+int check_internal(char **args){ //pepbi
     if(args[0] == NULL){
         return 0;
     }else if(strcmp(args[0],"cd") == 0){
@@ -132,6 +132,8 @@ int check_internal(char **args){
         return 0;
     }
 }
+
+//pepbi
 
 int internal_cd(char **args){
     fprintf(stderr, GRIS_T "[internal_cd()→ Esta función cambiará de directorio]\n" RESET);
@@ -177,7 +179,7 @@ int internal_bg(char **args)
     return 1;
 }
 
-int execute_line(char *line){
+int execute_line(char *line){ //pau
     char *args[ARGS_SIZE];
     int num_tokens;
     int interno;

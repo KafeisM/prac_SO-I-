@@ -58,7 +58,7 @@ char *user;
 char *home;
 
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]){ //jordi
 
     char line[COMMAND_LINE_SIZE];  
 
@@ -95,7 +95,7 @@ void imprimir_prompt(){
    
 }
 
-char *read_line(char *line){
+char *read_line(char *line){ 
 
     imprimir_prompt();
     
@@ -322,7 +322,7 @@ int internal_export(char **args)
     }
 }
 
-int internal_source(char **args)
+int internal_source(char **args) //pepbi
 {
 
     char str[COMMAND_LINE_SIZE];
@@ -374,7 +374,7 @@ int internal_bg(char **args)
     return 1;
 }
 
-int execute_line(char *line){
+int execute_line(char *line){ //pau
     char lineaux[strlen(line)+1];
     strcpy(lineaux,line);
     int status;

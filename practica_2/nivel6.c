@@ -74,7 +74,7 @@ char *home;
 int n_pids = 0;
 
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]){ //jordi
 
     char line[COMMAND_LINE_SIZE];  
 
@@ -110,6 +110,7 @@ int is_background(char **args){
     for (int i=0; i < longitud; i++){
         if (strcmp(args[i],"&") == 0){
             args[i] = NULL;
+            num_tokens--;
             return 1;
         }
     }
@@ -122,25 +123,26 @@ void reaper(int signum){
     pid_t ended;
     int status;
 
-    fprintf(stderr,GRIS_T"[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
+    //fprintf(stderr,GRIS_T"[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
           
     while ((ended=waitpid(-1, &status , WNOHANG))>0) {
         //if ended es el pid del hijo en primer plano
         if (ended == jobs_list[0].pid){ //foreground
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
+            //fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
             jobs_list[0].pid = 0;
             jobs_list[0].status = 'F';
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
         }else{ //background
             int pos = jobs_list_find(ended);
-            fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[pos].cmd,status);
+            //fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[pos].cmd,status);
             fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
             jobs_list_remove(pos);
             
         }
 
     }  
-
+    sleep(0.4);
+    fflush(stdout);
 
 }
 
@@ -161,6 +163,7 @@ void ctrlc(int signum){
         fprintf(stderr,GRIS_T"\n[ctrlc()--> Señal 15 NO enviada por %d (%s) debido a que no hay proceso en foreground"RESET,getpid(),mi_shell);
     }
     printf("\n");
+    sleep(0.4);
     fflush(stdout);
 }
 
@@ -188,6 +191,7 @@ void ctrlz(int signum){
         fprintf(stderr,GRIS_T"\n[ctrlz()--> Señal SIGSTOP NO enviada por %d (%s) debido a que no hay proceso en foreground"RESET,getpid(),mi_shell);
     }
     printf("\n");
+    sleep(0.4);
     fflush(stdout);
 
 }
@@ -509,7 +513,7 @@ int internal_jobs(char **args)
     return 1;
 }
 
-int internal_fg(char **args)
+int internal_fg(char **args) //pau
 {
     if (args[1] != NULL){
         int pos = (int)strtol(args[1],NULL,10);
@@ -540,7 +544,7 @@ int internal_fg(char **args)
     return SUCCES;
 }
 
-int internal_bg(char **args)
+int internal_bg(char **args) //pau
 {
 
     if (args[1] != NULL){
@@ -561,26 +565,23 @@ int internal_bg(char **args)
     return 1;
 }
 
-int is_out_redirection(char **args){
+int is_out_redirection(char **args){ //pau
 
     int final = 0;
     int longitud = num_tokens;
     for (int i=0; i < longitud; i++){
         if (strcmp(args[i],">") == 0){
             args[i] = NULL;
-            //args[i] = args[i+1];
-            //args[i+1] = NULL;
             final = 1;
         }
     }
-
     if(final == 1){
         int fd = open (args[2],  O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
         if (fd == -1){
             perror(ROJO_T"ERROR EN LA APERTURA DEL ARCHIVO"RESET);
             return FAILURE;
         }
-        if (dup2(fd,1) == -1){ /* El descriptor 1, de la salida estándar, pasa a ser un duplicado de fd */
+        if (dup2(fd,1) == -1){ // El descriptor 1, de la salida estándar, pasa a ser un duplicado de fd 
             perror(ROJO_T"ERROR EN DUP2"RESET);
             return FAILURE;
         }
@@ -594,7 +595,7 @@ int is_out_redirection(char **args){
 
 }
 
-int execute_line(char *line){
+int execute_line(char *line){ //pau
     
     char lineaux[strlen(line)+1];
     strcpy(lineaux,line);
@@ -607,14 +608,21 @@ int execute_line(char *line){
       if (check_internal(args) == 0){
         //si es comando externo hacemos fork
         int is_bg = is_background(args);
+        fprintf(stderr,GRIS_T"isbg: %i"RESET,is_bg);
         pid_t id = fork();
         if (id == 0){ //si es el hijo
             
             signal(SIGINT, SIG_IGN);
             signal(SIGTSTP,SIG_IGN);
-            int is_o_red = is_out_redirection(args);
+            signal(SIGCHLD,SIG_DFL);
+            int is_o_red;
+            is_o_red = is_out_redirection(args);
             fprintf(stderr, GRIS_T "red: %d\n" RESET, is_o_red);
+            fprintf(stderr, GRIS_T "SOY EL HIJO\n" RESET);
             int err = execvp(args[0], args);
+            if (is_o_red){
+                exit(-1);
+            }
             if (err == -1){
                 exit(-1);
             }
@@ -628,7 +636,7 @@ int execute_line(char *line){
            
             if(is_bg == 0){ //miramos si no esta en background
 
-                //fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
+                fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
                 jobs_list[0].status = 'E';   
                 strcpy(jobs_list[0].cmd, lineaux);
                 jobs_list[0].pid = id;

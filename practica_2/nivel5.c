@@ -71,7 +71,7 @@ char *home;
 int n_pids = 0;
 
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]){ //jordi
 
     char line[COMMAND_LINE_SIZE];  
 
@@ -101,7 +101,7 @@ void init_jobslist(){
     memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
 }
 
-int is_background(char **args){
+int is_background(char **args){ //pau
     
     int longitud = num_tokens;
     for (int i=0; i < longitud; i++){
@@ -134,8 +134,10 @@ void reaper(int signum){
             jobs_list_remove(pos);
             
         }
-
+        
     }  
+    sleep(0.4);
+    fflush(stdout);
 
 }
 
@@ -156,10 +158,11 @@ void ctrlc(int signum){
         fprintf(stderr,GRIS_T"\n[ctrlc()--> Señal 15 NO enviada por %d (%s) debido a que no hay proceso en foreground"RESET,getpid(),mi_shell);
     }
     printf("\n");
+    sleep(0.4);
     fflush(stdout);
 }
 
-void ctrlz(int signum){
+void ctrlz(int signum){ //jordi
     signal (SIGTSTP, ctrlz);
     printf("\n");
     fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s)\n"RESET,getpid(),mi_shell);
@@ -182,11 +185,12 @@ void ctrlz(int signum){
         fprintf(stderr,GRIS_T"\n[ctrlz()--> Señal SIGSTOP NO enviada por %d (%s) debido a que no hay proceso en foreground"RESET,getpid(),mi_shell);
     }
     printf("\n");
+    sleep(0.4);
     fflush(stdout);
 
 }
 
-int jobs_list_add(pid_t pid,char status, char *cmd){
+int jobs_list_add(pid_t pid,char status, char *cmd){ //pau
     n_pids++;
 
     if(n_pids < N_JOBS){
@@ -196,7 +200,7 @@ int jobs_list_add(pid_t pid,char status, char *cmd){
     }
 }
 
-int jobs_list_find(pid_t pid){
+int jobs_list_find(pid_t pid){ //pepbi
     int final;
     bool trobat = false;
     for (int i = 1; (!trobat) && (i <= n_pids); i++){
@@ -209,7 +213,7 @@ int jobs_list_find(pid_t pid){
     return final;
 }
 
-int  jobs_list_remove(int pos){
+int  jobs_list_remove(int pos){ //pau
     jobs_list[pos] = jobs_list[n_pids];
     jobs_list[n_pids].pid = 0;
     jobs_list[n_pids].status = '\0';
@@ -493,7 +497,7 @@ int internal_source(char **args)
     return -1;
 }
 
-int internal_jobs(char **args)
+int internal_jobs(char **args) //jordi
 {
 
     for(int i = 1; i<= n_pids; i++){
@@ -519,7 +523,7 @@ int internal_bg(char **args)
     return 1;
 }
 
-int execute_line(char *line){
+int execute_line(char *line){ //pau
     
     char lineaux[strlen(line)+1];
     strcpy(lineaux,line);

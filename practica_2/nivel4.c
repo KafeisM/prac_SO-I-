@@ -66,7 +66,7 @@ char *home;
 static int acabados=0; //contabilizar procesos acabados
 
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]){ //jordi
 
     char line[COMMAND_LINE_SIZE];  
 
@@ -89,13 +89,13 @@ int main(int argc, char *argv[]){
     }
 }
 
-void init_jobslist(){
+void init_jobslist(){ //jordi
     jobs_list[0].pid = 0;
     jobs_list[0].status = 'N';
     memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
 }
 
-void reaper(int signum){
+void reaper(int signum){ //pepbi
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
@@ -116,7 +116,7 @@ void reaper(int signum){
 
 }
 
-void ctrlc(int signum){
+void ctrlc(int signum){ //jordi
     signal(SIGINT, ctrlc);
     printf("\n");
     fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
@@ -436,7 +436,7 @@ int internal_bg(char **args)
     return 1;
 }
 
-int execute_line(char *line){
+int execute_line(char *line){ //pau
     
     char lineaux[strlen(line)+1];
     strcpy(lineaux,line);
