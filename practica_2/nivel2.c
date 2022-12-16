@@ -152,7 +152,7 @@ int parse_args(char **args,char *line){ //pau
 * Output:   Valor entero donde 1 significa que hay comando interno y 0 que no.
 ---------------------------------------------------------------------------------------------------------*/
 
-int check_internal(char **args){ //pepbi
+int check_internal(char **args){
     if(args[0] == NULL){ //Por si no hay elementos dentro de args[0]
         return 0;
     }else if(strcmp(args[0],"cd") == 0){
@@ -181,14 +181,25 @@ int check_internal(char **args){ //pepbi
     }
 }
 
-int cd_avanzado(char **args){ //pepbi
+/*---------------------------------------------------------------------------------------------------------
+* Ampliación de la función interna_cd, que trata los directorios que van seguidos del comando
+* CD cuyos nombres llevan espacios. Estos directorios con espacios deben de ir:
+* cd "directorio 1"
+* cd 'directorio 2'
+* cd directorio\3
+* Así que esta función detecta alguno de los tres casos y los trata como un único token
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
+
+int cd_avanzado(char **args){ 
 
     char *token = args[1];
 
     if(strchr(token,92) != NULL){ //Miramos si hay " \ " para substituirla por un espacio
         int i = 0;
         while(i < strlen(token)){
-            if(token[i] == 92){
+            if(token[i] == 92){ //Si la encontramos la substituimos por un espacio
                 token[i] = ' ';
             }
             i++;
@@ -196,7 +207,7 @@ int cd_avanzado(char **args){ //pepbi
     }else if(strchr(token,34) != NULL){ //Miramos si hay " " para coger lo de dentro y que se junte en un solo token
         char *token2;
         token2 = args[2];
-        if(token[strlen(token) - 1] == 34){ //Si solo hay una palabra dentro de las " "
+        if(token[strlen(token) - 1] == 34){ //Si solo hay una palabra dentro de las " " solo las quitamos
             int i = 0;
             while(i < strlen(token)){
                 if(i == (strlen(token) - 2)){
@@ -206,9 +217,9 @@ int cd_avanzado(char **args){ //pepbi
                 }
                 i++;
             }
-        }else if(token2 == NULL){ //Si solo hay una "
+        }else if(token2 == NULL){ //Si solo hay una ", significa que ha habído un error
             fprintf(stderr,ROJO_T "ERROR\n" RESET);
-        }else{
+        }else{//Hay más palabras dentro de " ", así que se van passando las palabras hasta encontrar el segundo "
             int cont = 3;
             while(strchr(token2,34) == NULL){
                 token[strlen(token)] = ' ';
@@ -232,7 +243,7 @@ int cd_avanzado(char **args){ //pepbi
     }else if(strchr(token,39) != NULL){ //Miramos si hay ' ' para coger lo de dentro y que se junte en un solo token
         char *token2;
         token2 = args[2];
-        if(token[strlen(token) - 1] == 39){ //Si solo hay una palabra dentro de las ' '
+        if(token[strlen(token) - 1] == 39){ //Si solo hay una palabra dentro de las ' ' solo las quitamos
             int i = 0;
             while(i < strlen(token)){
                 if(i == (strlen(token) - 2)){
@@ -242,9 +253,9 @@ int cd_avanzado(char **args){ //pepbi
                 }
                 i++;
             }
-        }else if(token2 == NULL){ //Si solo hay una '
+        }else if(token2 == NULL){ //Si solo hay una ', significa que ha habido un error
             fprintf(stderr,ROJO_T "ERROR\n" RESET);
-        }else{
+        }else{ //Hay más palabras dentro de ' ', así que se van passando las palabras hasta encontrar el segundo '
             int cont = 3;
             while(strchr(token2,39) == NULL){
                 token[strlen(token)] = ' ';
@@ -267,19 +278,28 @@ int cd_avanzado(char **args){ //pepbi
     }
 }
 
-int internal_cd(char **args){ //pepbi
+/*---------------------------------------------------------------------------------------------------------
+* Función que cambiará al directorio que se introduce seguido del comando. Si el comando
+* se introduce solo, se translada al HOME
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   FAILURE (-1): ha habído error
+            SUCCES (0): ha ido bien
+---------------------------------------------------------------------------------------------------------*/
+
+int internal_cd(char **args){
     
-    if(args[1] == NULL){
+    if(args[1] == NULL){    //Miramos si el comando CD va solo, y si es así canviamos el directorio a HOME
         if(chdir("/home") != 0){
             perror("chdir()");
         }
-    }else {
+    }else { //sino llamamos al cd avanzado por si hay " ", ' ' o \ y cambiamos el directorio al que hemos indicado
         cd_avanzado(args);
-        if(chdir(args[1]) != 0){
+        if(chdir(args[1]) != 0){    //Si no está el directorio indicado salta un error
             perror("chdir()");   
         }
     }
     
+    //Imprimimos el prompt
     char cwd[COMMAND_LINE_SIZE];
     if (getcwd(cwd, COMMAND_LINE_SIZE) != NULL) {
         fprintf(stderr, GRIS_T "[internal_cd()→ PWD: %s\n" RESET, cwd);

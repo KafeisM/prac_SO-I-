@@ -175,7 +175,7 @@ int check_internal(char **args){
 * Estas funciones que contienen internal, de momento solo imprime lo que va a hacer en un futuro, por
 * eso no se hace nada dentro. Más adelante veremos como estas funciones se van implementando
 * Input:    args: array que contiene la línea escrita por consola dividida por tokens
-* Output:   De momento devuenve un entero
+* Output:   De momento devuenve un entero (1)
 ---------------------------------------------------------------------------------------------------------*/
 
 int internal_cd(char **args){

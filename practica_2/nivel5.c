@@ -119,20 +119,27 @@ int is_background(char **args){ //pau
     
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función denominada enterrador de hijos, que controla si el hijo que termina se ejecut en primer plano.
+* Si es así, va a resetear jobs_list. Sino eliminia el proceso a través de la función jobs_list_remove()
+* Input:    signum: señal la qual ha terminado el hijo
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
+
 void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
           
-    while ((ended=waitpid(-1, &status , WNOHANG))>0) {
+    while ((ended=waitpid(-1, &status , WNOHANG))>0) { //En ended habrá el PID del hijo que ha finalizado
         fprintf(stderr,GRIS_T"\n[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
-        //if ended es el pid del hijo en primer plano
+        //if ended es el pid del hijo en primer plano reseteamos jobs_list
         if (ended == jobs_list[0].pid){ //foreground
             fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
             jobs_list[0].pid = 0;
             jobs_list[0].status = 'F';
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
-        }else{ //background
+        }else{ //background, eliminamos proceso con pid del hijo que ha finalizado
             int pos = jobs_list_find(ended);
             fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[pos].cmd,status);
             fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
@@ -205,11 +212,17 @@ int jobs_list_add(pid_t pid,char status, char *cmd){ //pau
     }
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función que busca el pid pasado por parámetro para devolver la posición dentro de jobs_list
+* Input:    pid: pid del proceso que queremos buscar la posición
+* Output:   final: posición del pid que nos pasan por parámetro
+---------------------------------------------------------------------------------------------------------*/
+
 int jobs_list_find(pid_t pid){ //pepbi
     int final;
     bool trobat = false;
     for (int i = 1; (!trobat) && (i <= n_pids); i++){
-        if(jobs_list[i].pid == pid){
+        if(jobs_list[i].pid == pid){ //Si el pid que nos pasan por parámetro coincide con el pid de jobd_list, hemos encontrado la posición
             final = i;
             trobat = true;
         }
@@ -217,6 +230,12 @@ int jobs_list_find(pid_t pid){ //pepbi
     
     return final;
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Función que elimina el proceso que se encuentra en la posición pasada por parámetro dentro de jobs_list
+* Input:    pos: posición del proceso que se desea eliminar
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
 
 int  jobs_list_remove(int pos){ //pau
     jobs_list[pos] = jobs_list[n_pids];
@@ -290,8 +309,15 @@ int parse_args(char **args,char *line){
 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función que mira si en args[0] hay un comando interno, si es así, nos va a llevar a la función 
+* que pertenece dicho token
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   Valor entero donde 1 significa que hay comando interno y 0 que no.
+---------------------------------------------------------------------------------------------------------*/
+
 int check_internal(char **args){
-    if(args[0] == NULL){
+    if(args[0] == NULL){ //Por si no hay elementos dentro de args[0]
         return 0;
     }else if(strcmp(args[0],"cd") == 0){
         internal_cd(args);
@@ -311,22 +337,33 @@ int check_internal(char **args){
     }else if(strcmp(args[0],"bg")== 0){
         internal_bg(args);
         return 1;
-    }else if(strcmp(args[0],"exit")== 0){
+    }else if(strcmp(args[0],"exit")== 0){ //En el caso que escribamos exit, va a salir del minishell
         exit(0);
-    }else{
+    }else{ 
         //printf("No es un comando interno\n");
         return 0;
     }
 }
 
-int cd_avanzado(char **args){
+/*---------------------------------------------------------------------------------------------------------
+* Ampliación de la función interna_cd, que trata los directorios que van seguidos del comando
+* CD cuyos nombres llevan espacios. Estos directorios con espacios deben de ir:
+* cd "directorio 1"
+* cd 'directorio 2'
+* cd directorio\3
+* Así que esta función detecta alguno de los tres casos y los trata como un único token
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
+
+int cd_avanzado(char **args){ 
 
     char *token = args[1];
 
     if(strchr(token,92) != NULL){ //Miramos si hay " \ " para substituirla por un espacio
         int i = 0;
         while(i < strlen(token)){
-            if(token[i] == 92){
+            if(token[i] == 92){ //Si la encontramos la substituimos por un espacio
                 token[i] = ' ';
             }
             i++;
@@ -334,7 +371,7 @@ int cd_avanzado(char **args){
     }else if(strchr(token,34) != NULL){ //Miramos si hay " " para coger lo de dentro y que se junte en un solo token
         char *token2;
         token2 = args[2];
-        if(token[strlen(token) - 1] == 34){ //Si solo hay una palabra dentro de las " "
+        if(token[strlen(token) - 1] == 34){ //Si solo hay una palabra dentro de las " " solo las quitamos
             int i = 0;
             while(i < strlen(token)){
                 if(i == (strlen(token) - 2)){
@@ -344,9 +381,9 @@ int cd_avanzado(char **args){
                 }
                 i++;
             }
-        }else if(token2 == NULL){ //Si solo hay una "
+        }else if(token2 == NULL){ //Si solo hay una ", significa que ha habído un error
             fprintf(stderr,ROJO_T "ERROR\n" RESET);
-        }else{
+        }else{//Hay más palabras dentro de " ", así que se van passando las palabras hasta encontrar el segundo "
             int cont = 3;
             while(strchr(token2,34) == NULL){
                 token[strlen(token)] = ' ';
@@ -370,7 +407,7 @@ int cd_avanzado(char **args){
     }else if(strchr(token,39) != NULL){ //Miramos si hay ' ' para coger lo de dentro y que se junte en un solo token
         char *token2;
         token2 = args[2];
-        if(token[strlen(token) - 1] == 39){ //Si solo hay una palabra dentro de las ' '
+        if(token[strlen(token) - 1] == 39){ //Si solo hay una palabra dentro de las ' ' solo las quitamos
             int i = 0;
             while(i < strlen(token)){
                 if(i == (strlen(token) - 2)){
@@ -380,9 +417,9 @@ int cd_avanzado(char **args){
                 }
                 i++;
             }
-        }else if(token2 == NULL){ //Si solo hay una '
+        }else if(token2 == NULL){ //Si solo hay una ', significa que ha habido un error
             fprintf(stderr,ROJO_T "ERROR\n" RESET);
-        }else{
+        }else{ //Hay más palabras dentro de ' ', así que se van passando las palabras hasta encontrar el segundo '
             int cont = 3;
             while(strchr(token2,39) == NULL){
                 token[strlen(token)] = ' ';
@@ -405,19 +442,28 @@ int cd_avanzado(char **args){
     }
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función que cambiará al directorio que se introduce seguido del comando. Si el comando
+* se introduce solo, se translada al HOME
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   FAILURE (-1): ha habído error
+            SUCCES (0): ha ido bien
+---------------------------------------------------------------------------------------------------------*/
+
 int internal_cd(char **args){
     
-    if(args[1] == NULL){
+    if(args[1] == NULL){    //Miramos si el comando CD va solo, y si es así canviamos el directorio a HOME
         if(chdir("/home") != 0){
             perror("chdir()");
         }
-    }else {
+    }else { //sino llamamos al cd avanzado por si hay " ", ' ' o \ y cambiamos el directorio al que hemos indicado
         cd_avanzado(args);
-        if(chdir(args[1]) != 0){
+        if(chdir(args[1]) != 0){    //Si no está el directorio indicado salta un error
             perror("chdir()");   
         }
     }
     
+    //Imprimimos el prompt
     char cwd[COMMAND_LINE_SIZE];
     if (getcwd(cwd, COMMAND_LINE_SIZE) != NULL) {
         fprintf(stderr, GRIS_T "[internal_cd()→ PWD: %s\n" RESET, cwd);
@@ -474,30 +520,37 @@ int internal_export(char **args)
     //fprintf(stderr, GRIS_T "[internal_export()→ EEsta función asignará valores a variables de entorno\n"RESET);
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función que provoca la ejecución de los comandos que están escritos dentro de un fichero
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   devuelve -1
+---------------------------------------------------------------------------------------------------------*/
+
 int internal_source(char **args)
 {
 
     char str[COMMAND_LINE_SIZE];
 
-    FILE *fp = fopen(args[1],"r");//r porq queremos solo leer
-    if( fp == NULL ) {
+    FILE *fp = fopen(args[1],"r");//Abrimos modo lectura del fichero pasado por el args[1]. r porq queremos solo leer
+    if( fp == NULL ) {  //Control de error
       fprintf(stderr, ROJO_T "Error de sintaxis. Uso: source <nombre fichero>\n"RESET);
       return(-1);
     }
 
+    //Mientras no haya llegado al final del fichero va leyendo linea por linea
     while( fgets (str, COMMAND_LINE_SIZE, fp)!=NULL ) {
         for (size_t i = 0; i < COMMAND_LINE_SIZE; i++){
-            if(str[i] == '\n'){
+            if(str[i] == '\n'){ //Substituimos el cambio de linea por \0
                 str[i] = '\0';
             }
         }
         fprintf(stderr,"\n");
         fprintf(stderr, GRIS_T "[internal_source()→ LINE: %s]\n"RESET,str);
         fflush(fp);
-        execute_line(str);
+        execute_line(str); //Enciamos la línea para que se ejecute
       
     }
-    fclose(fp);
+    fclose(fp); //Cerramos fichero
 
     return -1;
 }
