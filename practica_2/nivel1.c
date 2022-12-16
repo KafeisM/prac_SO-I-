@@ -41,7 +41,10 @@ int internal_fg(char **args);
 int internal_bg(char **args);
 void imprimir_prompt();
 
-int main(){ //jordi
+/*El main del programa se lee de manera continuea las líneas de comandos introducidad
+para posteriormente ser tratadas (las lineas son troceadas en tokens) y ejecutadas (no implementado en el nivel 1)
+mediante el execute_line*/
+int main(){ 
     char line[COMMAND_LINE_SIZE];  
     while(true){
         if(read_line(line)){
@@ -51,7 +54,8 @@ int main(){ //jordi
     }
 }
 
-void imprimir_prompt(){ //jordi
+//Función empleada para la impresión del prompt
+void imprimir_prompt(){ 
     //queda implementar el PWD en niveles posteriores
     user = getenv("USER");
     home = getenv("HOME");
@@ -62,6 +66,12 @@ void imprimir_prompt(){ //jordi
 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de la lectura del flujo de entrada de la consola, se implementa
+* la salida del minishell mediante CTRL + D.
+* Input:   stdin
+* Output:  Puntero a la línea leída
+---------------------------------------------------------------------------------------------------------*/
 char *read_line(char *line){ //jordi
 
     imprimir_prompt();
@@ -73,6 +83,7 @@ char *read_line(char *line){ //jordi
         if (salto){
             *salto = '\0';
         }
+        return line;
         //sino, miramos si hay final de fichero y salimos
     }else{
         if(feof(stdin)){
@@ -116,7 +127,7 @@ int parse_args(char **args,char *line){ //pau
 * Output:   Valor entero donde 1 significa que hay comando interno y 0 que no.
 ---------------------------------------------------------------------------------------------------------*/
 
-int check_internal(char **args){ //pepbi
+int check_internal(char **args){ 
     if(args[0] == NULL){ //Por si no hay elementos dentro de args[0]
         return 0;
     }else if(strcmp(args[0],"cd") == 0){

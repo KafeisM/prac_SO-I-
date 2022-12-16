@@ -140,14 +140,16 @@ void reaper(int signum){
         }else{ //background
             int pos = jobs_list_find(ended);
             //fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[pos].cmd,status);
-            fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
+            fprintf(stderr,"\nTerminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
             jobs_list_remove(pos);
             
         }
 
     }  
+   
     sleep(0.4);
     fflush(stdout);
+    fflush(stderr);
 
 }
 
@@ -622,8 +624,6 @@ int execute_line(char *line){ //pau
             signal(SIGCHLD,SIG_DFL);
             int is_o_red;
             is_o_red = is_out_redirection(args);
-            fprintf(stderr, GRIS_T "red: %d\n" RESET, is_o_red);
-            fprintf(stderr, GRIS_T "SOY EL HIJO\n" RESET);
             int err = execvp(args[0], args);
             if (is_o_red){
                 exit(-1);
