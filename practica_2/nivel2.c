@@ -96,23 +96,39 @@ char *read_line(char *line){ //jordi
     return line; 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de trocear la línea obtenida en tokens usando como separadores los espacios,
+* tabuladores y saltos de línea. Si el primer carácter de un token es '#' obviaremos el resto de elementos.
+* Input:    args: array que contendrá la línea escrita por consola dividida por tokens
+            line: línea que contiene la línea escrita por consola
+* Output:   Número de tokens creados
+---------------------------------------------------------------------------------------------------------*/
+
 int parse_args(char **args,char *line){ //pau
-    int res = 0;
+    int index = 0;
     char *token;
-    token = strtok(line, " \t\n\r");
+
+    //cogemos el primer token
+    token = strtok(line, " \t\n\r"); 
 
     while(token != NULL){
-        args[res] = token;
-        if(args[res][0] != '#'){
+        //añadimos el token al array
+        args[index] = token;
+        printf(GRIS_T NEGRITA"Token %i: %s\n",index,args[index]);
+        if(args[index][0] != '#'){
+            //si el primer carácter del token no es '#' seguimos 
+            //cogemos el siguiente token
             token = strtok(NULL," \t\n\r");
-            res++;           
+            index++;           
         }else{
+            //sino acabamos el proceso
             token = NULL;
         }
     }
-    args[res] = NULL;
+    //último elemento del array es NULL
+    args[index] = NULL;
 
-    return res;
+    return index;
 
 }
 
@@ -260,6 +276,14 @@ int internal_cd(char **args){ //pepbi
     }
     return SUCCES;
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de trocear la línea obtenida en tokens usando como separadores los espacios,
+* tabuladores y saltos de línea. Si el primer carácter de un token es '#' obviaremos el resto de elementos.
+* Input:    args: array que contendrá la línea escrita por consola dividida por tokens
+            line: línea que contiene la línea escrita por consola
+* Output:   Número de tokens creados
+---------------------------------------------------------------------------------------------------------*/
 
 int internal_export(char **args){ //pau
     const char s[2] = "=";

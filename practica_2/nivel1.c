@@ -96,27 +96,42 @@ char *read_line(char *line){ //jordi
     return line; 
 }
 
-int parse_args(char **args,char *line){ //pau
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de trocear la línea obtenida en tokens usando como separadores los espacios,
+* tabuladores y saltos de línea. Si el primer carácter de un token es '#' obviaremos el resto de elementos.
+* Input:    args: array que contendrá la línea escrita por consola dividida por tokens
+            line: línea que contiene la línea escrita por consola
+* Output:   Número de tokens creados
+---------------------------------------------------------------------------------------------------------*/
 
-    int res = 0;
+int parse_args(char **args,char *line){
+
+    int index = 0;
     char *token;
-    token = strtok(line, " \t\n\r");
+
+    //cogemos el primer token
+    token = strtok(line, " \t\n\r"); 
 
     while(token != NULL){
-        args[res] = token;
-        printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
-        if(args[res][0] != '#'){
+        //añadimos el token al array
+        args[index] = token;
+        printf(GRIS_T NEGRITA"Token %i: %s\n",index,args[index]);
+        if(args[index][0] != '#'){
+            //si el primer carácter del token no es '#' seguimos 
+            //cogemos el siguiente token
             token = strtok(NULL," \t\n\r");
-            res++;           
+            index++;           
         }else{
+            //sino acabamos el proceso
             token = NULL;
         }
     }
-    args[res] = NULL;
-    printf(GRIS_T NEGRITA"Token %i: %s\n",res,args[res]);
-    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",res);
+    //último elemento del array es NULL
+    args[index] = NULL;
+    printf(GRIS_T NEGRITA"Token %i: %s\n",index,args[index]);
+    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",index);
 
-    return res;
+    return index;
 
 }
 
@@ -207,10 +222,18 @@ int internal_bg(char **args)
     return 1;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Esta función es la encargada de trasnsformar la línea de comando en un array de tokens y ejecutar la
+* instrucción.
+* Input:    line: String que contiene la línea introducida por comando 
+* Output:   0
+---------------------------------------------------------------------------------------------------------*/
+
 int execute_line(char *line){ //pau
     char *args[ARGS_SIZE];
     int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
     interno = check_internal(args);
+    return 0;
 }
