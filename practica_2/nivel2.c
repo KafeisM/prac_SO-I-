@@ -47,7 +47,10 @@ int internal_fg(char **args);
 int internal_bg(char **args);
 void imprimir_prompt();
 
-int main(){ //jordi
+/*El main del programa se lee de manera continuea las líneas de comandos introducidad
+para posteriormente ser tratadas (las lineas son troceadas en tokens) y ejecutadas (no implementado en el nivel 1)
+mediante el execute_line*/
+int main(){ 
     char line[COMMAND_LINE_SIZE];  
     while(true){
         if(read_line(line)){
@@ -56,11 +59,14 @@ int main(){ //jordi
         }
     }
 }
-
-void imprimir_prompt(){ //jordi
+/*Función empleada para la impresión del prompt en este nivel ya queda implemantado
+en su forma final*/
+void imprimir_prompt(){
+    //obtenemos gracias a llamadas al sistea el USER y el HOME
     user = getenv("USER");
     home = getenv("HOME");
 
+    //anidamos todo correctamente para obtener nuestro propio cwd (current working directory)
     char cwd[COMMAND_LINE_SIZE];
     if(getcwd(cwd,COMMAND_LINE_SIZE)!=NULL){
         printf(BLANCO_T NEGRITA"%s:"RESET,user);
@@ -73,7 +79,13 @@ void imprimir_prompt(){ //jordi
    
 }
 
-char *read_line(char *line){ //jordi
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de la lectura del flujo de entrada de la consola, se implementa
+* la salida del minishell mediante CTRL + D.
+* Input:   stdin
+* Output:  Puntero a la línea leída
+---------------------------------------------------------------------------------------------------------*/
+char *read_line(char *line){ 
 
     imprimir_prompt();
     
@@ -84,6 +96,7 @@ char *read_line(char *line){ //jordi
         if (salto){
             *salto = '\0';
         }
+        return line;
         //sino, miramos si hay final de fichero y salimos
     }else{
         if(feof(stdin)){

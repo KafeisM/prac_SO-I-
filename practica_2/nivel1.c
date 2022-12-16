@@ -56,7 +56,7 @@ int main(){
 
 //Función empleada para la impresión del prompt
 void imprimir_prompt(){ 
-    //queda implementar el PWD en niveles posteriores
+    //queda implementar el CWD en niveles posteriores
     user = getenv("USER");
     home = getenv("HOME");
 
@@ -186,7 +186,7 @@ int internal_cd(char **args){
 int internal_export(char **args)
 {
 
-    fprintf(stderr, GRIS_T "[internal_export()→ EEsta función asignará valores a variables de entorno\n" RESET);
+    fprintf(stderr, GRIS_T "[internal_export()→ Esta función asignará valores a variables de entorno\n" RESET);
     return 1;
 }
 

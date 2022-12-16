@@ -127,36 +127,48 @@ void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
+
+    //fprintf(stderr,GRIS_T"[reaper()→ Recibida señal %d (SIGCHLD)]\n"RESET, signum); // la señal 17 es SIGCHILD
           
     while ((ended=waitpid(-1, &status , WNOHANG))>0) {
         //if ended es el pid del hijo en primer plano
         if (ended == jobs_list[0].pid){ //foreground
+            //fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en foreground (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[0].cmd,status);
             jobs_list[0].pid = 0;
             jobs_list[0].status = 'F';
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
         }else{ //background
             int pos = jobs_list_find(ended);
-            printf("\nTerminado PID %d (%s) en job_list[%d] con status %d",ended,jobs_list[pos].cmd,pos,status);
+            //fprintf(stderr,GRIS_T"[reaper()→ Proceso hijo %d en background (%s) finalizado por la señal %d]\n"RESET,ended,jobs_list[pos].cmd,status);
+            fprintf(stderr,"\nTerminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
             jobs_list_remove(pos);
             
         }
 
     }  
-
+   
     sleep(0.4);
     fflush(stdout);
+    fflush(stderr);
 
 }
 
 void ctrlc(int signum){
     signal(SIGINT, ctrlc);
-
+    printf("\n");
+    fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
     if(jobs_list[0].pid > 0){
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){
+            fprintf(stderr,GRIS_T"el proceso foreground es %d (%s) \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
+            fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal 2 (SIGINT)]\n");
             kill(jobs_list[0].pid,SIGTERM);
+            fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
+        }else{
+            fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 NO enviada a %d (%s) debido a que su proceso en foreground es el shell"RESET,getpid(),mi_shell);
         }
+    }else{
+        fprintf(stderr,GRIS_T"\n[ctrlc()--> Señal 15 NO enviada por %d (%s) debido a que no hay proceso en foreground"RESET,getpid(),mi_shell);
     }
-
     printf("\n");
     sleep(0.4);
     fflush(stdout);
@@ -164,20 +176,28 @@ void ctrlc(int signum){
 
 void ctrlz(int signum){
     signal (SIGTSTP, ctrlz);
-    
+    printf("\n");
+    fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
     if(jobs_list[0].pid > 0){ //si hay un proceso en foreground entonces:
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){ // si no es el minishell, entonces:
-            
+            fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
+            fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal 20 (SIGTSTP)]\n");
             kill(jobs_list[0].pid,SIGSTOP);
+            fprintf(stderr,GRIS_T"[ctrlz()--> Señal 19 (SIGSTOP) enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
+
             jobs_list[0].status = 'D';
             jobs_list_add(jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd);
-            printf("\n[%d] %d     %c      %s\n",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso detenido
+            printf("\n[%d] %d     %c      %s",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso detenido
             
             //reseteamos el proceso en foreground
              init_jobslist();
+        }else{
+            fprintf(stderr,GRIS_T"[ctrlz()--> Señal SIGSTOP NO enviada a %d (%s) debido a que su proceso en foreground es el shell"RESET,getpid(),mi_shell);
         }
+    }else{ 
+        fprintf(stderr,GRIS_T"\n[ctrlz()--> Señal SIGSTOP NO enviada por %d (%s) debido a que no hay proceso en foreground"RESET,getpid(),mi_shell);
     }
-
+    printf("\n");
     sleep(0.4);
     fflush(stdout);
 
@@ -227,7 +247,7 @@ void imprimir_prompt(){
         perror("getcwd() error");
         
     }
-    sleep(0.8);
+    sleep(0.4);
     fflush(stdout);
    
 }
@@ -408,12 +428,12 @@ int internal_cd(char **args){
     
     char cwd[COMMAND_LINE_SIZE];
     if (getcwd(cwd, COMMAND_LINE_SIZE) != NULL) {
-        return SUCCES;
+        fprintf(stderr, GRIS_T "[internal_cd()→ PWD: %s\n" RESET, cwd);
     } else {
         perror("getcwd() error\n");
         return FAILURE;
     }
-    
+    return SUCCES;
 }
 
 int internal_export(char **args)
@@ -438,18 +458,20 @@ int internal_export(char **args)
     }
 
     if(valor != NULL && nombre != NULL){
-        
+        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
         if (getenv(nombre) != NULL){
-            
+            fprintf(stderr,GRIS_T "[internal_export()→ antiguo valor para USER: %s\n"RESET,getenv(nombre));
             setenv(nombre,valor,1);
-            
+            fprintf(stderr,GRIS_T "[internal_export()→ nuevo valor para USER: %s\n"RESET,getenv(nombre));
             return SUCCES;
         }else{
-            
+            fprintf(stderr,ROJO_T "Error: Nombre no existente\n"RESET);
             return FAILURE;
         }
     }else if(valor != NULL || nombre != NULL){
-        
+        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
     }else{
@@ -477,7 +499,8 @@ int internal_source(char **args)
                 str[i] = '\0';
             }
         }
-        
+        fprintf(stderr,"\n");
+        fprintf(stderr, GRIS_T "[internal_source()→ LINE: %s]\n"RESET,str);
         fflush(fp);
         execute_line(str);
       
@@ -592,6 +615,7 @@ int execute_line(char *line){ //pau
       if (check_internal(args) == 0){
         //si es comando externo hacemos fork
         int is_bg = is_background(args);
+        fprintf(stderr,GRIS_T"isbg: %i"RESET,is_bg);
         pid_t id = fork();
         if (id == 0){ //si es el hijo
             
@@ -611,9 +635,13 @@ int execute_line(char *line){ //pau
             exit(SUCCES);
             
         }else if (id > 0){ //si es el padre 
+
+            fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
+            fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
            
             if(is_bg == 0){ //miramos si no esta en background
 
+                fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
                 jobs_list[0].status = 'E';   
                 strcpy(jobs_list[0].cmd, lineaux);
                 jobs_list[0].pid = id;

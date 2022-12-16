@@ -3,12 +3,13 @@
 -PAU GIRÓN RODRÍGUEZ
 -JOSEP GABRIEL FORNÉS REYNÉS*/
 
+//constantes
 #define _POSIX_C_SOURCE 200112L
 #define COMMAND_LINE_SIZE 1024
 #define ARGS_SIZE 64
 #define N_JOBS 64
 
-//colores para prompt y errores
+//colores para prompt, errores e includes de librerias
 #define RESET "\033[0m"
 #define NEGRO_T "\x1b[30m"
 #define NEGRO_F "\x1b[40m"
@@ -46,14 +47,19 @@ int internal_fg(char **args);
 int internal_bg(char **args);
 void imprimir_prompt();
 
-//tabla datos de los procesos 
+//TABLA INFORMACIÓN DE LOS TRABAJOS
+/*Este struct es una estructira de datos que nos sirve para poder tener toda la informacion de los
+trabajos actuales del programa. Contiene la siguiente información:
+-pid: es el identificador de proceso
+-status: nos indica el estado del proceso ‘N’, ’E’, ‘D’, ‘F’ (‘N’: ninguno, ‘E’: Ejecutándose y ‘D’: Detenido, ‘F’: Finalizado) 
+-cmd: linea de comando introducida por el usuario*/
 struct info_job {
    pid_t pid;
-   char status; // ‘N’, ’E’, ‘D’, ‘F’ (‘N’: ninguno, ‘E’: Ejecutándose y ‘D’: Detenido, ‘F’: Finalizado) 
-   char cmd[COMMAND_LINE_SIZE]; // línea de comando asociada
+   char status; 
+   char cmd[COMMAND_LINE_SIZE]; 
 };
 
-//variable para control procesos
+//variables para control procesos
 static char mi_shell[COMMAND_LINE_SIZE]; 
 static struct info_job jobs_list [N_JOBS];
 
@@ -111,6 +117,7 @@ char *read_line(char *line){
         if (salto){
             *salto = '\0';
         }
+        return line;
         //sino, miramos si hay final de fichero y salimos
     }else{
         if(feof(stdin)){
@@ -417,10 +424,10 @@ int execute_line(char *line){ //pau
             if (WIFEXITED(status)){
                 int statuscode = WEXITSTATUS(status);
                 if (statuscode == 0){
-                    fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
+                    fprintf(stderr,GRIS_T"[execute_line(): Proceso hijo %d (cmd: %s) finalizado con exit() con estado: %d]\n"RESET,jobs_list[0].pid,jobs_list[0].cmd,status);
                 }else{
                     fprintf(stderr,ROJO_T"(%s): no se encontró la orden\n"RESET,jobs_list[0].cmd);
-                    fprintf(stderr,GRIS_T"[execute_line(): Finaliza con exit() el hijo (cmd: %s) con estado: %d]\n"RESET,jobs_list[0].cmd,status);
+                    fprintf(stderr,GRIS_T"[execute_line(): Proceso hijo %d (cmd: %s) finalizado con exit() con estado: %d]\n"RESET,jobs_list[0].pid,jobs_list[0].cmd,statuscode);
                 }
             }
             
