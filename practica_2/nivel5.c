@@ -106,15 +106,26 @@ void init_jobslist(){
     memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
 }
 
-int is_background(char **args){ //pau
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de determinar si el comando especificado por teclado debe ser ejecutado en segundo
+* plano.
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   1: es en segundo plano, 0: no es en segundo plano
+---------------------------------------------------------------------------------------------------------*/
+
+int is_background(char **args){
     
+    //numero de iteraciones
     int longitud = num_tokens;
+    //para cada elemento del array de argumentos se analiza si es "&"
     for (int i=0; i < longitud; i++){
         if (strcmp(args[i],"&") == 0){
+            //se sustituye el "&" y retornamos 1.
             args[i] = NULL;
             return 1;
         }
     }
+    //es en primer plano
     return 0;
     
 }
@@ -202,10 +213,22 @@ void ctrlz(int signum){ //jordi
 
 }
 
-int jobs_list_add(pid_t pid,char status, char *cmd){ //pau
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de añadir un proceso nuevo al conjunto de procesos existentes.
+* Input:    pid: identificador del proceso
+*           status: estado del proceso
+*           cmd: comando que ejecuta el proceso
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
+
+int jobs_list_add(pid_t pid,char status, char *cmd){ 
+
+    //aumentamos el numero de proceso existentes
     n_pids++;
 
+    //si este número es menor que el máximo de tareas posibles
     if(n_pids < N_JOBS){
+        //se acutializan los datos de este proceso con los pasado por parámetro
         jobs_list[n_pids].status = status;
         jobs_list[n_pids].pid = pid;
         strcpy(jobs_list[n_pids].cmd,cmd);
@@ -218,7 +241,7 @@ int jobs_list_add(pid_t pid,char status, char *cmd){ //pau
 * Output:   final: posición del pid que nos pasan por parámetro
 ---------------------------------------------------------------------------------------------------------*/
 
-int jobs_list_find(pid_t pid){ //pepbi
+int jobs_list_find(pid_t pid){
     int final;
     bool trobat = false;
     for (int i = 1; (!trobat) && (i <= n_pids); i++){
@@ -237,11 +260,14 @@ int jobs_list_find(pid_t pid){ //pepbi
 * Output:   -
 ---------------------------------------------------------------------------------------------------------*/
 
-int  jobs_list_remove(int pos){ //pau
+int  jobs_list_remove(int pos){
+    //el último proceso de la lista sustituye al eliminado
     jobs_list[pos] = jobs_list[n_pids];
+    //los datos del ultimo proceso de la lista se resetean
     jobs_list[n_pids].pid = 0;
     jobs_list[n_pids].status = '\0';
     memset(jobs_list[n_pids].cmd,'\0',COMMAND_LINE_SIZE);
+    //decrementamos el numero de procesos existentes
     n_pids--;
 }
 
@@ -285,27 +311,39 @@ char *read_line(char *line){
     return NULL; 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de trocear la línea obtenida en tokens usando como separadores los espacios,
+* tabuladores y saltos de línea. Si el primer carácter de un token es '#' obviaremos el resto de elementos.
+* Input:    args: array que contendrá la línea escrita por consola dividida por tokens
+*           line: línea que contiene la línea escrita por consola
+* Output:   Número de tokens creados
+---------------------------------------------------------------------------------------------------------*/
+
 int parse_args(char **args,char *line){
 
-    int res = 0;
+    int index = 0;
     char *token;
-    char *aux;
-    token = strtok(line, " \t\n\r");
+
+    //cogemos el primer token
+    token = strtok(line, " \t\n\r"); 
 
     while(token != NULL){
-        args[res] = token;
-       // printf("ARGS %i : %s\n",res,args[res]);
-        if(args[res][0] != '#'){
+        //añadimos el token al array
+        args[index] = token;
+        if(args[index][0] != '#'){
+            //si el primer carácter del token no es '#' seguimos 
+            //cogemos el siguiente token
             token = strtok(NULL," \t\n\r");
-            res++;           
+            index++;           
         }else{
+            //sino acabamos el proceso
             token = NULL;
         }
-       // printf("ARGS %i: %s\n",res,args[res]);
     }
-    args[res] = NULL;
+    //último elemento del array es NULL
+    args[index] = NULL;
 
-    return res;
+    return index;
 
 }
 
@@ -474,17 +512,28 @@ int internal_cd(char **args){
     return SUCCES;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de asignar un valor a una variable de entorno. Analizamos el segundo token del array
+* de argumentos y si se puede realizar la asignación, se hace.
+* Input:    args: array que contendrá la línea escrita por consola dividida por tokens
+* Output:   confirmación de la operación (SUCCES, FAILURE)
+---------------------------------------------------------------------------------------------------------*/
+
 int internal_export(char **args)
 {
+
+    //variables para trocear el argumento a analizar
     const char s[2] = "=";
     char *token;
     char *aux = args[1];
-
+    //variables auxiliares
     char *nombre = NULL;
     char *valor = NULL;
     int cont = 0;
+    //lectura del primer token
     token = strtok(aux,s);
 
+    //asignación del nombre y del valor.
     while(token != NULL){
         cont++;
         if (cont == 1){
@@ -492,32 +541,36 @@ int internal_export(char **args)
         }else{
             valor = token;
         }
-        token = strtok(NULL,s);
+        token = strtok(NULL," ");
     }
 
-    if(valor != NULL && nombre != NULL){
-        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
-        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
-        if (getenv(nombre) != NULL){
+    //mostramos por pantalla el resultado de la operación
+    if(valor != NULL && nombre != NULL){ //si ambas variables están llenas, entonces
+        //mostramos el valor de ambas variables
+        fprintf(stderr,GRIS_T"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,GRIS_T"[internal_export()→ valor: %s\n"RESET,valor);
+        if (getenv(nombre) != NULL){ //si existe la variable de entorno
+            //Se muestra el antiguo valor de este
             fprintf(stderr,GRIS_T "[internal_export()→ antiguo valor para USER: %s\n"RESET,getenv(nombre));
+            //Se cambia el valor
             setenv(nombre,valor,1);
+            //Se muestra el nuevo valor
             fprintf(stderr,GRIS_T "[internal_export()→ nuevo valor para USER: %s\n"RESET,getenv(nombre));
             return SUCCES;
-        }else{
+        }else{ //si no existe la variable de entorno
             fprintf(stderr,ROJO_T "Error: Nombre no existente\n"RESET);
             return FAILURE;
         }
-    }else if(valor != NULL || nombre != NULL){
-        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
-        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
+    }else if(valor != NULL || nombre != NULL){//si una de las variables no está llena, entonces
+        //mostramos el valor de ambas variables y el uso correcto de la función
+        fprintf(stderr,GRIS_T"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,GRIS_T"[internal_export()→ valor: %s\n"RESET,valor);
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
-    }else{
+    }else{ //si ninguna de las variables está llena mostramos el uso correcto de la función
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
     }
-    
-    //fprintf(stderr, GRIS_T "[internal_export()→ EEsta función asignará valores a variables de entorno\n"RESET);
 }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -581,25 +634,43 @@ int internal_bg(char **args)
     return 1;
 }
 
-int execute_line(char *line){ //pau
+/*---------------------------------------------------------------------------------------------------------
+* Esta función es la encargada de trasnsformar la línea de comando en un array de tokens y ejecutar la
+* instrucción. Implementamos la ejecución de comandos externos, con la ayuda de un proceso hijo. Además,
+* el proceso en primer plano esperará a que se produzca alguna señal y reaccionará a ella. Gestión de los
+* procesos en segundo plano y nuevas señales.
+* Input:    line: String que contiene la línea introducida por comando 
+* Output:   0
+---------------------------------------------------------------------------------------------------------*/
+
+int execute_line(char *line){
     
+    //línea auxiliar para no modificar la original
     char lineaux[strlen(line)+1];
     strcpy(lineaux,line);
+
+    //estado de los procesos
     int status;
+
     char *args[ARGS_SIZE];
+    int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
 
-    if (num_tokens > 0){
-      if (check_internal(args) == 0){
-        //si es comando externo hacemos fork
+    if (num_tokens > 0){ //Si exiten argumentos, entonces
+      if (check_internal(args) == 0){ //se ejecuta check_internar por si es un comando interno.
+        //si es comando externo
+        //miramos si debe ejecutarse se segundo plano
         int is_bg = is_background(args);
+        //creamos un proceso hijo
         pid_t id = fork();
         if (id == 0){ //si es el hijo
             
+            //asociamos las acciones necesarias a las señales
             signal(SIGINT, SIG_IGN);
             signal(SIGTSTP,SIG_IGN);
-      
+
+            //ejecución del comando externo controlando el error
             int err = execvp(args[0], args);
             if (err == -1){
                 exit(-1);
@@ -608,32 +679,34 @@ int execute_line(char *line){ //pau
             exit(SUCCES);
             
         }else if (id > 0){ //si es el padre 
-
+            
+            //Mostramos el pid de los procesos
             fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
             fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
            
-            if(is_bg == 0){ //miramos si no esta en background
+            if(is_bg == 0){ //si no esta en background
 
-                //fprintf(stderr, GRIS_T "[execute_line(): not background\n" RESET);
-
+                //actualizamos los datos de jobs.list[0]
                 jobs_list[0].status = 'E';   
                 strcpy(jobs_list[0].cmd, lineaux);
                 jobs_list[0].pid = id;
 
+                //mientras haya un proceso hijo, el padre esperará a que llegue alguna señal
                 while (jobs_list[0].pid > 0){
                     pause();
                 }
 
             }else{ //si esta en background añadir a jobs_list
 
-                //fprintf(stderr, GRIS_T "[execute_line(): background\n" RESET);
+                //pausa auxiliar
                 sleep(0.4);
+                //añadimos el proceso a la lista de procesos
                 jobs_list_add(id,'E',lineaux);
                 printf("[%d] %d     %c      %s\n",n_pids,jobs_list[n_pids].pid,jobs_list[n_pids].status,jobs_list[n_pids].cmd); //imprimimos el estado del proceso en segundo plano
 
             }
            
-        }else{
+        }else{ //si hay un error con el hijo se muestra
             fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
         }

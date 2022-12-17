@@ -113,11 +113,11 @@ char *read_line(char *line){
 * Función encargada de trocear la línea obtenida en tokens usando como separadores los espacios,
 * tabuladores y saltos de línea. Si el primer carácter de un token es '#' obviaremos el resto de elementos.
 * Input:    args: array que contendrá la línea escrita por consola dividida por tokens
-            line: línea que contiene la línea escrita por consola
+*           line: línea que contiene la línea escrita por consola
 * Output:   Número de tokens creados
 ---------------------------------------------------------------------------------------------------------*/
 
-int parse_args(char **args,char *line){ //pau
+int parse_args(char **args,char *line){
     int index = 0;
     char *token;
 
@@ -127,7 +127,7 @@ int parse_args(char **args,char *line){ //pau
     while(token != NULL){
         //añadimos el token al array
         args[index] = token;
-        printf(GRIS_T NEGRITA"Token %i: %s\n",index,args[index]);
+        //printf(GRIS_T NEGRITA"Token %i: %s\n",index,args[index]);
         if(args[index][0] != '#'){
             //si el primer carácter del token no es '#' seguimos 
             //cogemos el siguiente token
@@ -176,7 +176,7 @@ int check_internal(char **args){
     }else if(strcmp(args[0],"exit")== 0){ //En el caso que escribamos exit, va a salir del minishell
         exit(0);
     }else{  
-        printf("No es un comando interno\n");
+        //printf("No es un comando interno\n");
         return 0;
     }
 }
@@ -283,7 +283,7 @@ int cd_avanzado(char **args){
 * se introduce solo, se translada al HOME
 * Input:    args: array que contiene la línea escrita por consola dividida por tokens
 * Output:   FAILURE (-1): ha habído error
-            SUCCES (0): ha ido bien
+*           SUCCES (0): ha ido bien
 ---------------------------------------------------------------------------------------------------------*/
 
 int internal_cd(char **args){
@@ -311,23 +311,26 @@ int internal_cd(char **args){
 }
 
 /*---------------------------------------------------------------------------------------------------------
-* Función encargada de trocear la línea obtenida en tokens usando como separadores los espacios,
-* tabuladores y saltos de línea. Si el primer carácter de un token es '#' obviaremos el resto de elementos.
+* Función encargada de asignar un valor a una variable de entorno. Analizamos el segundo token del array
+* de argumentos y si se puede realizar la asignación, se hace.
 * Input:    args: array que contendrá la línea escrita por consola dividida por tokens
-            line: línea que contiene la línea escrita por consola
-* Output:   Número de tokens creados
+* Output:   confirmación de la operación (SUCCES, FAILURE)
 ---------------------------------------------------------------------------------------------------------*/
 
-int internal_export(char **args){ //pau
+int internal_export(char **args){ 
+
+    //variables para trocear el argumento a analizar
     const char s[2] = "=";
     char *token;
     char *aux = args[1];
-
+    //variables auxiliares
     char *nombre = NULL;
     char *valor = NULL;
     int cont = 0;
+    //lectura del primer token
     token = strtok(aux,s);
 
+    //asignación del nombre y del valor.
     while(token != NULL){
         cont++;
         if (cont == 1){
@@ -338,24 +341,30 @@ int internal_export(char **args){ //pau
         token = strtok(NULL," ");
     }
 
-    if(valor != NULL && nombre != NULL){
+    //mostramos por pantalla el resultado de la operación
+    if(valor != NULL && nombre != NULL){ //si ambas variables están llenas, entonces
+        //mostramos el valor de ambas variables
         fprintf(stderr,GRIS_T"[internal_export()→ nombre: %s\n"RESET,nombre);
         fprintf(stderr,GRIS_T"[internal_export()→ valor: %s\n"RESET,valor);
-        if (getenv(nombre) != NULL){
+        if (getenv(nombre) != NULL){ //si existe la variable de entorno
+            //Se muestra el antiguo valor de este
             fprintf(stderr,GRIS_T "[internal_export()→ antiguo valor para USER: %s\n"RESET,getenv(nombre));
+            //Se cambia el valor
             setenv(nombre,valor,1);
+            //Se muestra el nuevo valor
             fprintf(stderr,GRIS_T "[internal_export()→ nuevo valor para USER: %s\n"RESET,getenv(nombre));
             return SUCCES;
-        }else{
+        }else{ //si no existe la variable de entorno
             fprintf(stderr,ROJO_T "Error: Nombre no existente\n"RESET);
             return FAILURE;
         }
-    }else if(valor != NULL || nombre != NULL){
+    }else if(valor != NULL || nombre != NULL){//si una de las variables no está llena, entonces
+        //mostramos el valor de ambas variables y el uso correcto de la función
         fprintf(stderr,GRIS_T"[internal_export()→ nombre: %s\n"RESET,nombre);
         fprintf(stderr,GRIS_T"[internal_export()→ valor: %s\n"RESET,valor);
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
-    }else{
+    }else{ //si ninguna de las variables está llena mostramos el uso correcto de la función
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
     }
@@ -395,7 +404,15 @@ int internal_bg(char **args)
     return 1;
 }
 
-int execute_line(char *line){ //pau
+/*---------------------------------------------------------------------------------------------------------
+* Esta función es la encargada de trasnsformar la línea de comando en un array de tokens y ejecutar la
+* instrucción.
+* Input:    line: String que contiene la línea introducida por comando 
+* Output:   0
+---------------------------------------------------------------------------------------------------------*/
+
+int execute_line(char *line){ 
+
     char *args[ARGS_SIZE];
     int num_tokens;
     int interno;

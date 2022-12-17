@@ -186,26 +186,39 @@ char *read_line(char *line){
     return NULL; 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de trocear la línea obtenida en tokens usando como separadores los espacios,
+* tabuladores y saltos de línea. Si el primer carácter de un token es '#' obviaremos el resto de elementos.
+* Input:    args: array que contendrá la línea escrita por consola dividida por tokens
+*           line: línea que contiene la línea escrita por consola
+* Output:   Número de tokens creados
+---------------------------------------------------------------------------------------------------------*/
+
 int parse_args(char **args,char *line){
-    int res = 0;
+
+    int index = 0;
     char *token;
-    char *aux;
-    token = strtok(line, " \t\n\r");
+
+    //cogemos el primer token
+    token = strtok(line, " \t\n\r"); 
 
     while(token != NULL){
-        args[res] = token;
-       // printf("ARGS %i : %s\n",res,args[res]);
-        if(args[res][0] != '#'){
+        //añadimos el token al array
+        args[index] = token;
+        if(args[index][0] != '#'){
+            //si el primer carácter del token no es '#' seguimos 
+            //cogemos el siguiente token
             token = strtok(NULL," \t\n\r");
-            res++;           
+            index++;           
         }else{
+            //sino acabamos el proceso
             token = NULL;
         }
-       // printf("ARGS %i: %s\n",res,args[res]);
     }
-    args[res] = NULL;
+    //último elemento del array es NULL
+    args[index] = NULL;
 
-    return res;
+    return index;
 
 }
 
@@ -374,17 +387,28 @@ int internal_cd(char **args){
     return SUCCES;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de asignar un valor a una variable de entorno. Analizamos el segundo token del array
+* de argumentos y si se puede realizar la asignación, se hace.
+* Input:    args: array que contendrá la línea escrita por consola dividida por tokens
+* Output:   confirmación de la operación (SUCCES, FAILURE)
+---------------------------------------------------------------------------------------------------------*/
+
 int internal_export(char **args)
 {
+
+    //variables para trocear el argumento a analizar
     const char s[2] = "=";
     char *token;
     char *aux = args[1];
-
+    //variables auxiliares
     char *nombre = NULL;
     char *valor = NULL;
     int cont = 0;
+    //lectura del primer token
     token = strtok(aux,s);
 
+    //asignación del nombre y del valor.
     while(token != NULL){
         cont++;
         if (cont == 1){
@@ -392,32 +416,36 @@ int internal_export(char **args)
         }else{
             valor = token;
         }
-        token = strtok(NULL,s);
+        token = strtok(NULL," ");
     }
 
-    if(valor != NULL && nombre != NULL){
-        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
-        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
-        if (getenv(nombre) != NULL){
+    //mostramos por pantalla el resultado de la operación
+    if(valor != NULL && nombre != NULL){ //si ambas variables están llenas, entonces
+        //mostramos el valor de ambas variables
+        fprintf(stderr,GRIS_T"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,GRIS_T"[internal_export()→ valor: %s\n"RESET,valor);
+        if (getenv(nombre) != NULL){ //si existe la variable de entorno
+            //Se muestra el antiguo valor de este
             fprintf(stderr,GRIS_T "[internal_export()→ antiguo valor para USER: %s\n"RESET,getenv(nombre));
+            //Se cambia el valor
             setenv(nombre,valor,1);
+            //Se muestra el nuevo valor
             fprintf(stderr,GRIS_T "[internal_export()→ nuevo valor para USER: %s\n"RESET,getenv(nombre));
             return SUCCES;
-        }else{
+        }else{ //si no existe la variable de entorno
             fprintf(stderr,ROJO_T "Error: Nombre no existente\n"RESET);
             return FAILURE;
         }
-    }else if(valor != NULL || nombre != NULL){
-        fprintf(stderr,"[internal_export()→ nombre: %s\n"RESET,nombre);
-        fprintf(stderr,"[internal_export()→ valor: %s\n"RESET,valor);
+    }else if(valor != NULL || nombre != NULL){//si una de las variables no está llena, entonces
+        //mostramos el valor de ambas variables y el uso correcto de la función
+        fprintf(stderr,GRIS_T"[internal_export()→ nombre: %s\n"RESET,nombre);
+        fprintf(stderr,GRIS_T"[internal_export()→ valor: %s\n"RESET,valor);
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
-    }else{
+    }else{ //si ninguna de las variables está llena mostramos el uso correcto de la función
         fprintf(stderr,ROJO_T "Error de sintaxis. Uso: export Nombre=Valor \n"RESET);
         return FAILURE;
     }
-    
-    //fprintf(stderr, GRIS_T "[internal_export()→ EEsta función asignará valores a variables de entorno\n"RESET);
 }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -479,45 +507,62 @@ int internal_bg(char **args)
     return 1;
 }
 
-int execute_line(char *line){ //pau
+/*---------------------------------------------------------------------------------------------------------
+* Esta función es la encargada de trasnsformar la línea de comando en un array de tokens y ejecutar la
+* instrucción. Implementamos la ejecución de comandos externos, con la ayuda de un proceso hijo. Además,
+* el proceso en primer plano esperará a que se produzca alguna señal y reaccionará a ella.
+* Input:    line: String que contiene la línea introducida por comando 
+* Output:   0
+---------------------------------------------------------------------------------------------------------*/
+
+int execute_line(char *line){ 
     
+    //línea auxiliar para no modificar la original
     char lineaux[strlen(line)+1];
     strcpy(lineaux,line);
+
+    //estado de los procesos
     int status;
+
     char *args[ARGS_SIZE];
+    int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
 
-    if (num_tokens > 0){
-      if (check_internal(args) == 0){
-        //si es un comando externo hacemos un fork
+    if (num_tokens > 0){ //Si exiten argumentos, entonces
+      if (check_internal(args) == 0){ //se ejecuta check_internar por si es un comando interno.
+        //si es un comando externo creamos un proceso hijo
         pid_t id = fork();
         if (id == 0){ //si es el hijo
 
+            //asociamos las acciones necesarias a las señales
             signal(SIGCHLD, SIG_DFL);
             signal(SIGINT, SIG_IGN);
            
+            //ejecución del comando externo controlando el error
             int err = execvp(args[0], args);
             if (err == -1){
-                     exit(-1);
-                }
+                exit(-1);
+            }
 
             exit(SUCCES);
 
         }else if (id > 0){ //si es el padre
 
+            //Mostramos el pid de los procesos y actualizamos los datos de jobs.list[0]
             fprintf(stderr, GRIS_T "[execute_line(): PID padre: %d | (%s)]\n" RESET, getpid(), mi_shell);
             fprintf(stderr, GRIS_T "[execute_line(): PID hijo: %d | (%s)]\n" RESET, id, lineaux);
             
             jobs_list[0].pid = id;
             strcpy(jobs_list[0].cmd, lineaux);
             jobs_list[0].status = 'E';
-        ;           
-             while (jobs_list[0].pid > 0){
+
+            //mientras haya un proceso hijo, el padre esperará a que llegue alguna señal           
+            while (jobs_list[0].pid > 0){
                 pause();
-             }
+            }
         
-        }else{
+        }else{ //si se produce algún error se muestra
             fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
             exit(-1);
         }

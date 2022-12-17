@@ -100,7 +100,7 @@ char *read_line(char *line){ //jordi
 * Función encargada de trocear la línea obtenida en tokens usando como separadores los espacios,
 * tabuladores y saltos de línea. Si el primer carácter de un token es '#' obviaremos el resto de elementos.
 * Input:    args: array que contendrá la línea escrita por consola dividida por tokens
-            line: línea que contiene la línea escrita por consola
+*           line: línea que contiene la línea escrita por consola
 * Output:   Número de tokens creados
 ---------------------------------------------------------------------------------------------------------*/
 
@@ -129,7 +129,7 @@ int parse_args(char **args,char *line){
     //último elemento del array es NULL
     args[index] = NULL;
     printf(GRIS_T NEGRITA"Token %i: %s\n",index,args[index]);
-    printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",index);
+    //printf(GRIS_T NEGRITA"Numero total de tokens: %i\n",index);
 
     return index;
 
@@ -166,7 +166,7 @@ int check_internal(char **args){
     }else if(strcmp(args[0],"exit")== 0){ //En el caso que escribamos exit, va a salir del minishell
         exit(0);
     }else{  
-        printf("No es un comando interno\n");
+        //printf("No es un comando interno\n");
         return 0;
     }
 }
