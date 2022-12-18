@@ -414,8 +414,12 @@ int internal_source(char **args)
 
     FILE *fp = fopen(args[1],"r");//Abrimos modo lectura del fichero pasado por el args[1]. r porq queremos solo leer
     if( fp == NULL ) {  //Control de error
-      fprintf(stderr, ROJO_T "Error de sintaxis. Uso: source <nombre fichero>\n"RESET);
-      return(-1);
+        if (args[1] == NULL){
+            fprintf(stderr, ROJO_T "Error de sintaxis. Uso: source <nombre fichero>\n"RESET);
+        }else{
+            fprintf(stderr, ROJO_T "fopen: No such file or directory\n"RESET);
+        }
+        return(-1);
     }
 
     //Mientras no haya llegado al final del fichero va leyendo linea por linea
