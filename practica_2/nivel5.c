@@ -134,6 +134,7 @@ int is_background(char **args){
             //se sustituye el "&" y retornamos 1.
             args[i] = NULL;
             return 1;
+            num_tokens--;
         }
     }
     //es en primer plano
@@ -701,7 +702,6 @@ int execute_line(char *line){
     int status;
 
     char *args[ARGS_SIZE];
-    int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
 

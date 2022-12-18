@@ -143,7 +143,7 @@ void reaper(int signum){
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
         }else{ //background, eliminamos proceso con pid del hijo que ha finalizado
             int pos = jobs_list_find(ended);
-            fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
+            fprintf(stderr,"\nTerminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
             jobs_list_remove(pos);
             
         }

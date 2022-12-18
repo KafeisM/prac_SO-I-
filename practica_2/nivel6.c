@@ -129,7 +129,7 @@ void init_jobslist(){
 ---------------------------------------------------------------------------------------------------------*/
 
 int is_background(char **args){
-    
+    int find = 0;
     //numero de iteraciones
     int longitud = num_tokens;
     //para cada elemento del array de argumentos se analiza si es "&"
@@ -137,11 +137,12 @@ int is_background(char **args){
         if (strcmp(args[i],"&") == 0){
             //se sustituye el "&" y retornamos 1.
             args[i] = NULL;
-            return 1;
+            find = 1;
+            num_tokens--;
         }
     }
     //es en primer plano
-    return 0;
+    return find;
     
 }
 
@@ -156,7 +157,7 @@ void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
-          
+
     while ((ended=waitpid(-1, &status , WNOHANG))>0) { //En ended habrá el PID del hijo que ha finalizado
         //if ended es el pid del hijo en primer plano reseteamos jobs_list
         if (ended == jobs_list[0].pid){ //foreground
@@ -165,8 +166,9 @@ void reaper(int signum){
             memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
         }else{ //background, eliminamos proceso con pid del hijo que ha finalizado
             int pos = jobs_list_find(ended);
-            fprintf(stderr,"Terminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
+            fprintf(stderr,"\nTerminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
             jobs_list_remove(pos);
+            imprimir_prompt();
             
         }
         
@@ -185,14 +187,19 @@ void reaper(int signum){
 
 void ctrlc(int signum){
     signal(SIGINT, ctrlc);
+    printf("\n");
 
     if(jobs_list[0].pid > 0){ //comprobamos si hay proceso en foreground
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){  //miramos si el proceso no es el propio minishell
             kill(jobs_list[0].pid,SIGTERM); //enviamos la señal al proceso correspondeinte
+        }else{
+            imprimir_prompt();
         }
+    }else{
+        imprimir_prompt();
     }
 
-    printf("\n");
+    
     sleep(0.4);
     fflush(stdout);
 }
@@ -206,7 +213,8 @@ void ctrlc(int signum){
 
 void ctrlz(int signum){
     signal (SIGTSTP, ctrlz);
-    
+    printf("\n");
+
     if(jobs_list[0].pid > 0){ //si hay un proceso en foreground entonces:
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){ // si no es el minishell, entonces:
             
@@ -214,12 +222,15 @@ void ctrlz(int signum){
             jobs_list[0].status = 'D'; //indicamos que el proceso esta detenido
             jobs_list_add(jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd);
             printf("\n[%d] %d     %c      %s\n",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso detenido
-            
             //reseteamos el proceso en foreground
              init_jobslist();
+        }else{
+            imprimir_prompt();
         }
+    }else{
+        imprimir_prompt();
     }
-
+    
     sleep(0.4);
     fflush(stdout);
 
@@ -299,7 +310,7 @@ void imprimir_prompt(){
         perror("getcwd() error");
         
     }
-    sleep(0.8);
+    sleep(0.4);
     fflush(stdout);
    
 }
@@ -624,7 +635,7 @@ int internal_source(char **args)
 * Input:    args: array que contiene la línea escrita por consola dividida por tokens
 * Output:   devuelve 1
 ---------------------------------------------------------------------------------------------------------*/
-
+ 
 int internal_jobs(char **args)
 {
 
@@ -778,7 +789,6 @@ int execute_line(char *line){
     int status;
 
     char *args[ARGS_SIZE];
-    int num_tokens;
     int interno;
     num_tokens = parse_args(args, line);
 
