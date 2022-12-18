@@ -55,11 +55,16 @@ int  jobs_list_remove(int pos);
 int jobs_list_add(pid_t pid,char status, char *cmd);
 
 
-//tabla datos de los procesos 
+//TABLA INFORMACIÓN DE LOS TRABAJOS
+/*Este struct es una estructira de datos que nos sirve para poder tener toda la informacion de los
+trabajos actuales del programa. Contiene la siguiente información:
+-pid: es el identificador de proceso
+-status: nos indica el estado del proceso ‘N’, ’E’, ‘D’, ‘F’ (‘N’: ninguno, ‘E’: Ejecutándose y ‘D’: Detenido, ‘F’: Finalizado) 
+-cmd: linea de comando introducida por el usuario*/ 
 struct info_job {
    pid_t pid;
-   char status; // ‘N’, ’E’, ‘D’, ‘F’ (‘N’: ninguno, ‘E’: Ejecutándose y ‘D’: Detenido, ‘F’: Finalizado) 
-   char cmd[COMMAND_LINE_SIZE]; // línea de comando asociada
+   char status;  
+   char cmd[COMMAND_LINE_SIZE]; 
 };
 
 //variable para control procesos
@@ -76,7 +81,7 @@ char *home;
 int n_pids = 0;
 
 
-int main(int argc, char *argv[]){ //jordi
+int main(int argc, char *argv[]){ 
 
     char line[COMMAND_LINE_SIZE];  
 
@@ -99,6 +104,12 @@ int main(int argc, char *argv[]){ //jordi
         }
     }
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Función auxiliar creada para facilitar la inicializacion de los datos.
+* Input:    -
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
 
 void init_jobslist(){
     jobs_list[0].pid = 0;
@@ -164,16 +175,27 @@ void reaper(int signum){
 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Manejador propio para la señal SIGINIT, al ser pulsado ctrl+c se recibe la señal y lo que se hace
+* en el manejador es que a los procesos que si tienen asociada la señal terminaran su ejecución.
+* Input:    sigint: señal de interrupción de la ejecución.
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
+
 void ctrlc(int signum){
     signal(SIGINT, ctrlc);
     printf("\n");
+
     fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s)\n"RESET,getpid(),mi_shell);
     fprintf(stderr,GRIS_T"[ctrlc()→ recibida señal %i (SIGINT)]",signum);
-    if(jobs_list[0].pid > 0){
-        if(strcmp(jobs_list[0].cmd,mi_shell) != 0){
+
+    if(jobs_list[0].pid > 0){ //comprobamos si hay proceso en foreground
+        if(strcmp(jobs_list[0].cmd,mi_shell) != 0){ //miramos si el proceso no es el propio minishell
+
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
-            kill(jobs_list[0].pid,SIGTERM);
+            kill(jobs_list[0].pid,SIGTERM); //enviamos la señal al proceso correspondeinte
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)]"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
+
         }else{
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 NO enviada a %d (%s) debido a que su proceso en foreground es el shell]"RESET,getpid(),mi_shell);
         }
@@ -185,18 +207,28 @@ void ctrlc(int signum){
     fflush(stdout);
 }
 
-void ctrlz(int signum){ //jordi
+/*---------------------------------------------------------------------------------------------------------
+* Manejador propio para la señal SIGTSTP, al ser pulsado ctrl+Z se recibe la señal y lo que se hace
+* en el manejador es que a los procesos que si tienen asociada la señal DETIENEN su ejecución.
+* Input:    sigtstp: señal para detener la ejecución.
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
+
+void ctrlz(int signum){ 
     signal (SIGTSTP, ctrlz);
     printf("\n");
+
     fprintf(stderr,GRIS_T"[ctrlz()--> soy el proceso con PID %d (%s)\n"RESET,getpid(),mi_shell);
     fprintf(stderr,GRIS_T"[ctrlz()→ recibida señal %i (SIGTSTP)]",signum);
+
     if(jobs_list[0].pid > 0){ //si hay un proceso en foreground entonces:
         if(strcmp(jobs_list[0].cmd,mi_shell) != 0){ // si no es el minishell, entonces:
+
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
-            kill(jobs_list[0].pid,SIGSTOP);
+            kill(jobs_list[0].pid,SIGSTOP); //enviamos la señal
             fprintf(stderr,GRIS_T"[ctrlz()--> Señal 19 (SIGSTOP) enviada a %d (%s) por %d (%s)"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
-            jobs_list[0].status = 'D';
-            jobs_list_add(jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd);
+            jobs_list[0].status = 'D'; //indicamos que el proceso esta detenido
+            jobs_list_add(jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //lo añadimos a la lista
             printf("\n[%d] %d     %c      %s",n_pids,jobs_list[0].pid,jobs_list[0].status,jobs_list[0].cmd); //imprimimos el estado del proceso detenido
             
             //reseteamos el proceso en foreground
@@ -272,9 +304,11 @@ int  jobs_list_remove(int pos){
 }
 
 void imprimir_prompt(){
+    //obtenemos gracias a llamadas al sistea el USER y el HOME
     user = getenv("USER");
     home = getenv("HOME");
 
+    //anidamos todo correctamente para obtener nuestro propio cwd (current working directory)
     char cwd[COMMAND_LINE_SIZE];
     if(getcwd(cwd,COMMAND_LINE_SIZE)!=NULL){
         printf(BLANCO_T NEGRITA"%s:"RESET,user);
@@ -288,6 +322,13 @@ void imprimir_prompt(){
     fflush(stdout);
    
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de la lectura del flujo de entrada de la consola, se implementa
+* la salida del minishell mediante CTRL + D.
+* Input:   stdin
+* Output:  Puntero a la línea leída
+---------------------------------------------------------------------------------------------------------*/
 
 char *read_line(char *line){
 
@@ -607,6 +648,13 @@ int internal_source(char **args)
 
     return -1;
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Función que implementa el comando interno JOBS el cual nos imprime la lista de todos los trabajos
+* que hay actualmente.
+* Input:    args: array que contiene la línea escrita por consola dividida por tokens
+* Output:   devuelve 1
+---------------------------------------------------------------------------------------------------------*/
 
 int internal_jobs(char **args) //jordi
 {

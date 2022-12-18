@@ -59,6 +59,7 @@ int main(){
         }
     }
 }
+
 /*Función empleada para la impresión del prompt en este nivel ya queda implemantado
 en su forma final*/
 void imprimir_prompt(){

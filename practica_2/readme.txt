@@ -33,5 +33,5 @@ dependiendo del equipo y la ruta de directorios del usuario.
 
     -nivel 6/my_shell: tras esperar a que acabe un proceso en segundo plano no reaparece el prompt a no ser que se le introduzca un enter o otro comando.
 
-
+-funcion init_jobslist: funcion implementada a partir del nivel4 para facilitar la inicializacion de la tabla o resetear los valores.
 

@@ -50,11 +50,16 @@ void init_jobslist();
 void ctrlc(int signum);
 void reaper(int signum);
 
-//tabla datos de los procesos 
+//TABLA INFORMACIÓN DE LOS TRABAJOS
+/*Este struct es una estructira de datos que nos sirve para poder tener toda la informacion de los
+trabajos actuales del programa. Contiene la siguiente información:
+-pid: es el identificador de proceso
+-status: nos indica el estado del proceso ‘N’, ’E’, ‘D’, ‘F’ (‘N’: ninguno, ‘E’: Ejecutándose y ‘D’: Detenido, ‘F’: Finalizado) 
+-cmd: linea de comando introducida por el usuario*/ 
 struct info_job {
    pid_t pid;
-   char status; // ‘N’, ’E’, ‘D’, ‘F’ (‘N’: ninguno, ‘E’: Ejecutándose y ‘D’: Detenido, ‘F’: Finalizado) 
-   char cmd[COMMAND_LINE_SIZE]; // línea de comando asociada
+   char status; 
+   char cmd[COMMAND_LINE_SIZE]; 
 };
 
 //variable para control procesos
@@ -94,7 +99,13 @@ int main(int argc, char *argv[]){ //jordi
     }
 }
 
-void init_jobslist(){ //jordi
+/*---------------------------------------------------------------------------------------------------------
+* Función auxiliar creada para facilitar la inicializacion de los datos.
+* Input:    -
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
+
+void init_jobslist(){ 
     jobs_list[0].pid = 0;
     jobs_list[0].status = 'N';
     memset(jobs_list[0].cmd,'\0',COMMAND_LINE_SIZE);
@@ -127,15 +138,25 @@ void reaper(int signum){
 
 }
 
-void ctrlc(int signum){ //jordi
+/*---------------------------------------------------------------------------------------------------------
+* Manejador propio para la señal SIGINIT, al ser pulsado ctrl+c se recibe la señal y lo que se hace
+* en el manejador es que a los procesos que si tienen asociada la señal terminaran su ejecución.
+* Input:    sigint: señal de interrupción de la ejecución.
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
+
+void ctrlc(int signum){ 
     signal(SIGINT, ctrlc);
     printf("\n");
+
     fprintf(stderr,GRIS_T"[ctrlc()--> soy el proceso con PID %d (%s) "RESET,getpid(),mi_shell);
-    if(jobs_list[0].pid > 0){
-        if(strcmp(jobs_list[0].cmd,"./nivel4") != 0){
+    if(jobs_list[0].pid > 0){ //comprobamos si hay proceso en foreground
+        if(strcmp(jobs_list[0].cmd,"./nivel4") != 0){ //miramos si el proceso no es el propio minishell
+
             fprintf(stderr,GRIS_T"el proceso foreground es %d (%s)] \n"RESET,jobs_list[0].pid,jobs_list[0].cmd);
-            kill(jobs_list[0].pid,SIGTERM);
+            kill(jobs_list[0].pid,SIGTERM); //enviamos la señal al proceso correspondeinte
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 enviada a %d (%s) por %d (%s)]"RESET,jobs_list[0].pid,jobs_list[0].cmd,getpid(),mi_shell);
+
         }else{
             fprintf(stderr,GRIS_T"[ctrlc()--> Señal 15 NO enviada a %d (%s) debido a que su proceso en foreground es el shell]"RESET,getpid(),mi_shell);
         }
@@ -147,9 +168,11 @@ void ctrlc(int signum){ //jordi
 }
 
 void imprimir_prompt(){
+    //obtenemos gracias a llamadas al sistea el USER y el HOME
     user = getenv("USER");
     home = getenv("HOME");
 
+    //anidamos todo correctamente para obtener nuestro propio cwd (current working directory)
     char cwd[COMMAND_LINE_SIZE];
     if(getcwd(cwd,COMMAND_LINE_SIZE)!=NULL){
         printf(BLANCO_T NEGRITA"%s:"RESET,user);
@@ -162,6 +185,13 @@ void imprimir_prompt(){
     sleep(0.4);
    fflush(stdout);
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de la lectura del flujo de entrada de la consola, se implementa
+* la salida del minishell mediante CTRL + D.
+* Input:   stdin
+* Output:  Puntero a la línea leída
+---------------------------------------------------------------------------------------------------------*/
 
 char *read_line(char *line){
 

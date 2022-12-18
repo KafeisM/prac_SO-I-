@@ -69,7 +69,7 @@ char *user;
 char *home;
 
 
-int main(int argc, char *argv[]){ //jordi
+int main(int argc, char *argv[]){ 
 
     char line[COMMAND_LINE_SIZE];  
 
@@ -91,9 +91,11 @@ int main(int argc, char *argv[]){ //jordi
 }
 
 void imprimir_prompt(){
+    //obtenemos gracias a llamadas al sistea el USER y el HOME
     user = getenv("USER");
     home = getenv("HOME");
 
+    //anidamos todo correctamente para obtener nuestro propio cwd (current working directory)
     char cwd[COMMAND_LINE_SIZE];
     if(getcwd(cwd,COMMAND_LINE_SIZE)!=NULL){
         printf(BLANCO_T NEGRITA"%s:"RESET,user);
@@ -106,6 +108,12 @@ void imprimir_prompt(){
    
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función encargada de la lectura del flujo de entrada de la consola, se implementa
+* la salida del minishell mediante CTRL + D.
+* Input:   stdin
+* Output:  Puntero a la línea leída
+---------------------------------------------------------------------------------------------------------*/
 char *read_line(char *line){ 
 
     imprimir_prompt();
