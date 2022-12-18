@@ -609,8 +609,12 @@ int internal_source(char **args)
 
     FILE *fp = fopen(args[1],"r");//Abrimos modo lectura del fichero pasado por el args[1]. r porq queremos solo leer
     if( fp == NULL ) {  //Control de error
-      fprintf(stderr, ROJO_T "Error de sintaxis. Uso: source <nombre fichero>\n"RESET);
-      return(-1);
+        if (args[1] == NULL){
+            fprintf(stderr, ROJO_T "Error de sintaxis. Uso: source <nombre fichero>\n"RESET);
+        }else{
+            fprintf(stderr, ROJO_T "fopen: No such file or directory\n"RESET);
+        }
+        return(-1);
     }
 
     //Mientras no haya llegado al final del fichero va leyendo linea por linea
@@ -662,12 +666,12 @@ int internal_fg(char **args)
 
         if((pos > n_pids) || (pos == 0)){ //si la posición es mayor que el numero de procesos existentes o es 0
             //mostramos el error del comando y salimos
-            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO\n");
+            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO\n"RESET);
             return FAILURE;
         }else if(jobs_list[pos].status == 'D'){ //si el proceso está detenido
             //se vuelve a activar el proceso
             kill(jobs_list[pos].pid,SIGCONT);
-          
+            //fprintf(stderr,GRIS_T "[internal_fg()-> Señal 18 (SIGCONT) enviada a %d (%s)]\n"RESET,jobs_list[pos].pid,jobs_list[0].cmd);
         }
         //actualizamos los datos del proceso
         jobs_list[pos].status = 'E';
@@ -682,7 +686,7 @@ int internal_fg(char **args)
 
         //acutalizamos los datos del proceso en primer plano con los del proceso trabajado
         jobs_list[0] = jobs_list[pos];
-        fprintf(stderr,NEGRITA "(%s)\n",jobs_list[0].cmd);
+        fprintf(stderr,NEGRITA"(%s)\n"RESET,jobs_list[0].cmd);
 
         //eliminamos el proceso en segundo plano
         jobs_list_remove(pos);
@@ -711,10 +715,10 @@ int internal_bg(char **args) //si la posición es mayor que el numero de proceso
 
         if ((pos > n_pids) || (pos == 0)){ //si la posición es mayor que el numero de procesos existentes o es 0
             //mostramos el error del comando y salimos
-            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO\n");
+            fprintf(stderr,ROJO_T "NO EXISTE ESE TRABAJO\n"RESET);
             return FAILURE;
         }else if (jobs_list[pos].status == 'E'){ //si el proceso se está ejecutando se informa
-            fprintf(stderr,ROJO_T "EL TRABAJO YA ESTÁ EN SEGUNDO PLANO\n");
+            fprintf(stderr,ROJO_T "EL TRABAJO YA ESTÁ EN SEGUNDO PLANO\n"RESET);
             return FAILURE;
         }
 
@@ -724,7 +728,8 @@ int internal_bg(char **args) //si la posición es mayor que el numero de proceso
         strcat(jobs_list[pos].cmd," &");
         //reactivamos el proceso
         kill(jobs_list[pos].pid,SIGCONT);
-        fprintf(stderr,"\n[%d] %d     %c      %s\n",pos,jobs_list[pos].pid,jobs_list[pos].status,jobs_list[pos].cmd);   
+        //fprintf(stderr,GRIS_T "[internal_bg() → Señal 18 (SIGCONT) enviada a %d (%s)]\n"RESET,jobs_list[pos].pid,jobs_list[pos].cmd);
+        fprintf(stderr,"[%d] %d     %c      %s\n",pos,jobs_list[pos].pid,jobs_list[pos].status,jobs_list[pos].cmd);   
     }
     return SUCCES;
 }
@@ -738,18 +743,21 @@ int internal_bg(char **args) //si la posición es mayor que el numero de proceso
             -1: si ha habído error
 ---------------------------------------------------------------------------------------------------------*/
 
-int is_out_redirection(char **args){ 
+int is_out_redirection(char **args){ //pepbi
 
     int final = 0;
     int longitud = num_tokens;
-    for (int i=0; i < longitud; i++){ //Miramos si esta el símbolo '>'
+    bool sortir = false;
+    int i=0;
+    for (i=0; (i < longitud) && (!sortir); i++){ //Miramos si esta el símbolo '>'
         if (strcmp(args[i],">") == 0){
             args[i] = NULL;
             final = 1;
+            sortir = true;
         }
     }
     if(final == 1){ //Si lo ha encontrado, abrimos el archivo correspondiente y tratamos lo errores
-        int fd = open (args[2],  O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
+        int fd = open (args[i],  O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
         if (fd == -1){
             perror(ROJO_T"ERROR EN LA APERTURA DEL ARCHIVO"RESET);
             return FAILURE;
