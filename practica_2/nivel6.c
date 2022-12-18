@@ -823,6 +823,7 @@ int execute_line(char *line){
                 exit(-1);
             }
             if (err == -1){
+                fprintf(stderr,ROJO_T"(%s): no se encontró la orden\n"RESET,lineaux);
                 exit(-1);
             }
 
