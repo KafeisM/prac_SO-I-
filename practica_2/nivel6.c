@@ -84,7 +84,7 @@ char *home;
 int n_pids = 0;
 
 
-int main(int argc, char *argv[]){ //jordi
+int main(int argc, char *argv[]){ 
 
     char line[COMMAND_LINE_SIZE];  
 
