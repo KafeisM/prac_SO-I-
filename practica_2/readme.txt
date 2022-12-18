@@ -11,7 +11,7 @@ debida gestión. Ademas permitira implementar procesos en segundo plano y la ges
 
 Observaciones:
 -cd_avanzado: Hemos implementado esta función que permite introduccir nombres de directorios entre comillas (puede ser
-comillas dobles o simples), separados por espacio o bien con el simbolo '\ '.
+comillas dobles o simples), separados por espacio o bien con el simbolo '\' NO COMO '\ ' es un cambio que hemos decidido implementar.
 
     ejemplos:
         cd "directorio 1"
@@ -34,4 +34,6 @@ dependiendo del equipo y la ruta de directorios del usuario.
     -nivel 6/my_shell: tras esperar a que acabe un proceso en segundo plano no reaparece el prompt a no ser que se le introduzca un enter o otro comando.
 
 -funcion init_jobslist: funcion implementada a partir del nivel4 para facilitar la inicializacion de la tabla o resetear los valores.
+
+
 

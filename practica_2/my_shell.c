@@ -74,6 +74,7 @@ struct info_job {
 static char mi_shell[COMMAND_LINE_SIZE]; 
 static struct info_job jobs_list [N_JOBS];
 static int num_tokens;
+static int is_bg;
 
 //variables para el prompt
 char const PROMPT = '$';
@@ -157,7 +158,8 @@ void reaper(int signum){
     signal(SIGCHLD,reaper);
     pid_t ended;
     int status;
-
+    char *argsaux[ARGS_SIZE];
+    
     while ((ended=waitpid(-1, &status , WNOHANG))>0) { //En ended habrá el PID del hijo que ha finalizado
         //if ended es el pid del hijo en primer plano reseteamos jobs_list
         if (ended == jobs_list[0].pid){ //foreground
@@ -167,12 +169,15 @@ void reaper(int signum){
         }else{ //background, eliminamos proceso con pid del hijo que ha finalizado
             int pos = jobs_list_find(ended);
             fprintf(stderr,"\nTerminado PID %d (%s) en job_list[%d] con status %d\n"RESET,ended,jobs_list[pos].cmd,pos,status);
-            jobs_list_remove(pos);
             imprimir_prompt();
-            
+            jobs_list_remove(pos);   
         }
         
     }  
+
+    
+
+   
     sleep(0.4);
     fflush(stdout);
 
@@ -803,7 +808,7 @@ int execute_line(char *line){
       if (check_internal(args) == 0){ //se ejecuta check_internal por si es un comando interno
         //si es comando externo
         //miramos si debe ejecutarse se segundo plano
-        int is_bg = is_background(args);
+        is_bg = is_background(args);
         //creamos un proceso hijo
         pid_t id = fork();
         if (id == 0){ //si es el hijo
@@ -823,10 +828,13 @@ int execute_line(char *line){
                 exit(-1);
             }
             if (err == -1){
+                fprintf(stderr,ROJO_T"(%s): no se encontró la orden\n"RESET,lineaux);
                 exit(-1);
             }
 
+           
             exit(SUCCES);
+
             
         }else if (id > 0){ //si es el padre 
            
@@ -842,6 +850,8 @@ int execute_line(char *line){
                     pause();
                 }
 
+                
+
             }else{ //si esta en background añadir a jobs_list
 
                 //pausa auxiliar
@@ -854,8 +864,9 @@ int execute_line(char *line){
            
         }else{ //si hay un error con el hijo se muestra
             fprintf(stderr, ROJO_T "Error con la creación del hijo\n" RESET);
-            exit(-1);
+            exit(-2);
         }
+         
       }
     } 
 }
