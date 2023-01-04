@@ -1,0 +1,2 @@
+int NUM_THREADS = 10;
+int N = 1000000;
