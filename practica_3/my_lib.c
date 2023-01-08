@@ -427,7 +427,7 @@ struct my_stack *my_stack_read(char *filename){
     //lectura del size y control del error
     er = read(fd,&size_aux,sizeof(int)); 
     if (er == -1) {
-        perror("Ha habido un problema al leer el fichero.\n");      
+        perror("Ha habido un problema al leer el fichero.\n");    
     }
     
     //stack auxiliar e inicialización con size leído antes
