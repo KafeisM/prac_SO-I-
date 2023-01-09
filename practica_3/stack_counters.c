@@ -56,8 +56,8 @@ int main(int argc,char *argv[]){
 
         fprintf(stderr,"stack->size: %i \n",stack_aux->size);
         fprintf(stderr,"original stack length: %i \n",my_stack_len(stack_aux));
-
-        for (int i = 0; i < (NUM_THREADS - my_stack_len(stack_aux)); i++){
+        int len = my_stack_len(stack_aux);
+        for (int i = 0; i < (NUM_THREADS - len); i++){
             data = malloc(4);
             my_stack_push(stack_aux,data);
         }
@@ -120,7 +120,7 @@ void *worker(void *ptr){
         val_aux++;
         fprintf(stderr,"Soy el hilo %lu ejecutando push \n",pthread_self());
         my_stack_push(stack_aux,&val_aux);
-        /*my_stack_pop();
+        my_stack_pop();
         incrementam amb 1 valor de datos
         my_stack_pop();
         pthread_mutex_unlock(&mutex);

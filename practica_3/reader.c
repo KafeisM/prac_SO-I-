@@ -23,9 +23,14 @@ int main(int argc,char *argv[]){
     max = 0;
 
     items = my_stack_len(stack_aux);
-    fprintf(stderr,"Stack length: %i \n",items);
     
-    for (int i = 0; stack_aux->top != NULL; i++){  
+    fprintf(stderr,"Stack length: %i \n",items);
+
+    if(items > NUM_THREADS){
+        items = NUM_THREADS;
+    }
+    
+    for (int i = 0; stack_aux->top != NULL && (i<NUM_THREADS); i++){  
 
         val_aux = *((int*)my_stack_pop(stack_aux));
         fprintf(stderr,"%i \n",val_aux);
