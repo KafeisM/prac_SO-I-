@@ -12,7 +12,7 @@ int NUM_THREADS = 10;
 int main(int argc,char *argv[]){
 
     if(argv[1] == NULL){
-        fprintf(stderr,"USAGE: ./stack_counters stack_file");
+        fprintf(stderr,"USAGE: ./stack_counters stack_file \n");
         return -1;
     }
 
@@ -20,13 +20,13 @@ int main(int argc,char *argv[]){
 
     int val_aux, items, sum, min, max, average;
     min = INT_MAX;
-    for (int i = 0; i < NUM_THREADS; i++){        
-        if (i = 0){
-            items = my_stack_pop(stack_aux);
+    for (int i = 0; stack_aux->top != NULL; i++){        
+        if (i == 0){
+            items = *((int*)my_stack_pop(stack_aux));
             fprintf(stderr,"Stack length: %i \n",items);
             max = 0;
         }else{
-            val_aux = my_stack_pop(stack_aux);
+            val_aux = *((int*)my_stack_pop(stack_aux));
             fprintf(stderr,"%i \n",val_aux);
             sum += val_aux;
             if (val_aux > max){
