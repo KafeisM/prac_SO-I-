@@ -108,11 +108,11 @@ int main(int argc,char *argv[]){
 
 void *worker(void *ptr){
 
-    //stack_aux = my_stack_read(ptr);
-    int val_aux;
+    int *val_aux;
     for(int i = 0; i < N; i++){
 
-        pthread_mutex_lock(&mutex);
+       /*
+       pthread_mutex_lock(&mutex);
 
         fprintf(stderr,"Soy el hilo %lu ejecutando pop \n",pthread_self());
         val_aux = *((int*)my_stack_pop(stack_aux));
@@ -122,8 +122,19 @@ void *worker(void *ptr){
         my_stack_push(stack_aux,&val_aux);
         /*my_stack_pop();
         incrementam amb 1 valor de datos
-        my_stack_pop();*/
+        my_stack_pop();
+        pthread_mutex_unlock(&mutex);
+        */
 
+        //worker 2
+        pthread_mutex_lock(&mutex);
+        val_aux = my_stack_pop(stack_aux);
+        pthread_mutex_unlock(&mutex);
+
+        (*val_aux)++;
+
+        pthread_mutex_lock(&mutex);
+        my_stack_push(stack_aux,val_aux);
         pthread_mutex_unlock(&mutex);
 
     }
@@ -431,14 +442,13 @@ void imprimir_stack(struct my_stack *stack){
     if(stack->top == NULL){
         fprintf(stderr,"\n");
     }else{
-
         aux = stack->top;
         do{
             num = *((int*)aux->data);
             fprintf(stderr,"%d\n",num);
             aux = aux->next;
            
-        }while(aux->next != NULL);
+        }while(aux != NULL);
     }
 }
 
