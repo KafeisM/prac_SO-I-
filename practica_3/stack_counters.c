@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-int NUM_THREADS = 3;
-int N = 5;
+int NUM_THREADS = 10;
+int N = 1000000;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 struct my_stack *stack_aux;
 
@@ -92,10 +92,10 @@ void *worker(void *ptr){
 
         pthread_mutex_lock(&mutex);
 
-        fprintf(stderr,"Soy el hilo %lu ejecutando pop \n",pthread_self());
+        //fprintf(stderr,"Soy el hilo %lu ejecutando pop \n",pthread_self());
         val_aux = *((int*)my_stack_pop(stack_aux));
         val_aux++;
-        fprintf(stderr,"Soy el hilo %lu ejecutando push \n",pthread_self());
+        //fprintf(stderr,"Soy el hilo %lu ejecutando push \n",pthread_self());
         my_stack_push(stack_aux,&val_aux);
         /*my_stack_pop();
         incrementam amb 1 valor de datos
