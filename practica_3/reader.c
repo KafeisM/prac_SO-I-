@@ -1,3 +1,8 @@
+/*PRÀCTICA 3 SISTEMAS OPERATIVOS
+-JORDI FLORIT ENSENYAT
+-PAU GIRÓN RODRÍGUEZ
+-JOSEP GABRIEL FORNÉS REYNÉS*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "my_lib.h"
