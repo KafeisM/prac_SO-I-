@@ -5,11 +5,15 @@
 #include <stdbool.h>
 #include <string.h>
 
+ //numero de hilos y accesos a la pila
 int NUM_THREADS = 10;
 int N = 1000000;
+
+//semáforo y pila auxiliar
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 struct my_stack *stack_aux;
 
+//tamaño de línea y argv
 #define COMMAND_LINE_SIZE 1024
 #define ARGV_SIZE 64
 
@@ -18,21 +22,25 @@ void imprimir_stack(struct my_stack *stack);
 
 int main(int argc,char *argv[]){ 
 
+    //array de hilos (sus identificadores)
     pthread_t threads[NUM_THREADS];
-    //int or_length,new_length;
+
+    //control si no se ha especificado ningun fichero
     if(argv[1] == NULL){
         fprintf(stderr,"USAGE: ./stack_counters <stack_file>\n");
         exit(0);
     }
 
+    //leemos la pila
     stack_aux = my_stack_read(argv[1]);
 
     fprintf(stderr,"Threads: %i, Iterations: %i\n",NUM_THREADS,N);
     
+    //variable para el dato que extraemos de la pila
     int *data = 0;
     
     if (stack_aux == NULL){
-        //si la pila no exista, creamos pila N elementos a 0
+        //si la pila no existe, creamos pila N elementos a 0
 
         stack_aux = my_stack_init(4);
         fprintf(stderr,"stack->size: %i \n",stack_aux->size);
@@ -62,13 +70,16 @@ int main(int argc,char *argv[]){
             my_stack_push(stack_aux,data);
         }
 
+        //imprimir la nueva pila
         fprintf(stderr,"stack content for treatment:\n");
         imprimir_stack(stack_aux);
         fprintf(stderr,"new stack length: %i \n",my_stack_len(stack_aux));
     
-    }else{ //sino significa que esta completa
+    }else{ //sino significa que ya está completa
         fprintf(stderr,"stack->size: %i \n",stack_aux->size);
         fprintf(stderr,"original stack:\n");
+
+        //imprimir la nueva pila
         imprimir_stack(stack_aux);
         fprintf(stderr,"original stack length: %i \n",my_stack_len(stack_aux));
 
@@ -76,27 +87,33 @@ int main(int argc,char *argv[]){
     
     //CREACIÓN HILOS
 
+    //bucle para crear los hijos
     for(int i = 0; i < NUM_THREADS; i++){
         pthread_create(&threads[i], NULL, worker, NULL);
         fprintf(stderr,"%i) Thread %lu created \n",i,threads[i]);
     }
     
+    //bucle donde el hilo principal espera a que acaben los otros
     for(int i = 0; i < NUM_THREADS; i++){
         pthread_join(threads[i], NULL);
     }
 
+    //imprimir nuevo stack
     fprintf(stderr,"\nstack content after threads iterations\n");
     imprimir_stack(stack_aux);
     fprintf(stderr,"stack length: %i \n",my_stack_len(stack_aux));
 
+    //escribimos la pila en el fichero
     int write = my_stack_write(stack_aux,argv[1]);
 
+    //control del error en la escritura
     if (write == -1){
         fprintf(stderr,"Error escritura en el fichero\n");
     }else{
         fprintf(stderr,"Written elements from stack to file: %i\n",write);
     }
 
+    //liberamos la pila y mostramos los bytes liberados
     fprintf(stderr,"Released bytes: %i\n",my_stack_purge(stack_aux));
 
     pthread_exit(NULL);
@@ -111,28 +128,16 @@ void *worker(void *ptr){
     int *val_aux;
     for(int i = 0; i < N; i++){
 
-       /*
-       pthread_mutex_lock(&mutex);
+        //para cada acceso acemos un pop, modificamos el valor y push
 
-        fprintf(stderr,"Soy el hilo %lu ejecutando pop \n",pthread_self());
-        val_aux = *((int*)my_stack_pop(stack_aux));
-        fprintf(stderr,"valor aux: %d por el hilo %lu\n",val_aux, pthread_self());
-        val_aux++;
-        fprintf(stderr,"Soy el hilo %lu ejecutando push \n",pthread_self());
-        my_stack_push(stack_aux,&val_aux);
-        my_stack_pop();
-        incrementam amb 1 valor de datos
-        my_stack_pop();
-        pthread_mutex_unlock(&mutex);
-        */
+        //protegemos el valor en el pop y en el push
 
-        //worker 2
         pthread_mutex_lock(&mutex);
         val_aux = my_stack_pop(stack_aux);
         pthread_mutex_unlock(&mutex);
 
+        //incrementamos el valor
         (*val_aux)++;
-        
 
         pthread_mutex_lock(&mutex);
         my_stack_push(stack_aux,val_aux);
@@ -142,6 +147,12 @@ void *worker(void *ptr){
     pthread_exit(NULL);
 
 }
+
+/*---------------------------------------------------------------------------------------------------------
+* Imprime una pila
+* Input:    stack: puntero a la pila que queremos imprimir
+* Output:   -
+---------------------------------------------------------------------------------------------------------*/
 
 void imprimir_stack(struct my_stack *stack){
     //nodo auxiliar y contador para el resultado
