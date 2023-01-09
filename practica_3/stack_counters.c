@@ -8,6 +8,7 @@
 int NUM_THREADS = 10;
 int N = 1000000;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+struct my_stack *stack_aux;
 
 #define COMMAND_LINE_SIZE 1024
 #define ARGV_SIZE 64
@@ -16,7 +17,7 @@ void *worker(void *ptr);
 
 int main(int argc,char *argv[]){ 
 
-    struct my_stack *stack_aux = my_stack_read(argv[1]);
+    stack_aux = my_stack_read(argv[1]);
     pthread_t threads[NUM_THREADS];
 
     if(argv[1] == NULL){
@@ -40,17 +41,27 @@ int main(int argc,char *argv[]){
     for(int i = 0; i < NUM_THREADS; i++){
         pthread_create(&threads[i], NULL, worker, NULL);
     }
+    
+    for(int i = 0; i < NUM_THREADS; i++){
+        pthread_join(&threads[i], NULL);
+    }
 
+    my_stack_write(stack_aux,argv[1]);
+    pthread_exit(NULL);
 
     return 0;
 }
 
 void *worker(void *ptr){
 
+    int val_aux;
     for(int i = 0; i < N; i++){
 
         pthread_mutex_lock(&mutex);
 
+        val_aux = my_stack_pop(stack_aux);
+        val_aux++;
+        my_stack_push(stack_aux,&val_aux);
         /*my_stack_pop();
         incrementam amb 1 valor de datos
         my_stack_pop();*/
@@ -58,6 +69,7 @@ void *worker(void *ptr){
         pthread_mutex_unlock(&mutex);
 
     }
+    pthread_exit(NULL);
 
 }
 
