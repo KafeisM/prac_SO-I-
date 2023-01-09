@@ -33,9 +33,9 @@ int main(int argc,char *argv[]){
             data = malloc(4);
             my_stack_push(stack_aux,data);
         }
-        my_stack_write(stack_aux,argv[1]);
+        //my_stack_write(stack_aux,argv[1]);
     }
-    my_stack_purge(stack_aux);
+    //my_stack_purge(stack_aux);
 
 
     for(int i = 0; i < NUM_THREADS; i++){
@@ -43,10 +43,13 @@ int main(int argc,char *argv[]){
     }
     
     for(int i = 0; i < NUM_THREADS; i++){
-        pthread_join(&threads[i], NULL);
+        pthread_join(threads[i], NULL);
     }
 
     my_stack_write(stack_aux,argv[1]);
+
+    my_stack_purge(stack_aux);
+
     pthread_exit(NULL);
 
     return 0;
@@ -54,12 +57,13 @@ int main(int argc,char *argv[]){
 
 void *worker(void *ptr){
 
+    //stack_aux = my_stack_read(ptr);
     int val_aux;
     for(int i = 0; i < N; i++){
 
         pthread_mutex_lock(&mutex);
 
-        val_aux = my_stack_pop(stack_aux);
+        val_aux = *((int*)my_stack_pop(stack_aux));
         val_aux++;
         my_stack_push(stack_aux,&val_aux);
         /*my_stack_pop();
