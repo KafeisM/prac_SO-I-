@@ -20,22 +20,24 @@ int main(int argc,char *argv[]){
 
     int val_aux, items, sum, min, max, average;
     min = INT_MAX;
-    for (int i = 0; stack_aux->top != NULL; i++){        
-        if (i == 0){
-            items = *((int*)my_stack_pop(stack_aux));
-            fprintf(stderr,"Stack length: %i \n",items);
-            max = 0;
-        }else{
-            val_aux = *((int*)my_stack_pop(stack_aux));
-            fprintf(stderr,"%i \n",val_aux);
-            sum += val_aux;
-            if (val_aux > max){
-                max = val_aux;
-            }
-            if (val_aux < min){
-                min = val_aux;
-            }
+    max = 0;
+
+    items = my_stack_len(stack_aux);
+    fprintf(stderr,"Stack length: %i \n",items);
+    
+    for (int i = 0; stack_aux->top != NULL; i++){  
+
+        val_aux = *((int*)my_stack_pop(stack_aux));
+        fprintf(stderr,"%i \n",val_aux);
+
+        sum += val_aux;
+        if (val_aux > max){
+            max = val_aux;
         }
+        if (val_aux < min){
+            min = val_aux;
+        }
+
     }
     average = sum/items;
     fprintf(stderr,"Items: %i | Sum: %i | Min: %i | Max: %i | Average: %i \n",items,sum,min,max,average);
@@ -198,4 +200,33 @@ void *my_stack_pop (struct my_stack *stack){
         return aux->data;
     }
     
+}
+
+/*---------------------------------------------------------------------------------------------------------
+* Mide la longitud de la pila contando los nodos que hay
+* Input:    stack: puntero de la pila
+* Output:   número de nodos totales que hay en los elementos de la pila
+---------------------------------------------------------------------------------------------------------*/
+
+int my_stack_len (struct my_stack *stack){
+
+    //nodo auxiliar y contador para el resultado
+    struct my_stack_node *aux;
+    int cont = 1;
+
+    //control de pila vacía y bucle para aumentar el contador
+    if(stack->top == NULL){
+        return 0;
+    }else{
+
+        aux = stack->top;
+        while(aux->next != NULL){
+            cont++;
+            aux = aux->next;
+           
+        }
+
+        return cont;
+    }
+
 }
