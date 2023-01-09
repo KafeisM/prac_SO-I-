@@ -421,13 +421,15 @@ struct my_stack *my_stack_read(char *filename){
     //apertura fichero y control de error
     fd = open(filename,O_RDONLY);
     if (fd == -1) {
-        perror("Ha habido un problema al abrir el fichero.\n");
+        //perror("Ha habido un problema al abrir el fichero.\n");
+        return NULL;
     }
 
     //lectura del size y control del error
     er = read(fd,&size_aux,sizeof(int)); 
     if (er == -1) {
-        perror("Ha habido un problema al leer el fichero.\n");    
+        //perror("Ha habido un problema al leer el fichero.\n");
+        return NULL;    
     }
     
     //stack auxiliar e inicialización con size leído antes
@@ -439,13 +441,15 @@ struct my_stack *my_stack_read(char *filename){
         //reservar espacio de memoria para cada data y control del error   
         data = malloc(stack_aux->size);
         if (data == NULL) {
-            printf("Ha habido un problema al reservar memoria.\n");           
+            //printf("Ha habido un problema al reservar memoria.\n");
+            return NULL;           
         }
 
         //lectura del data y control del error
         er = read(fd,data,stack_aux->size);
         if (er == -1) {
-            perror("Ha habido un problema al leer el fichero.\n");
+            //perror("Ha habido un problema al leer el fichero.\n");
+            return NULL;
         }
 
         //push del data en la pila
@@ -457,7 +461,8 @@ struct my_stack *my_stack_read(char *filename){
     //cerrar fichero y control del error   
     er = close(fd);
     if (er == -1) {
-        perror("Error al cerrar el fichero!!!");       
+        //perror("Error al cerrar el fichero!!!");
+        return NULL;       
     }
     
     return stack_aux;
