@@ -12,7 +12,7 @@ int NUM_THREADS = 10;
 int main(int argc,char *argv[]){
 
     if(argv[1] == NULL){
-        fprintf(stderr,"USAGE: ./stack_counters stack_file \n");
+        fprintf(stderr,"USAGE: ./reader <stack_file> \n");
         return -1;
     }
 
