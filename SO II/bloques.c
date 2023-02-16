@@ -1,7 +1,5 @@
 #include "bloques.h"
 
-static int descriptor = 0;
-
 int main(){
     return 0;
 }
