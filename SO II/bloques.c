@@ -1,5 +1,7 @@
 #include "bloques.h"
 
+static int descriptor = 0;
+
 int main(){
     return 0;
 }
@@ -27,6 +29,18 @@ int bumount(){
 
 
 int bwrite(unsigned int nbloque, const void *buf){
+
+    off_t desplazamiento = nbloque * BLOCKSIZE;
+
+    if (lseek(descriptor,desplazamiento,SEEK_SET) < 0){
+        return FALLO;
+    }
+
+    if (write(descriptor, buf, BLOCKSIZE) < 0){
+        return FALLO;
+    }
+
+    return BLOCKSIZE;
 
 }
 
