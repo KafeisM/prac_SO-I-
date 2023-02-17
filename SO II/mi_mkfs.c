@@ -9,6 +9,7 @@
 
 static int descriptor = 0;
 
+
 //colores para errores
 #define RESET "\033[0m"
 #define NEGRO_T "\x1b[30m"
@@ -24,14 +25,14 @@ static int descriptor = 0;
 #define NEGRITA "\x1b[1m"
 
 int main(int argc, char **argv){
-    int num_blocks = (int) strol(argv[1], NULL,10);
+    int num_blocks = atoi(argv[2]);
     printf("%d\n",num_blocks);
 
     if(argc != 3){
-        fprintf(stderr,"Sintaxis correcta: ./mi_mkfs <nombre_dispositivo> <nbloques>",ROJO_T);
+        fprintf(stderr,"\nSintaxis correcta: ./mi_mkfs <nombre_dispositivo> <nbloques>");
     }else{
         // MONTAR EL DISPOSITIVO VIRTUAL
-        descriptor = bmount(&argv[1]);
+       // descriptor = bmount(argv[1]);
         // INICIAR FICHERO
         
         
