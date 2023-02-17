@@ -2,10 +2,6 @@
 
 static int descriptor = 0;
 
-int main(){
-    return 0;
-}
-
 int bmount(const char *camino){
 
     umask(000);
