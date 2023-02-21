@@ -4,7 +4,7 @@ static int descriptor = 0;
 
 int bmount(const char *camino){
 
-    umask(000);
+    umask(110);
     descriptor = open(camino,O_RDWR | O_CREAT);
     if (descriptor < 0){
         perror("Error en la apertura del fichero");
