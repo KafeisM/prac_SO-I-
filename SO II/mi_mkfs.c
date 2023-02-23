@@ -1,5 +1,5 @@
 #include <string.h> 
-#include "bloques.h"
+#include "ficheros_basico.h"
 
 //COLORES
 #define RESET "\033[0m"
