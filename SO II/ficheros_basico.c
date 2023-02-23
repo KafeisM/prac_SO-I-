@@ -24,8 +24,8 @@
 
  int tamAI(unsigned int ninodos){
 
-    int res = (ninodos / INODOSIZE) / BLOCKSIZE;
-    if (res = (ninodos / INODOSIZE) % BLOCKSIZE != 0){
+    int res = (ninodos * INODOSIZE) / BLOCKSIZE;
+    if (res = (ninodos * INODOSIZE) % BLOCKSIZE != 0){
         res += 1;
     }
     return res;
