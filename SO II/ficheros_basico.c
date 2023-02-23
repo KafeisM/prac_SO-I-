@@ -43,12 +43,15 @@
  }
 
 /*---------------------------------------------------------------------------------------------------------
-* FUNCION
+* Inicializa el mapa de bits poniendo a 1 los bits que representan los metadatos.
 * Input:    -
 * Output:   OUTPUT
 ---------------------------------------------------------------------------------------------------------*/
 
- int initMB(){
+ int initMB(){    
+    struct superbloque SB;
+    bread(0,&SB);
+    
 
  }
 
