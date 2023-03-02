@@ -49,7 +49,7 @@ int bread(unsigned int nbloque, void *buf){
         return FALLO;
     }
 
-    if (read(descriptor, buf, BLOCKSIZE) < 0){
+    if (read(descriptor,  buf,BLOCKSIZE) < 0){
         return FALLO;
     }
 

@@ -33,6 +33,18 @@ int main(int argc, char **argv){
     if(bumount() == -1){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
     }
+
+    if(initSB() == FALLO){
+        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE\n"RESET);
+    }
+
+    if(initMB() == FALLO){
+        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE MAPA DE BITS\n"RESET);
+    }
+
+    if(initAI() == FALLO){
+        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE ARRAY DE INODOS\n"RESET);
+    }
         
     return 0;
 

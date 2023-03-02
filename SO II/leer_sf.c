@@ -39,3 +39,19 @@ void mostrarStructInodo(){
     printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
 
 }
+
+/*void imprimirInodosLibres(){
+
+    struct superbloque SB;
+    bread(posSB,&SB);
+    struct inodo inodos[BLOCKSIZE/INODOSIZE];
+
+    for(int i = SB.posPrimerBloqueAI; i < SB.posUltimoBloqueAI; i++){
+        bread(i, &inodos);
+        for(int j = 0; j < (BLOCKSIZE / INODOSIZE); j++){
+            if(inodos[i] == 'l'){
+
+            }
+        }
+    }
+}*/

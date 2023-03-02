@@ -69,7 +69,7 @@ int binaryToDecimal(int byte[]);
 
       SB.totInodos = ninodos; //Cantidad total de inodos
 
-      bwrite(posSB,&SB);
+      return bwrite(posSB,&SB);
  }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ int binaryToDecimal(int byte[]);
         bufferMB[aux] = 0;
     }
 
-    bwrite(SB.posPrimerBloqueMB, &bufferMB);
+    return bwrite(SB.posPrimerBloqueMB, &bufferMB);
  }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -157,12 +157,30 @@ int initAI(){
    
    struct inodo inodos[BLOCKSIZE/INODOSIZE];
 
+   bool error = false;
+
    int contInodos = SB.posPrimerInodoLibre + 1;
-   for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
-      bread(i, &SB);
-      for(int j = 0; j < (BLOCKSIZE / INODOSIZE); j++){
+   for (int i = SB.posPrimerBloqueAI; (i <= SB.posUltimoBloqueAI) && (!error); i++){
+      bread(i, &inodos);
+      for(int j = 0; (j < (BLOCKSIZE / INODOSIZE)) && (!error); j++){
          inodos[j].tipo == 'l';
+         if(contInodos < SB.totInodos){
+            inodos[j].punterosDirectos[0] == contInodos;
+            contInodos++;
+         } else {
+            inodos[j].punterosDirectos[0] == UINT_MAX;
+            break;
+         }
       }
+      if(bwrite(i, &inodos) == FALLO){
+        error = true;
+      }
+   }
+
+   if(error){
+    return FALLO;
+   }else{
+    return EXITO;
    }
 
 }
