@@ -68,6 +68,8 @@ int binaryToDecimal(int byte[]);
       SB.totBloques = nbloques; //Cantidad total de bloques
 
       SB.totInodos = ninodos; //Cantidad total de inodos
+
+      bwrite(posSB,&SB);
  }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -80,37 +82,41 @@ int binaryToDecimal(int byte[]);
     struct superbloque SB;
     bread(posSB,&SB);
     char bufferMB[BLOCKSIZE];
-    //numero de BITS del mapa (es el tamaño de SB + MB + AI), cada bit representa un bloque fisico
+    // numero de BITS del mapa (es el tamaño de SB + MB + AI), cada bit representa un bloque fisico
     int nbits = SB.posPrimerBloqueDatos;
 
-   //miramos si todos estos BITS caben en 1 bloque
-   if((nbits/8)/BLOCKSIZE == 0){
-      int nbytes = nbits/8;
-      
-      for (int i = 0; i < nbytes; i++){
-         bufferMB[i] = 255; //ponemos todos los bytes a 1 (elementos de la array)
-      }
+   //mirar si necesitamos bloques extra, o solo 1
+    if ((nbits / 8) / BLOCKSIZE != 0){
+        int bloqExtra = (nbits / 8) / BLOCKSIZE;
+        
+    }
 
-      //calcular resto de bits que pueden quedar por meter
-      int rest = nbits % 8;
-      if(rest != 0){
+    int nbytes = nbits / 8;
 
-         int byte[8];
-         for(int i = 0; i <rest; i++){
-            byte[i] = 1;
-         }
-         bufferMB[nbytes] = binaryToDecimal(byte);
-      }else{
-         bufferMB[nbytes] = 0;
-      }
+    for (int i = 0; i < nbytes; i++){
+        bufferMB[i] = 255; // ponemos todos los bytes a 1 (elementos de la array)
+    }
 
-      
+    // calcular resto de bits que pueden quedar por meter
+    int rest = nbits % 8;
+    if (rest != 0){
+        int byte[8];
+        for (int i = 0; i < rest; i++)
+        {
+           byte[i] = 1;
+        }
+        bufferMB[nbytes] = binaryToDecimal(byte);
+    }else{
+        bufferMB[nbytes] = 0;
+    }
 
-   }
+   //acabar de iniciar el resto de bits 
+    int aux = nbytes + 1;
+    for (int aux; aux < BLOCKSIZE; aux++){
+        bufferMB[aux] = 0;
+    }
 
-
-    
-
+    bwrite(SB.posPrimerBloqueMB, &bufferMB);
  }
 
 /*---------------------------------------------------------------------------------------------------------
