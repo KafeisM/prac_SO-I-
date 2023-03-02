@@ -1,6 +1,6 @@
 #include "ficheros_basico.h"
 
-void mostrarSB(){
+void main(){
 
     struct superbloque SB;
 
@@ -31,10 +31,6 @@ void mostrarSB(){
     printf("totInodos = %d", SB.totInodos);
 
     printf("sizeof struct superbloque is: %lu\n", sizeof(struct superbloque));
-
-}
-
-void mostrarStructInodo(){
 
     printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
 
