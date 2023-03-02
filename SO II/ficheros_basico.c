@@ -119,11 +119,7 @@ int binaryToDecimal(int byte[]);
         bufferMB[aux] = 0;
     }
 
-<<<<<<< Updated upstream
-    return bwrite(SB.posPrimerBloqueMB, &bufferMB);
-=======
-    bwrite(primerBloq, &bufferMB);
->>>>>>> Stashed changes
+    bwrite(SB.posPrimerBloqueMB, &bufferMB);
  }
 
 /*---------------------------------------------------------------------------------------------------------
