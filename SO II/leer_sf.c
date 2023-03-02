@@ -1,8 +1,10 @@
 #include "ficheros_basico.h"
 
-void main(){
+int main(){
 
     struct superbloque SB;
+
+    bread(posSB, &SB);
 
     printf("DATOS DEL SUPERBLOQUE");
 
@@ -34,6 +36,7 @@ void main(){
 
     printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
 
+    return 0;
 }
 
 /*void imprimirInodosLibres(){

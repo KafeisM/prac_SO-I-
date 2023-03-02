@@ -34,7 +34,7 @@ int main(int argc, char **argv){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
     }
 
-    if(initSB() == FALLO){
+    if(initSB(num_blocks, num_blocks/4) == FALLO){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE\n"RESET);
     }
 

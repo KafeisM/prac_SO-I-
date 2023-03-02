@@ -7,6 +7,12 @@
 #define tamSB 1
 #define INODOSIZE 128 // tamaño en bytes de un inodo
 
+int tamMB(unsigned int nbloques);
+int tamAI(unsigned int ninodos);
+int initSB(unsigned int nbloques, unsigned int ninodos);
+int initMB(); 
+int initAI();
+
 
 struct superbloque {
    unsigned int posPrimerBloqueMB;          // Posición absoluta del primer bloque del mapa de bits

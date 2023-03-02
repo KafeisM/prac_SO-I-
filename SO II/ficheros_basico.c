@@ -4,6 +4,7 @@ int binaryToDecimal(int byte[]);
 
 
 
+
 /*---------------------------------------------------------------------------------------------------------
 * Calcula el número de bloques necesarios para el mapa de bits 
 * Input:    nbloques: número de bloques reservados
@@ -13,7 +14,7 @@ int binaryToDecimal(int byte[]);
  int tamMB(unsigned int nbloques){
 
     int res = (nbloques / 8) / BLOCKSIZE;
-    if (res = (nbloques / 8) % BLOCKSIZE != 0){
+    if (res % BLOCKSIZE != 0){
         res += 1;
     }
     return res;
@@ -29,7 +30,7 @@ int binaryToDecimal(int byte[]);
  int tamAI(unsigned int ninodos){
 
     int res = (ninodos * INODOSIZE) / BLOCKSIZE;
-    if (res = (ninodos * INODOSIZE) % BLOCKSIZE != 0){
+    if (res % BLOCKSIZE != 0){
         res += 1;
     }
     return res;
@@ -78,7 +79,7 @@ int binaryToDecimal(int byte[]);
 * Output:   OUTPUT
 ---------------------------------------------------------------------------------------------------------*/
 
- int initMB(){    
+int initMB(){    
     struct superbloque SB;
     bread(posSB,&SB);
     char bufferMB[BLOCKSIZE];
@@ -119,8 +120,7 @@ int binaryToDecimal(int byte[]);
     }
 
    //acabar de iniciar el resto de bits 
-    int aux = nbytes + 1;
-    for (int aux; aux < BLOCKSIZE; aux++){
+    for (int aux = nbytes + 1; aux < BLOCKSIZE; aux++){
         bufferMB[aux] = 0;
     }
 
@@ -131,8 +131,9 @@ int binaryToDecimal(int byte[]);
     if(bwrite(posSB,&SB) == FALLO){
         return FALLO;
     }
- }
 
+    return EXITO;
+}
 /*---------------------------------------------------------------------------------------------------------
 * Función auxiliar para calcular el decimal de un número binario
 * Input:    byte: array con el número binario
@@ -177,12 +178,12 @@ int initAI(){
    for (int i = SB.posPrimerBloqueAI; (i <= SB.posUltimoBloqueAI) && (!error); i++){
       bread(i, &inodos);
       for(int j = 0; (j < (BLOCKSIZE / INODOSIZE)) && (!error); j++){
-         inodos[j].tipo == 'l';  //libres
+         inodos[j].tipo = 'l';  //libres
          if(contInodos < SB.totInodos){
-            inodos[j].punterosDirectos[0] == contInodos;
+            inodos[j].punterosDirectos[0] = contInodos;
             contInodos++;
          } else {
-            inodos[j].punterosDirectos[0] == UINT_MAX;
+            inodos[j].punterosDirectos[0] = UINT_MAX;
             break;
          }
       }
