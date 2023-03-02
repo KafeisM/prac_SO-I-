@@ -166,7 +166,7 @@ int initAI(){
    for (int i = SB.posPrimerBloqueAI; (i <= SB.posUltimoBloqueAI) && (!error); i++){
       bread(i, &inodos);
       for(int j = 0; (j < (BLOCKSIZE / INODOSIZE)) && (!error); j++){
-         inodos[j].tipo == 'l';
+         inodos[j].tipo == 'l';  //libres
          if(contInodos < SB.totInodos){
             inodos[j].punterosDirectos[0] == contInodos;
             contInodos++;

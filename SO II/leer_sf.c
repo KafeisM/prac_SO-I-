@@ -30,7 +30,7 @@ void mostrarSB(){
 
     printf("totInodos = %d", SB.totInodos);
 
-    printf("sizeof struct inodo is: %lu\n", sizeof(struct superbloque));
+    printf("sizeof struct superbloque is: %lu\n", sizeof(struct superbloque));
 
 }
 
