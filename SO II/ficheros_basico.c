@@ -78,7 +78,7 @@ int binaryToDecimal(int byte[]);
 
  int initMB(){    
     struct superbloque SB;
-    bread(0,&SB);
+    bread(posSB,&SB);
     char bufferMB[BLOCKSIZE];
     //numero de BITS del mapa (es el tamaño de SB + MB + AI), cada bit representa un bloque fisico
     int nbits = SB.posPrimerBloqueDatos;
@@ -113,6 +113,12 @@ int binaryToDecimal(int byte[]);
 
  }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función auxiliar para calcular el decimal de un número binario
+* Input:    byte: array con el número binario
+* Output:   decimal: valor decimal
+---------------------------------------------------------------------------------------------------------*/
+
  //funcion auxiliar para calcular el decimal de un numero binario
  int binaryToDecimal(int byte[]) {
     int decimal = 0;
@@ -139,5 +145,14 @@ int binaryToDecimal(int byte[]);
 ---------------------------------------------------------------------------------------------------------*/
 
 int initAI(){
+
+   struct superbloque SB;
+   bread(posSB,&SB);
+   
+   struct inodo inodos[BLOCKSIZE/INODOSIZE];
+
+   int contInodos = SB.posPrimerInodoLibre + 1;
+   for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
+   }
 
 }
