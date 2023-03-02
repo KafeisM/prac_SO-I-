@@ -159,6 +159,10 @@ int initAI(){
 
    int contInodos = SB.posPrimerInodoLibre + 1;
    for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
+      bread(i, &SB);
+      for(int j = 0; j < (BLOCKSIZE / INODOSIZE); j++){
+         inodos[j].tipo == 'l';
+      }
    }
 
 }
