@@ -85,13 +85,19 @@ int binaryToDecimal(int byte[]);
     int nbits = SB.posPrimerBloqueDatos;
     int nbytes = nbits / 8;
     int primerBloq = SB.posPrimerBloqueMB;
+    int totalBloq = 1;
+    int res;
 
    //mirar si necesitamos bloques extra, o solo 1
     if ((nbits / 8) / BLOCKSIZE != 0){
         int bloqExtra = (nbits / 8) / BLOCKSIZE;
         memset(bufferMB,255,BLOCKSIZE);
         for(int i = 0; i < bloqExtra; i++){
-            bwrite(primerBloq, &bufferMB);
+            res = bwrite(primerBloq, &bufferMB);
+            totalBloq++;
+            if(res == -1){
+                return res;
+            }
         }
         
     }
@@ -119,7 +125,10 @@ int binaryToDecimal(int byte[]);
         bufferMB[aux] = 0;
     }
 
-    bwrite(SB.posPrimerBloqueMB, &bufferMB);
+    res = bwrite(SB.posPrimerBloqueMB, &bufferMB);
+    SB.cantBloquesLibres = SB.cantBloquesLibres - totalBloq;
+    bwrite(posSB,&SB);
+    return res;
  }
 
 /*---------------------------------------------------------------------------------------------------------
