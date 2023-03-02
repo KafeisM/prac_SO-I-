@@ -82,17 +82,21 @@ int binaryToDecimal(int byte[]);
     struct superbloque SB;
     bread(posSB,&SB);
     char bufferMB[BLOCKSIZE];
-    // numero de BITS del mapa (es el tamaño de SB + MB + AI), cada bit representa un bloque fisico
     int nbits = SB.posPrimerBloqueDatos;
+    int nbytes = nbits / 8;
+    int primerBloq = SB.posPrimerBloqueMB;
 
    //mirar si necesitamos bloques extra, o solo 1
     if ((nbits / 8) / BLOCKSIZE != 0){
         int bloqExtra = (nbits / 8) / BLOCKSIZE;
+        memset(bufferMB,255,BLOCKSIZE);
+        for(int i = 0; i < bloqExtra; i++){
+            bwrite(primerBloq, &bufferMB);
+        }
         
     }
-
-    int nbytes = nbits / 8;
-
+    
+    //rellenamos el ultimo bloque
     for (int i = 0; i < nbytes; i++){
         bufferMB[i] = 255; // ponemos todos los bytes a 1 (elementos de la array)
     }
@@ -101,8 +105,7 @@ int binaryToDecimal(int byte[]);
     int rest = nbits % 8;
     if (rest != 0){
         int byte[8];
-        for (int i = 0; i < rest; i++)
-        {
+        for (int i = 0; i < rest; i++){
            byte[i] = 1;
         }
         bufferMB[nbytes] = binaryToDecimal(byte);
@@ -116,7 +119,11 @@ int binaryToDecimal(int byte[]);
         bufferMB[aux] = 0;
     }
 
+<<<<<<< Updated upstream
     return bwrite(SB.posPrimerBloqueMB, &bufferMB);
+=======
+    bwrite(primerBloq, &bufferMB);
+>>>>>>> Stashed changes
  }
 
 /*---------------------------------------------------------------------------------------------------------
