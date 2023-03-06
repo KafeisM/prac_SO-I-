@@ -16,14 +16,14 @@ int main(int argc, char **argv){
         exit(0);
     }
 
-    int num_blocks = atoi(argv[2]);
-    unsigned char buffer[1024];
-    memset(buffer, 0, sizeof(buffer));
-
     //MONTAR DISCO
     descriptor = bmount(argv[1]);
 
-    //INICIAR 
+    int num_blocks = atoi(argv[2]);
+    unsigned char buffer[BLOCKSIZE];
+    memset(buffer, 0, sizeof(buffer));
+
+    //INICIALIZAR a 0's
     for (size_t i = 0; i < num_blocks; i++){
         int bw = bwrite(i,&buffer);
         if(bw == FALLO){
