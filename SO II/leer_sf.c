@@ -1,42 +1,48 @@
 #include "ficheros_basico.h"
+#include "bloques.h"
 
-int main(){
+const char *directorio;
+struct superbloque SB;
+void *buffer[BLOCKSIZE];
 
-    struct superbloque SB;
+int main(int argc, char **argv){
 
-    bread(posSB, &SB);
+    directorio = argv[1];
+    bmount(directorio);
+    bread(posSB, buffer);
+    memcpy(&SB,buffer,sizeof(struct superbloque));
 
-    printf("DATOS DEL SUPERBLOQUE");
+    printf("DATOS DEL SUPERBLOQUE\n");
 
-    printf("posPrimerBloqueMB = %d", SB.posPrimerBloqueMB);
+    printf("posPrimerBloqueMB = %d\n", SB.posPrimerBloqueMB);
 
-    printf("posUltimoBloqueMB = %d", SB.posUltimoBloqueMB);
+    printf("posUltimoBloqueMB = %d\n", SB.posUltimoBloqueMB);
 
-    printf("posPrimerBloqueAI = %d", SB.posPrimerBloqueAI);
+    printf("posPrimerBloqueAI = %d\n", SB.posPrimerBloqueAI);
 
-    printf("posUltimoBloqueAI = %d", SB.posUltimoBloqueAI);
+    printf("posUltimoBloqueAI = %d\n", SB.posUltimoBloqueAI);
 
-    printf("posPrimerBloqueDatos = %d", SB.posPrimerBloqueDatos);
+    printf("posPrimerBloqueDatos = %d\n", SB.posPrimerBloqueDatos);
 
-    printf("posUltimoBloqueDatos = %d", SB.posUltimoBloqueDatos);
+    printf("posUltimoBloqueDatos = %d\n", SB.posUltimoBloqueDatos);
 
-    printf("posInodoRaiz = %d", SB.posInodoRaiz);
+    printf("posInodoRaiz = %d\n", SB.posInodoRaiz);
 
-    printf("posPrimerInodoLibre = %d", SB.posPrimerInodoLibre);
+    printf("posPrimerInodoLibre = %d\n", SB.posPrimerInodoLibre);
 
-    printf("cantBloquesLibres = %d", SB.cantBloquesLibres);
+    printf("cantBloquesLibres = %d\n", SB.cantBloquesLibres);
 
-    printf("cantInododsLibres = %d", SB.cantInodosLibres);
+    printf("cantInododsLibres = %d\n", SB.cantInodosLibres);
 
-    printf("totBloques = %d", SB.totBloques);
+    printf("totBloques = %d\n", SB.totBloques);
 
-    printf("totInodos = %d", SB.totInodos);
+    printf("totInodos = %d\n", SB.totInodos);
 
     printf("sizeof struct superbloque is: %lu\n", sizeof(struct superbloque));
 
     printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
 
-    return 0;
+    return EXITO;
 }
 
 /*void imprimirInodosLibres(){

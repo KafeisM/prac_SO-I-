@@ -21,29 +21,25 @@ int main(int argc, char **argv){
 
     int num_blocks = atoi(argv[2]);
     unsigned char buffer[BLOCKSIZE];
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
 
     //INICIALIZAR a 0's
     for (size_t i = 0; i < num_blocks; i++){
-        int bw = bwrite(i,&buffer);
-        if(bw == FALLO){
+        bwrite(i,&buffer);
+        /*if(bw == FALLO){
             fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO (bwrite)\n"RESET);
         }else if (bw < BLOCKSIZE){
             fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO (bwrite - blocksize)\n"RESET);
-        }
-    }
-    //DESMONTAR DISCO
-    if(bumount() == -1){
-        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
+        }*/
     }
 
-    int isb = initSB(num_blocks, num_blocks/4);
+    initSB(num_blocks, num_blocks/4);
 
-    if(isb == FALLO){
+    /*if(isb == FALLO){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE %i \n"RESET,isb);
     }else if (isb < BLOCKSIZE){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE (bwrite - blocksize)\n"RESET);
-    }
+    }*/
 
     if(initMB() == FALLO){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE MAPA DE BITS\n"RESET);
@@ -51,6 +47,11 @@ int main(int argc, char **argv){
 
     if(initAI() == FALLO){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE ARRAY DE INODOS\n"RESET);
+    }
+
+    //DESMONTAR DISCO
+    if(bumount() == -1){
+        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
     }
         
     return 0;

@@ -26,13 +26,12 @@ int bumount(){
 
 int bwrite(unsigned int nbloque, const void *buf){
 
-    off_t desplazamiento = nbloque * BLOCKSIZE;
+    lseek(descriptor,nbloque * BLOCKSIZE,SEEK_SET);
 
-    lseek(descriptor,desplazamiento,SEEK_SET);
-
-    int bytes_escritos = write(descriptor, buf, BLOCKSIZE);
+    size_t bytes_escritos = write(descriptor, buf, BLOCKSIZE);
 
     if (bytes_escritos == FALLO){
+        fprintf(stderr,"Error bwrite %d: %s\n",errno,strerror(errno));
         return FALLO;
     }
 
@@ -47,9 +46,10 @@ int bread(unsigned int nbloque, void *buf){
 
     lseek(descriptor,desplazamiento,SEEK_SET);
 
-    int bytes_leidos = read(descriptor,  buf,BLOCKSIZE);
+    size_t bytes_leidos = read(descriptor,  buf,BLOCKSIZE);
 
     if (bytes_leidos == FALLO){
+        fprintf(stderr,"Error bread %d: %s\n",errno,strerror(errno));
         return FALLO;
     }
 
