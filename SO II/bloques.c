@@ -28,15 +28,15 @@ int bwrite(unsigned int nbloque, const void *buf){
 
     off_t desplazamiento = nbloque * BLOCKSIZE;
 
-    if (lseek(descriptor,desplazamiento,SEEK_SET) < 0){
+    lseek(descriptor,desplazamiento,SEEK_SET);
+
+    int bytes_escritos = write(descriptor, buf, BLOCKSIZE);
+
+    if (bytes_escritos == FALLO){
         return FALLO;
     }
 
-    if (write(descriptor, buf, BLOCKSIZE) < 0){
-        return FALLO;
-    }
-
-    return BLOCKSIZE;
+    return bytes_escritos;
 
 }
 
@@ -45,14 +45,14 @@ int bread(unsigned int nbloque, void *buf){
 
     off_t desplazamiento = nbloque * BLOCKSIZE;
 
-    if (lseek(descriptor,desplazamiento,SEEK_SET) < 0){
+    lseek(descriptor,desplazamiento,SEEK_SET);
+
+    int bytes_leidos = read(descriptor,  buf,BLOCKSIZE);
+
+    if (bytes_leidos == FALLO){
         return FALLO;
     }
 
-    if (read(descriptor,  buf,BLOCKSIZE) < 0){
-        return FALLO;
-    }
-
-    return BLOCKSIZE;
+    return bytes_leidos;
 
 }

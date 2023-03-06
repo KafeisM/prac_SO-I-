@@ -31,7 +31,7 @@ int binaryToDecimal(int byte[]);
 
     int res = (ninodos * INODOSIZE) / BLOCKSIZE;
     if (res % BLOCKSIZE != 0){
-        res += 1;
+        res++;
     }
     return res;
 
@@ -45,6 +45,8 @@ int binaryToDecimal(int byte[]);
 
  int initSB(unsigned int nbloques, unsigned int ninodos){
       struct superbloque SB;
+
+      void *buf = &SB;
 
       SB.posPrimerBloqueMB = posSB + tamSB; //Posición del primer bloque del mapa de bits
 
@@ -70,7 +72,7 @@ int binaryToDecimal(int byte[]);
 
       SB.totInodos = ninodos; //Cantidad total de inodos
 
-      return bwrite(posSB,&SB);
+      return bwrite(posSB,buf);
  }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -175,7 +177,8 @@ int initAI(){
    bool error = false;
 
    int contInodos = SB.posPrimerInodoLibre + 1;
-   for (int i = SB.posPrimerBloqueAI; (i <= SB.posUltimoBloqueAI) && (!error); i++){
+   int i = 0;
+   for (i = SB.posPrimerBloqueAI; (i <= SB.posUltimoBloqueAI) && (!error); i++){
       bread(i, &inodos);
       for(int j = 0; (j < (BLOCKSIZE / INODOSIZE)) && (!error); j++){
          inodos[j].tipo = 'l';  //libres

@@ -25,8 +25,11 @@ int main(int argc, char **argv){
 
     //INICIAR 
     for (size_t i = 0; i < num_blocks; i++){
-        if(bwrite(i,&buffer) == -1){
-            fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
+        int bw = bwrite(i,&buffer);
+        if(bw == FALLO){
+            fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO (bwrite)\n"RESET);
+        }else if (bw < BLOCKSIZE){
+            fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO (bwrite - blocksize)\n"RESET);
         }
     }
     //DESMONTAR DISCO
@@ -34,8 +37,12 @@ int main(int argc, char **argv){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
     }
 
-    if(initSB(num_blocks, num_blocks/4) == FALLO){
-        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE\n"RESET);
+    int isb = initSB(num_blocks, num_blocks/4);
+
+    if(isb == FALLO){
+        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE %i \n"RESET,isb);
+    }else if (isb < BLOCKSIZE){
+        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE (bwrite - blocksize)\n"RESET);
     }
 
     if(initMB() == FALLO){
