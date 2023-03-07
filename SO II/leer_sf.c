@@ -42,21 +42,39 @@ int main(int argc, char **argv){
 
     printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
 
-    return EXITO;
-}
 
-/*void imprimirInodosLibres(){
+    printf("\nRECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
+    //Podéis hacer también un recorrido de la lista de inodos libres (mostrando para cada inodo el campo punterosDirectos[0]).
+    struct inodo inodos[BLOCKSIZE / INODOSIZE];
+    int cont = 0;
 
-    struct superbloque SB;
-    bread(posSB,&SB);
-    struct inodo inodos[BLOCKSIZE/INODOSIZE];
+    for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
+        //&inodos
+        if (bread(i, inodos) == EXIT_FAILURE){
+            return EXIT_FAILURE;
+        }
 
-    for(int i = SB.posPrimerBloqueAI; i < SB.posUltimoBloqueAI; i++){
-        bread(i, &inodos);
-        for(int j = 0; j < (BLOCKSIZE / INODOSIZE); j++){
-            if(inodos[i] == 'l'){
+        for (int j = 0; j < BLOCKSIZE / INODOSIZE; j++){
 
+            if ((inodos[j].tipo == 'l')){
+                cont++;
+                if (cont < 20){
+                    printf("%d ", cont);
+                }
+                else if (cont == 21){
+                    printf("... ");
+                }
+                else if ((cont > 24990) && (cont < SB.totInodos)){
+                    printf("%d ", cont);
+                }
+                else if (cont == SB.totInodos){
+                    printf("-1 \n");
+                }
+                cont--;
             }
+            cont++;
         }
     }
-}*/
+
+    return EXITO;
+}

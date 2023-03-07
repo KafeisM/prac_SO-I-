@@ -182,6 +182,7 @@ int initAI(){
 
    int contInodos = SB.posPrimerInodoLibre + 1;
    int i = 0;
+
    for (i = SB.posPrimerBloqueAI; (i <= SB.posUltimoBloqueAI) && (!error); i++){
       bread(i, &inodos);
       for(int j = 0; (j < (BLOCKSIZE / INODOSIZE)) && (!error); j++){
