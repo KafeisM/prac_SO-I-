@@ -84,7 +84,10 @@ int binaryToDecimal(int byte[]);
 int initMB(){    
     
     struct superbloque SB;
-    bread(posSB,&SB);
+    
+    if(bread(posSB,&SB) == FALLO){
+        return FALLO;
+    } 
 
     char bufferMB[BLOCKSIZE];
     int nbits = SB.posPrimerBloqueDatos;
@@ -174,7 +177,10 @@ int initMB(){
 int initAI(){
 
    struct superbloque SB;
-   bread(posSB,&SB);
+
+   if(bread(posSB,&SB) == FALLO){
+        return FALLO;
+    }
    
    struct inodo inodos[BLOCKSIZE/INODOSIZE];
 
@@ -206,4 +212,81 @@ int initAI(){
     return EXITO;
    }
 
+}
+
+/*---------------------------------------------------------------------------------------------------------
+* Escribe el valor indicado por bit {0,1} en un determinado bit del MB
+* Input:    bit: valor a escribir; nbloque: numero del bloque físico
+* Output:   OUTPUT
+---------------------------------------------------------------------------------------------------------*/
+int escribir_bit(unsigned int nbloque, unsigned int bit){
+    struct superbloque SB;
+
+    if(bread(posSB,&SB) == FALLO){
+        return FALLO;
+    }    
+
+    unsigned int posbyte = nbloque/8;
+    unsigned int posbit = nbloque%8;
+    unsigned nbloqueMB = posbyte/BLOCKSIZE; //numero de bloque de forma relativa al MB
+    unsigned int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB; //posicion absoluta del bloque en el dispositivo
+    unsigned char bufferMB[BLOCKSIZE];
+
+    unsigned char mascara = 128; //10000000
+    mascara >>= posbit; //desplazamos el bit de la mascara al bit deseado
+
+    //cargamos el bloque que contiene el bit para leer
+    if(bread(nbloqueabs,bufferMB) == FALLO){
+        return FALLO;
+    }
+
+    posbyte = posbyte % BLOCKSIZE; //localizar el byte dentro del bloque leido
+
+    //mirar si se debe escribir un 0 o 1
+    if(bit == 1){
+        bufferMB[posbyte] |= mascara;
+    }else{
+        bufferMB[posbyte] &= ~mascara;
+    }
+
+    if(bwrite(nbloqueabs,bufferMB) == FALLO){
+        return FALLO;
+    }
+
+    return EXITO;
+}
+
+/*---------------------------------------------------------------------------------------------------------
+* Lee un determinado bit del MB y devuelve el valor leido
+* Input:    nbloque: numero del bloque físico
+* Output:   OUTPUT
+---------------------------------------------------------------------------------------------------------*/
+char leer_bit(unsigned int nbloque){
+
+    struct superbloque SB;
+
+    if(bread(posSB,&SB) == FALLO){
+        return FALLO;
+    }   
+
+    unsigned int posbyte = nbloque/8;
+    unsigned int posbit = nbloque%8;
+    unsigned nbloqueMB = posbyte/BLOCKSIZE; //numero de bloque de forma relativa al MB
+    unsigned int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB; //posicion absoluta del bloque en el dispositivo
+    unsigned char bufferMB[BLOCKSIZE];
+
+    //cargamos el bloque que contiene el bit para leer
+    if(bread(nbloqueabs,bufferMB) == FALLO){
+        return FALLO;
+    }
+
+    posbyte = posbyte % BLOCKSIZE; //localizar el byte dentro del bloque leido
+
+    unsigned char mascara = 128; //10000000
+    mascara >>= posbit; //desplazamos el bit de la mascara al bit deseado
+    mascara &= bufferMB[posbyte];
+    mascara >>= (7 - posbit); //dejar a 0 o 1 el extremo derecho y leerlo en decimal
+
+    return mascara;
+    
 }
