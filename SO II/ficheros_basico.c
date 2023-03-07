@@ -14,8 +14,8 @@ int binaryToDecimal(int byte[]);
  int tamMB(unsigned int nbloques){
 
     int res = (nbloques / 8) / BLOCKSIZE;
-    if (res % BLOCKSIZE != 0){
-        res += 1;
+    if ((nbloques / 8) % BLOCKSIZE != 0){
+        res++;
     }
     return res;
 
@@ -30,7 +30,7 @@ int binaryToDecimal(int byte[]);
  int tamAI(unsigned int ninodos){
 
     int res = (ninodos * INODOSIZE) / BLOCKSIZE;
-    if (res % BLOCKSIZE != 0){
+    if ((ninodos * INODOSIZE) % BLOCKSIZE != 0){
         res++;
     }
     return res;
@@ -82,8 +82,10 @@ int binaryToDecimal(int byte[]);
 ---------------------------------------------------------------------------------------------------------*/
 
 int initMB(){    
+    
     struct superbloque SB;
     bread(posSB,&SB);
+
     char bufferMB[BLOCKSIZE];
     int nbits = SB.posPrimerBloqueDatos;
     int nbytes = nbits / 8;
@@ -112,6 +114,7 @@ int initMB(){
     // calcular resto de bits que pueden quedar por meter
     int rest = nbits % 8;
     if (rest != 0){
+        //byte auxiliar
         int byte[8];
         for (int i = 0; i < rest; i++){
            byte[i] = 1;
@@ -129,7 +132,8 @@ int initMB(){
     if(bwrite(SB.posPrimerBloqueMB, &bufferMB) == FALLO){
         return FALLO;
     }
-    SB.cantBloquesLibres = SB.cantBloquesLibres - totalBloq;
+
+    SB.cantBloquesLibres = SB.cantBloquesLibres -(tamMB(SB.totBloques) + tamSB + tamAI(SB.totInodos));
     if(bwrite(posSB,&SB) == FALLO){
         return FALLO;
     }
