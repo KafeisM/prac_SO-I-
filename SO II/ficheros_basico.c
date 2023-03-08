@@ -298,21 +298,33 @@ char leer_bit(unsigned int nbloque){
 ---------------------------------------------------------------------------------------------------------*/
 
 int reservar_bloque(){
-    
-    unsigned int nbloqueabs;
-    unsigned char bufferMB[BLOCKSIZE];
 
-    if(bread(nbloqueabs,&bufferMB) == FALLO){
+    struct superbloque SB;
+
+    if (bread(posSB,&SB)){
         return FALLO;
-    } 
+    }
+
+    if (SB.cantBloquesLibres == 0){
+        perror("reservar_bloque: no hay bloques disponibles");
+        return FALLO;
+    }
+    
+    
 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Encuentra el primer bloque libre, consultando el MB, lo ocupa y devuelve su posición.
+* Input:    -
+* Output:   OUTPUT
+---------------------------------------------------------------------------------------------------------*/
+
+int liberar_bloque(unsigned int nbloque){
 
 
 
-
-
+}
 
 /*---------------------------------------------------------------------------------------------------------
 * Escribe el contenido de una variable de tipo struct inodo, pasada por referencia, en un determinado 
