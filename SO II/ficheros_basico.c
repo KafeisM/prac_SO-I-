@@ -305,5 +305,76 @@ int reservar_bloque(){
     if(bread(nbloqueabs,&bufferMB) == FALLO){
         return FALLO;
     } 
+
+}
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------------------------------------
+* Escribe el contenido de una variable de tipo struct inodo, pasada por referencia, en un determinado 
+* inodo del array de inodos, inodos.
+* Input:    ninodo: posición que se encuentra el inodo  
+*           *inodo: variable de tipo struct que su contenido debe ser escrito en un array de inodos
+* Output:   OUTPUT
+---------------------------------------------------------------------------------------------------------*/
+
+int escribir_inodo(unsigned int ninodo, struct inodo *inodo){
+
+    struct superbloque SB;
+    struct inodo inodos[BLOCKSIZE/INODOSIZE];
+    unsigned int posBloque;
+
+    if(bread(posSB,&SB) == FALLO){
+        return FALLO;
+    }
+
+    posBloque = ninodo/(BLOCKSIZE/INODOSIZE) + SB.posPrimerBloqueAI;
     
+    if(bread(posBloque, inodos) == FALLO){
+        return FALLO;
+    }
+
+    inodos[ninodo%(BLOCKSIZE/INODOSIZE)] = *inodo;
+
+    if(bwrite(posBloque,inodos) == FALLO){
+        return FALLO;
+    }
+
+    return EXITO;
+}
+
+/*---------------------------------------------------------------------------------------------------------
+* Lee un determinado inodo del array de inodos para volcarlo en una variable de tipo 
+* struct inodo pasada por referencia.
+* Input:    ninodo: posición que se encuentra el inodo  
+*           *inodo: variable de tipo struct donde se debe escribir un determinado inodo
+* Output:   OUTPUT
+---------------------------------------------------------------------------------------------------------*/
+
+int leer_inodo(unsigned int ninodo, struct inodo *inodo){
+
+    struct superbloque SB;
+    struct inodo inodos[BLOCKSIZE/INODOSIZE];
+    struct inodo leido;
+    unsigned int posBloque;
+
+    if(bread(posSB,&SB) == FALLO){
+        return FALLO;
+    }
+
+    posBloque = ninodo/(BLOCKSIZE/INODOSIZE) + SB.posPrimerBloqueAI;
+
+    if(bread(posBloque, inodos) == FALLO){
+        return FALLO;
+    }
+
+    leido = inodos[ninodo%(BLOCKSIZE/INODOSIZE)];
+
+    memcpy(inodo, &leido, INODOSIZE);
+
+    return EXITO;
 }
