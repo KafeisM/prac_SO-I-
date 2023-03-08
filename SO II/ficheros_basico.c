@@ -169,7 +169,7 @@ int initMB(){
 }
 
 /*---------------------------------------------------------------------------------------------------------
-* Inicializa la lista de nodos libres
+* Inicializa la lista de inodos libres
 * Input:    -
 * Output:   OUTPUT
 ---------------------------------------------------------------------------------------------------------*/
@@ -288,5 +288,22 @@ char leer_bit(unsigned int nbloque){
     mascara >>= (7 - posbit); //dejar a 0 o 1 el extremo derecho y leerlo en decimal
 
     return mascara;
+    
+}
+
+/*---------------------------------------------------------------------------------------------------------
+* Encuentra el primer bloque libre, consultando el MB, lo ocupa y devuelve su posición.
+* Input:    -
+* Output:   OUTPUT
+---------------------------------------------------------------------------------------------------------*/
+
+int reservar_bloque(){
+    
+    unsigned int nbloqueabs;
+    unsigned char bufferMB[BLOCKSIZE];
+
+    if(bread(nbloqueabs,&bufferMB) == FALLO){
+        return FALLO;
+    } 
     
 }
