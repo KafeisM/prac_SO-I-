@@ -310,12 +310,64 @@ int reservar_bloque(){
         return FALLO;
     }
     
+    unsigned char bufferMB[BLOCKSIZE];
+    unsigned char bufferAux[BLOCKSIZE];
+    memset(&bufferAux,255,BLOCKSIZE); //llenamos el buffer aux con 1s
+
+    int nbloqueabs = SB.posPrimerBloqueMB;
+    bool found = false;
+
+    while (found == false){
+
+        if (bread(nbloqueabs,bufferMB) == FALLO){
+            return FALLO;
+        }
+
+        if (memcmp(bufferMB,bufferAux,BLOCKSIZE) != 0){
+            found = true;
+            break;
+        }
+
+        nbloqueabs++;
+
+    }
+
+    unsigned int posByte = 0;
+    found = false;
+
+    while (found == false){
+
+        if (bufferMB[posByte] != 255){
+            found == true;
+            break;
+        }
+
+        posByte++;
+
+    }
+
+    unsigned int posBit = 0;
+    unsigned char mascara = 128;
+
+    while (bufferMB[posByte] & mascara){
+
+        bufferMB[posByte] <<= 1;
+        posBit++;
+
+    }
+
+    unsigned int nbloque = ((nbloqueabs - SB.posPrimerBloqueMB) * BLOCKSIZE + posByte) * 8 + posBit;
+
+    if (escribir_bit(nbloque,1) == FALLO){
+        return FALLO;
+    }
+
     
 
 }
 
 /*---------------------------------------------------------------------------------------------------------
-* Encuentra el primer bloque libre, consultando el MB, lo ocupa y devuelve su posición.
+* FUNCION
 * Input:    -
 * Output:   OUTPUT
 ---------------------------------------------------------------------------------------------------------*/
