@@ -1,6 +1,8 @@
 #include "ficheros_basico.h"
 #include "bloques.h"
 
+void comprobarMB();
+
 const char *directorio;
 struct superbloque SB;
 void *buffer[BLOCKSIZE];
@@ -44,7 +46,6 @@ int main(int argc, char **argv){
 
 
     printf("\nRECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
-    //Podéis hacer también un recorrido de la lista de inodos libres (mostrando para cada inodo el campo punterosDirectos[0]).
     struct inodo inodos[BLOCKSIZE / INODOSIZE];
     int cont = 0;
 
@@ -76,5 +77,19 @@ int main(int argc, char **argv){
         }
     }
 
+    //comprobar reservar/liberar bloque
+    printf("\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
+
+
+    //comprobar leer/escribir bit
+    printf("\nMAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
+    comprobarMB();
+    
     return EXITO;
+}
+
+void comprobarMB(){
+    printf("posSB: %d -> leer_bit(%d) = %d\n",0,0,leer_bit(0));
+    printf("SB.posPrimerBloqueMB: %d -> leer_bit(%d) = %d\n",SB.posPrimerBloqueMB,SB.posPrimerBloqueMB,leer_bit(SB.posPrimerBloqueMB));
+    printf("SB.posUltimoBloqueMB: %d -> leer_bit(%d) = %d\n",SB.posUltimoBloqueMB,SB.posUltimoBloqueMB,leer_bit(SB.posUltimoBloqueMB));
 }

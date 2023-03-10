@@ -269,12 +269,15 @@ char leer_bit(unsigned int nbloque){
         return FALLO;
     }   
 
+
     unsigned int posbyte = nbloque/8;
     unsigned int posbit = nbloque%8;
     unsigned nbloqueMB = posbyte/BLOCKSIZE; //numero de bloque de forma relativa al MB
     unsigned int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB; //posicion absoluta del bloque en el dispositivo
     unsigned char bufferMB[BLOCKSIZE];
 
+    printf(GRIS_T"[leer_bit(%d)->posbyte:%d,posbit:%d,nbloqueMB:%d,nbloqueabs:%d]\n"RESET,nbloque,posbyte,posbit,nbloqueMB,nbloqueabs);
+    
     //cargamos el bloque que contiene el bit para leer
     if(bread(nbloqueabs,bufferMB) == FALLO){
         return FALLO;
@@ -337,7 +340,7 @@ int reservar_bloque(){
     while (found == false){ //encontramos el primer byte con un 0
 
         if (bufferMB[posByte] != 255){
-            found == true;
+            found = true;
             break;
         }
 
@@ -357,7 +360,10 @@ int reservar_bloque(){
 
     //buscamos el bloque fisico que representa el bit
     unsigned int nbloque = ((nbloqueabs - SB.posPrimerBloqueMB) * BLOCKSIZE + posByte) * 8 + posBit;
-    (escribir_bit(nbloque,1) == FALLO); //ponemos el bit a 1
+    if(escribir_bit(nbloque,1) == FALLO){
+        perror("reservar_bloque: Error al escribir el bit");
+        return FALLO;
+    } //ponemos el bit a 1
 
     SB.cantBloquesLibres--; //decrementamos la cantidad de bloques libres
 

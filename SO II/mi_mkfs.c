@@ -1,11 +1,6 @@
 #include <string.h> 
 #include "ficheros_basico.h"
 
-//COLORES
-#define RESET "\033[0m"
-#define ROJO_T "\x1b[31m"
-#define NEGRITA "\x1b[1m"
-
 static int descriptor = 0;
 
 int main(int argc, char **argv){
@@ -18,9 +13,9 @@ int main(int argc, char **argv){
 
     //MONTAR DISCO
     descriptor = bmount(argv[1]);
-
     int num_blocks = atoi(argv[2]);
     unsigned char buffer[BLOCKSIZE];
+    
     memset(&buffer, 0, sizeof(buffer));
 
     //INICIALIZAR a 0's
@@ -47,6 +42,10 @@ int main(int argc, char **argv){
 
     if(initAI() == FALLO){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE ARRAY DE INODOS\n"RESET);
+    }
+
+    if(reservar_inodo('d',7) == FALLO){
+        fprintf(stderr,ROJO_T"ERROR EN LA CREACIÓN DEL DIRECTORIO RAÍZ");
     }
 
     //DESMONTAR DISCO

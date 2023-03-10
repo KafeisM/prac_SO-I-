@@ -7,19 +7,6 @@
 #define tamSB 1
 #define INODOSIZE 128 // tamaño en bytes de un inodo
 
-int tamMB(unsigned int nbloques);
-int tamAI(unsigned int ninodos);
-int initSB(unsigned int nbloques, unsigned int ninodos);
-int initMB(); 
-int initAI();
-int escribir_bit(unsigned int nbloque, unsigned int bit);
-char leer_bit(unsigned int nbloque);
-int reservar_bloque();
-int liberar_bloque(unsigned int nbloque);
-int escribir_inodo(unsigned int ninodo, struct inodo *inodo);
-int leer_inodo(unsigned int ninodo, struct inodo *inodo);
-int reservar_inodo(unsigned char tipo, unsigned char permisos);
-
 struct superbloque {
    unsigned int posPrimerBloqueMB;          // Posición absoluta del primer bloque del mapa de bits
    unsigned int posUltimoBloqueMB;          // Posición absoluta del último bloque del mapa de bits
@@ -73,3 +60,15 @@ struct inodo {     // comprobar que ocupa 128 bytes haciendo un sizeof(inodo)!!!
    // Fijarse que también se resta lo que ocupen las variables de alineación utilizadas!!!
 };
 
+int tamMB(unsigned int nbloques);
+int tamAI(unsigned int ninodos);
+int initSB(unsigned int nbloques, unsigned int ninodos);
+int initMB(); 
+int initAI();
+int escribir_bit(unsigned int nbloque, unsigned int bit);
+char leer_bit(unsigned int nbloque);
+int reservar_bloque();
+int liberar_bloque(unsigned int nbloque);
+int escribir_inodo(unsigned int ninodo, struct inodo *inodo);
+int leer_inodo(unsigned int ninodo, struct inodo *inodo);
+int reservar_inodo(unsigned char tipo, unsigned char permisos);
