@@ -303,11 +303,12 @@ char leer_bit(unsigned int nbloque){
 int reservar_bloque(){
 
     struct superbloque SB; //leemos el superbloque
-    if (bread(posSB,&SB)){
+    if (bread(posSB,&SB) == FALLO){
+        perror("reservar_bloque: Error en bread de SB");
         return FALLO;
     }
 
-    if (SB.cantBloquesLibres == 0){ //comprobar si hay bloques disponibles
+    if (SB.cantBloquesLibres == FALLO){ //comprobar si hay bloques disponibles
         perror("reservar_bloque: no hay bloques disponibles");
         return FALLO;
     }
@@ -322,6 +323,7 @@ int reservar_bloque(){
     while (found == false){ //encontramos el primer bloque con un 0 y guardamos su contenido en bufferMB
 
         if (bread(nbloqueabs,bufferMB) == FALLO){
+            perror("reservar_bloque: Error en bread de bloque con 0");
             return FALLO;
         }
 

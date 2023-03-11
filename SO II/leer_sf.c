@@ -111,10 +111,11 @@ void comprobarBloques(){
     printf("Se ha reservado el bloque físico no %d que era el 1er libre indicado por el MB\n",SB.posPrimerBloqueDatos);
 
     //reservamos el primer bloque de datos
-    if(reservar_bloque(SB.posPrimerBloqueDatos) == FALLO){
+    if(reservar_bloque() == FALLO){
         fprintf(stderr,ROJO_T"FALLO AL RESERVAR BLOQUE\n"RESET);
     }
 
+    bread(posSB,&SB);
     printf("SB.cantBloquesLibres = %d\n",SB.cantBloquesLibres);
 
     //liberamos ese mismo bloque
@@ -122,6 +123,7 @@ void comprobarBloques(){
         fprintf(stderr,ROJO_T"FALLO AL LIBERAR BLOQUE\n");
     }
 
+    bread(posSB,&SB);
     printf("Liberamos ese bloque y después SB.cantBloquesLibres = %d\n",SB.cantBloquesLibres);
 
 }
@@ -130,12 +132,12 @@ void comprobarInodo(){
     struct inodo inodo;
 
     if(leer_inodo(0,&inodo)){
-        fprintf(stderr,"ERROR EN LA LECTURA DEL INODO");
+        fprintf(stderr,"ERROR EN LA LECTURA DEL INODO\n");
     }
 
     printf("\nDATOS DEL DIRECTORIO RAIZ\n");
     printf("tipo: %c\n",inodo.tipo);
-    printf("permisos: %c\n",inodo.permisos);
+    printf("permisos: %d\n",inodo.permisos);
     printf("nlinks: %d\n",inodo.nlinks);
     printf("tamEnBytesLog: %d\n",inodo.tamEnBytesLog);
     printf("numBloquesOcupados: %d\n",inodo.numBloquesOcupados);
