@@ -130,12 +130,31 @@ void comprobarBloques(){
 
 void comprobarInodo(){
     struct inodo inodo;
+    struct superbloque SB;
 
-    if(leer_inodo(0,&inodo)){
+    bread(posSB,&SB);
+
+    int inRes = reservar_inodo('d',7);
+
+    if(leer_inodo(inRes,&inodo)){
         fprintf(stderr,"ERROR EN LA LECTURA DEL INODO\n");
     }
 
     printf("\nDATOS DEL DIRECTORIO RAIZ\n");
+    struct tm *ts;
+    char atime[80];
+    char mtime[80];
+    char ctime[80];
+
+    leer_inodo(inRes, &inodo);
+    ts = localtime(&inodo.atime);
+    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&inodo.mtime);
+    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&inodo.ctime);
+    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
+    
+    printf("ID: %d \nATIME: %s \nMTIME: %s \nCTIME: %s\n",inRes,atime,mtime,ctime);
     printf("tipo: %c\n",inodo.tipo);
     printf("permisos: %d\n",inodo.permisos);
     printf("nlinks: %d\n",inodo.nlinks);
