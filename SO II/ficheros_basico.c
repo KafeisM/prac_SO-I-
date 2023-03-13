@@ -615,9 +615,7 @@ int traducir_bloque_inodo(struct inodo *ninodo, unsigned int nblogico, unsigned 
                         return FALLO;
                     }
                 }
-                if(memset(buffer,0,BLOCKSIZE) == FALLO){
-                    return FALLO;
-                }
+                memset(buffer,0,BLOCKSIZE);
             }
         }else{
             if(bread(ptr, buffer) == FALLO){
@@ -632,14 +630,14 @@ int traducir_bloque_inodo(struct inodo *ninodo, unsigned int nblogico, unsigned 
 
     }
 
-    if(ptr = 0){
-        if(reservar = 0){
+    if(ptr == 0){
+        if(reservar == 0){
             return FALLO;
         }else{
             ptr = reservar_bloque();
             ninodo->numBloquesOcupados++;
             ninodo->ctime = time(NULL);
-            if(nRangoBL = 0){
+            if(nRangoBL == 0){
                 ninodo->punterosDirectos[nblogico] = ptr;
             }else{
                 buffer[indice] = ptr;
