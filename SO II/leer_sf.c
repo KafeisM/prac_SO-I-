@@ -1,6 +1,14 @@
 #include "ficheros_basico.h"
 #include "bloques.h"
 
+#define DEBUGSB 1
+#define DEBUG1  0
+#define DEBUG2  0
+#define DEBUG3  0
+#define DEBUG4  0
+#define DEBUG5  0
+
+
 void comprobarMB();
 void comprobarBloques();
 void comprobarInodo();
@@ -16,6 +24,7 @@ int main(int argc, char **argv){
     bread(posSB, buffer);
     memcpy(&SB,buffer,sizeof(struct superbloque));
 
+#if DEBUGSB
     printf("DATOS DEL SUPERBLOQUE\n");
 
     printf("posPrimerBloqueMB = %d\n", SB.posPrimerBloqueMB);
@@ -45,8 +54,9 @@ int main(int argc, char **argv){
     printf("sizeof struct superbloque is: %lu\n", sizeof(struct superbloque));
 
     printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
+#endif
 
-
+#if DEBUG1
     printf("\nRECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
     struct inodo inodos[BLOCKSIZE / INODOSIZE];
     int cont = 0;
@@ -78,18 +88,24 @@ int main(int argc, char **argv){
             cont++;
         }
     }
+#endif
 
+#if DEBUG2
     //comprobar reservar/liberar bloque
     printf("\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
     comprobarBloques();
+#endif
 
+#if DEBUG3
     //comprobar leer/escribir bit
     printf("\nMAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
     comprobarMB();
+#endif
 
+#if DEBUG4
     //comrobar datos del directorio raiz
     comprobarInodo();
-
+#endif
     
     return EXITO;
 }
