@@ -520,3 +520,69 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos){
     return posInodoReservado;
 
 }
+
+/*---------------------------------------------------------------------------------------------------------
+*
+* Input:    
+* Output:   
+---------------------------------------------------------------------------------------------------------*/
+
+int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr){
+
+    int nrangoBL;
+
+    if(nblogico<DIRECTOS){
+        *ptr = inodo->punterosDirectos[nblogico];
+        nrangoBL = 0;   
+    }else if(nblogico<INDIRECTOS0){
+        *ptr = inodo->punterosIndirectos[0];
+        nrangoBL = 1;
+    }else if(nblogico<INDIRECTOS1){
+        *ptr = inodo->punterosIndirectos[1];
+        nrangoBL = 2;
+    }else if(nblogico<INDIRECTOS2){
+        *ptr = inodo->punterosIndirectos[2];
+        nrangoBL = 3;
+    }else{
+        *ptr = 0;
+        perror("obtener_nRangoBL: Bloque logico fuera de rango/n");
+        nrangoBL = FALLO;
+    }
+    return nrangoBL;
+}
+
+/*---------------------------------------------------------------------------------------------------------
+*
+* Input:    
+* Output:   
+---------------------------------------------------------------------------------------------------------*/
+
+int obtener_indice(unsigned int nblogico, int nivel_punteros){
+
+    int ind;
+
+    if(nblogico < DIRECTOS){
+        ind = nblogico;
+    }else if(nblogico < INDIRECTOS0){
+        if(nivel_punteros == 2){
+            ind = (nblogico - INDIRECTOS0) / NPUNTEROS;
+        }else if(nivel_punteros == 1){
+            ind = (nblogico - INDIRECTOS0) % NPUNTEROS;
+        }
+    }else if(nblogico < INDIRECTOS2){
+        if(nivel_punteros == 3){
+            ind = (nblogico - INDIRECTOS1) / (NPUNTEROS * NPUNTEROS);
+        }else if(nivel_punteros == 2){
+            ind = ((nblogico - INDIRECTOS1) % (NPUNTEROS * NPUNTEROS)) / NPUNTEROS;
+        }else if(nivel_punteros == 1){
+            ind = ((nblogico - INDIRECTOS1) % (NPUNTEROS * NPUNTEROS)) % NPUNTEROS;
+        }
+    }
+}
+
+/*---------------------------------------------------------------------------------------------------------
+*
+* Input:    
+* Output:   
+---------------------------------------------------------------------------------------------------------*/
+
