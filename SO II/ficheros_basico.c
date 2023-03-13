@@ -578,6 +578,7 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
             ind = ((nblogico - INDIRECTOS1) % (NPUNTEROS * NPUNTEROS)) % NPUNTEROS;
         }
     }
+    return ind;
 }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -586,3 +587,67 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
 * Output:   
 ---------------------------------------------------------------------------------------------------------*/
 
+int traducir_bloque_inodo(struct inodo *ninodo, unsigned int nblogico, unsigned char reservar){
+
+    unsigned int ptr = 0;
+    unsigned int ptr_ant = 0;
+    int nRangoBL;
+    int nivel_punteros;
+    int indice;
+    unsigned int buffer[NPUNTEROS];
+
+    nRangoBL = obtener_nRangoBL(ninodo, nblogico,&ptr);
+    nivel_punteros = nRangoBL;
+    while(nivel_punteros > 0){
+
+        if(ptr == 0){
+            if(reservar == 0){
+                return FALLO;
+            }else{
+                ptr = reservar_bloque();
+                ninodo->numBloquesOcupados++;
+                ninodo->ctime = time(NULL);
+                if(nivel_punteros == nRangoBL){
+                    ninodo->punterosIndirectos[nRangoBL-1] = ptr;
+                }else{
+                    buffer[indice] = ptr;
+                    if(bwrite(ptr_ant, buffer) == FALLO){
+                        return FALLO;
+                    }
+                }
+                if(memset(buffer,0,BLOCKSIZE) == FALLO){
+                    return FALLO;
+                }
+            }
+        }else{
+            if(bread(ptr, buffer) == FALLO){
+                return FALLO;
+            }
+        }
+
+        indice = obtener_indice(nblogico, nivel_punteros);
+        ptr_ant = ptr;
+        ptr = buffer[indice];
+        nivel_punteros--;
+
+    }
+
+    if(ptr = 0){
+        if(reservar = 0){
+            return FALLO;
+        }else{
+            ptr = reservar_bloque();
+            ninodo->numBloquesOcupados++;
+            ninodo->ctime = time(NULL);
+            if(nRangoBL = 0){
+                ninodo->punterosDirectos[nblogico] = ptr;
+            }else{
+                buffer[indice] = ptr;
+                if(bwrite(ptr_ant, buffer) == FALLO){
+                    return FALLO;
+                }
+            }
+        }
+    }
+    return ptr;
+}
