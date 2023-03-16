@@ -103,10 +103,8 @@ int initMB(){
 
     if (nbitsrest != 0){
         unsigned char byteaux = 128; //10000000
-        printf("nbitsrest: %i  nbytes: %i \n",nbitsrest, nbytes);
         for (int i=0; i<nbitsrest; i++){
             bufferMB[nbytes%BLOCKSIZE] |= byteaux;
-            printf("byteaux: %i  buffermb[%i]: %i\n",byteaux,nbytes%BLOCKSIZE,bufferMB[nbytes%BLOCKSIZE]);
             byteaux >>= 1;
         }
     }
@@ -124,7 +122,6 @@ int initMB(){
         unsigned char bufferAux[BLOCKSIZE];
         memset(bufferAux,255,BLOCKSIZE);
         for (int i=0; i<nbloques; i++){
-            printf("iteracio: %i \n",i);
             if (bwrite(SB.posPrimerBloqueMB + i,&bufferAux) == FALLO){
                 perror("initMB: error bwrite bufferMB (+1 bloques)");
                 return FALLO;

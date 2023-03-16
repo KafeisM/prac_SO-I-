@@ -6,12 +6,12 @@
 #define DEBUG2  0
 #define DEBUG3  0
 #define DEBUG4  0
-#define DEBUG5  0
+#define DEBUG5  1
 
 
 void comprobarMB();
 void comprobarBloques();
-void comprobarInodo();
+void comprobarInodo(int inRes);
 
 const char *directorio;
 struct superbloque SB;
@@ -104,9 +104,27 @@ int main(int argc, char **argv){
 
 #if DEBUG4
     //comrobar datos del directorio raiz
-    comprobarInodo();
+    printf("\nDATOS DEL DIRECTORIO RAIZ\n");
+    comprobarInodo(0); //directorio raiz es el inodo 0
 #endif
-    
+
+#if DEBUG5
+    int inodoRes = reservar_inodo('f',6);
+    struct inodo inodoAux;
+    leer_inodo(inodoRes,&inodoAux);
+
+    printf("\nINODO %d. TRADUCCIÓN DE LOS BLOQUES LOGICOS 8,24,30.004,400.004,468.750\n",inodoRes);
+    traducir_bloque_inodo(&inodoAux,8,1);
+    traducir_bloque_inodo(&inodoAux,24,1);
+    traducir_bloque_inodo(&inodoAux,30004,1);
+    traducir_bloque_inodo(&inodoAux,400004,1);
+    traducir_bloque_inodo(&inodoAux,468750,1);
+
+    printf("\nDATOS DEL INODO RESERVADO %d\n",inodoRes);
+    comprobarInodo(inodoRes);
+
+#endif
+
     return EXITO;
 }
 
@@ -144,19 +162,12 @@ void comprobarBloques(){
 
 }
 
-void comprobarInodo(){
+void comprobarInodo(int inRes){
     struct inodo inodo;
     struct superbloque SB;
 
     bread(posSB,&SB);
 
-    int inRes = reservar_inodo('d',7);
-
-    if(leer_inodo(inRes,&inodo)){
-        fprintf(stderr,"ERROR EN LA LECTURA DEL INODO\n");
-    }
-
-    printf("\nDATOS DEL DIRECTORIO RAIZ\n");
     struct tm *ts;
     char atime[80];
     char mtime[80];
