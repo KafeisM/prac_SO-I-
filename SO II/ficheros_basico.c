@@ -81,7 +81,73 @@ int binaryToDecimal(int byte[]);
 * Output:   OUTPUT
 ---------------------------------------------------------------------------------------------------------*/
 
-int initMB(){    
+int initMB(){
+
+    struct superbloque SB;
+
+    if (bread(posSB,&SB) == FALLO){
+        perror("initMB: error bread SB");
+        return FALLO;
+    }
+
+    unsigned int nbits = SB.posUltimoBloqueAI;
+    //unsigned int nbits = SB.posPrimerBloqueDatos;
+    unsigned int nbloques = nbits/8/BLOCKSIZE;
+    unsigned char bufferMB[BLOCKSIZE];
+    unsigned int nbytes = nbits/8;
+    unsigned int nbitsrest = nbits%8;
+
+    for (int i=0; i<nbytes%BLOCKSIZE; i++){
+        bufferMB[i] = 255;
+    }
+
+    if (nbitsrest != 0){
+        unsigned char byteaux = 128; //10000000
+        printf("nbitsrest: %i  nbytes: %i \n",nbitsrest, nbytes);
+        for (int i=0; i<nbitsrest; i++){
+            bufferMB[nbytes%BLOCKSIZE] |= byteaux;
+            printf("byteaux: %i  buffermb[%i]: %i\n",byteaux,nbytes%BLOCKSIZE,bufferMB[nbytes%BLOCKSIZE]);
+            byteaux >>= 1;
+        }
+    }
+
+    for (int i = nbytes%BLOCKSIZE + 1; i<BLOCKSIZE; i++){
+        bufferMB[i] = 0;
+    }
+
+    if (nbloques == 0){
+        if (bwrite(SB.posPrimerBloqueMB,&bufferMB) == FALLO){
+            perror("initMB: error bwrite bufferMB");
+            return FALLO;
+        }
+    }else{
+        unsigned char bufferAux[BLOCKSIZE];
+        memset(bufferAux,255,BLOCKSIZE);
+        for (int i=0; i<nbloques; i++){
+            printf("iteracio: %i \n",i);
+            if (bwrite(SB.posPrimerBloqueMB + i,&bufferAux) == FALLO){
+                perror("initMB: error bwrite bufferMB (+1 bloques)");
+                return FALLO;
+            }
+        }
+        if (bwrite(SB.posPrimerBloqueMB + nbloques,&bufferMB) == FALLO){
+            perror("initMB: error bwrite bufferMB");
+            return FALLO;
+        }
+    }
+
+    SB.cantBloquesLibres = SB.cantBloquesLibres -(tamMB(SB.totBloques) + tamSB + tamAI(SB.totInodos));
+
+    if (bwrite(posSB,&SB) == FALLO){
+        perror("initMB: error bwrite SB");
+        return FALLO;
+    }
+
+    return EXITO;
+
+}
+
+int initMB2(){    
     
     struct superbloque SB;
     
