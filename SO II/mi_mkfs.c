@@ -44,7 +44,7 @@ int main(int argc, char **argv){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE ARRAY DE INODOS\n"RESET);
     }
 
-    if(reservar_inodo('d',7) == FALLO){
+    if(reservar_inodo('d',7) == FALLO){ //CREAR INODO RAIZ
         fprintf(stderr,ROJO_T"ERROR EN LA CREACIÓN DEL DIRECTORIO RAÍZ");
     }
 

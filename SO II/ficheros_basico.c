@@ -90,8 +90,8 @@ int initMB(){
         return FALLO;
     }
 
-    unsigned int nbits = SB.posUltimoBloqueAI;
-    //unsigned int nbits = SB.posPrimerBloqueDatos;
+    //unsigned int nbits = SB.posUltimoBloqueAI;
+    unsigned int nbits = SB.posPrimerBloqueDatos;
     unsigned int nbloques = nbits/8/BLOCKSIZE;
     unsigned char bufferMB[BLOCKSIZE];
     unsigned int nbytes = nbits/8;
@@ -556,7 +556,7 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos){
         return FALLO;
     }
 
-    int posInodoReservado = SB.cantBloquesLibres;
+    unsigned int posInodoReservado = SB.posPrimerInodoLibre;
 
     SB.posPrimerInodoLibre++;
     SB.cantInodosLibres--;
@@ -661,6 +661,7 @@ int traducir_bloque_inodo(struct inodo *ninodo, unsigned int nblogico, unsigned 
 
     nRangoBL = obtener_nRangoBL(ninodo, nblogico,&ptr);
     nivel_punteros = nRangoBL;
+
     while(nivel_punteros > 0){
 
         if(ptr == 0){
@@ -668,6 +669,7 @@ int traducir_bloque_inodo(struct inodo *ninodo, unsigned int nblogico, unsigned 
                 return FALLO;
             }else{
                 ptr = reservar_bloque();
+                fprintf(stderr,"[traducir_bloque_inodo()-> inodo.punterosDIrectos[%d] = %d (reservado BF %d para BL %d)]\n",nblogico,ptr,ptr,nblogico);
                 ninodo->numBloquesOcupados++;
                 ninodo->ctime = time(NULL);
                 if(nivel_punteros == nRangoBL){
@@ -698,6 +700,7 @@ int traducir_bloque_inodo(struct inodo *ninodo, unsigned int nblogico, unsigned 
             return FALLO;
         }else{
             ptr = reservar_bloque();
+            fprintf(stderr,"[traducir_bloque_inodo()-> inodo.punterosDIrectos[%d] = %d (reservado BF %d para BL %d)]\n",nblogico,ptr,ptr,nblogico);
             ninodo->numBloquesOcupados++;
             ninodo->ctime = time(NULL);
             if(nRangoBL == 0){
@@ -710,5 +713,7 @@ int traducir_bloque_inodo(struct inodo *ninodo, unsigned int nblogico, unsigned 
             }
         }
     }
+
+
     return ptr;
 }

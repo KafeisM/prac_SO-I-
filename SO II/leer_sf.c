@@ -105,23 +105,28 @@ int main(int argc, char **argv){
 #if DEBUG4
     //comrobar datos del directorio raiz
     printf("\nDATOS DEL DIRECTORIO RAIZ\n");
-    comprobarInodo(0); //directorio raiz es el inodo 0
+    comprobarInodo(SB.posInodoRaiz); //directorio raiz es el inodo 0
 #endif
 
 #if DEBUG5
     int inodoRes = reservar_inodo('f',6);
-    struct inodo inodoAux;
-    leer_inodo(inodoRes,&inodoAux);
 
-    printf("\nINODO %d. TRADUCCIÓN DE LOS BLOQUES LOGICOS 8,24,30.004,400.004,468.750\n",inodoRes);
+    struct inodo inodoAux;
+    
+    printf("\nINODO %d. TRADUCCIÓN DE LOS BLOQUES LOGICOS 8,204,30.004,400.004,468.750\n",inodoRes);
+    leer_inodo(inodoRes,&inodoAux);
     traducir_bloque_inodo(&inodoAux,8,1);
-    traducir_bloque_inodo(&inodoAux,24,1);
+    traducir_bloque_inodo(&inodoAux,204,1);
     traducir_bloque_inodo(&inodoAux,30004,1);
     traducir_bloque_inodo(&inodoAux,400004,1);
     traducir_bloque_inodo(&inodoAux,468750,1);
 
     printf("\nDATOS DEL INODO RESERVADO %d\n",inodoRes);
     comprobarInodo(inodoRes);
+
+    bread(posSB,&SB);
+    printf("posPrimerInodoLibre = %d\n", SB.posPrimerInodoLibre);
+
 
 #endif
 
@@ -164,10 +169,7 @@ void comprobarBloques(){
 
 void comprobarInodo(int inRes){
     struct inodo inodo;
-    struct superbloque SB;
-
-    bread(posSB,&SB);
-
+    
     struct tm *ts;
     char atime[80];
     char mtime[80];
