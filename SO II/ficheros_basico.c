@@ -365,7 +365,7 @@ int reservar_bloque(){
         return FALLO;
     }
 
-    if (SB.cantBloquesLibres == FALLO){ //comprobar si hay bloques disponibles
+    if (SB.cantBloquesLibres == 0){ //comprobar si hay bloques disponibles
         perror("reservar_bloque: no hay bloques disponibles");
         return FALLO;
     }
@@ -401,9 +401,9 @@ int reservar_bloque(){
         if (bufferMB[posByte] != 255){
             found = true;
             break;
+        }else{
+            posByte++;
         }
-
-        posByte++;
 
     }
 
