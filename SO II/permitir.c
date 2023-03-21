@@ -13,8 +13,10 @@ int main(int argc, char **argv){
         if(bmount(directorio) == FALLO){
             return FALLO;
         }
-
-        mi_chmod_f(ninodo, permisos);
+        
+        if(mi_chmod_f(ninodo, permisos) == FALLO){
+            return FALLO;
+        }
 
         if(bumount(directorio) == FALLO){
             return FALLO;

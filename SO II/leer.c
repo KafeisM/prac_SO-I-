@@ -1,5 +1,6 @@
 #include "ficheros.h"
 
-int main(){
+// ./leer <nombre_dispositivo> <ninodo> 
+int main(int argc, char **argv){
     
 }
