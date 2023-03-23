@@ -91,7 +91,7 @@ int initMB(){
     }
 
     //unsigned int nbits = SB.posUltimoBloqueAI;
-    unsigned int nbits = SB.posPrimerBloqueDatos;
+    unsigned int nbits = tamSB + tamMB(SB.totBloques) + tamAI(SB.totInodos);
     unsigned int nbloques = nbits/8/BLOCKSIZE;
     unsigned char bufferMB[BLOCKSIZE];
     unsigned int nbytes = nbits/8;
@@ -361,12 +361,10 @@ int reservar_bloque(){
 
     struct superbloque SB; //leemos el superbloque
     if (bread(posSB,&SB) == FALLO){
-        perror("reservar_bloque: Error en bread de SB");
         return FALLO;
     }
 
     if (SB.cantBloquesLibres == 0){ //comprobar si hay bloques disponibles
-        perror("reservar_bloque: no hay bloques disponibles");
         return FALLO;
     }
     
@@ -377,7 +375,7 @@ int reservar_bloque(){
     int nbloqueabs = SB.posPrimerBloqueMB;
     bool found = false;
 
-    while (found == false){ //encontramos el primer bloque con un 0 y guardamos su contenido en bufferMB
+    while (found == false && nbloqueabs < SB.posUltimoBloqueMB){ //encontramos el primer bloque con un 0 y guardamos su contenido en bufferMB
 
         if (bread(nbloqueabs,bufferMB) == FALLO){
             perror("reservar_bloque: Error en bread de bloque con 0");
@@ -396,7 +394,7 @@ int reservar_bloque(){
     unsigned int posByte = 0;
     found = false;
 
-    while (found == false){ //encontramos el primer byte con un 0
+    while (found == false && posByte < BLOCKSIZE){ //encontramos el primer byte con un 0
 
         if (bufferMB[posByte] != 255){
             found = true;
