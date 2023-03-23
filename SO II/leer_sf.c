@@ -11,7 +11,7 @@
 
 void comprobarMB();
 void comprobarBloques();
-void comprobarInodo(int inRes);
+void comprobarInodo(int inRes, struct inodo inodo);
 
 const char *directorio;
 struct superbloque SB;
@@ -116,13 +116,17 @@ int main(int argc, char **argv){
     printf("\nINODO %d. TRADUCCIÓN DE LOS BLOQUES LOGICOS 8,204,30.004,400.004,468.750\n",inodoRes);
     leer_inodo(inodoRes,&inodoAux);
     traducir_bloque_inodo(&inodoAux,8,1);
+    printf("\n");
     traducir_bloque_inodo(&inodoAux,204,1);
+    printf("\n");
     traducir_bloque_inodo(&inodoAux,30004,1);
+    printf("\n");
     traducir_bloque_inodo(&inodoAux,400004,1);
+    printf("\n");
     traducir_bloque_inodo(&inodoAux,468750,1);
 
     printf("\nDATOS DEL INODO RESERVADO %d\n",inodoRes);
-    comprobarInodo(inodoRes);
+    comprobarInodo(inodoRes,inodoAux);
 
     bread(posSB,&SB);
     printf("posPrimerInodoLibre = %d\n", SB.posPrimerInodoLibre);
@@ -167,15 +171,13 @@ void comprobarBloques(){
 
 }
 
-void comprobarInodo(int inRes){
-    struct inodo inodo;
+void comprobarInodo(int inRes, struct inodo inodo){
     
     struct tm *ts;
     char atime[80];
     char mtime[80];
     char ctime[80];
 
-    leer_inodo(inRes, &inodo);
     ts = localtime(&inodo.atime);
     strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
     ts = localtime(&inodo.mtime);
