@@ -3,7 +3,7 @@
 // ./leer <nombre_dispositivo> <ninodo> 
 int main(int argc, char **argv){
     
-    if((argc =! 2) ||(argv[1] == NULL) ||(argv[2] == NULL)){
+    if((argc =! 3) ||(argv[1] == NULL) ||(argv[2] == NULL)){
         return FALLO;
     }else{
         struct inodo inodo;
@@ -15,7 +15,7 @@ int main(int argc, char **argv){
         unsigned int offset = 0;
         char buffer_texto[tamBuffer];
 
-        if(bumount(directorio) == FALLO){
+        if(bmount(directorio) == FALLO){
             return FALLO;
         }
 
@@ -46,11 +46,9 @@ int main(int argc, char **argv){
             return FALLO;
         }
 
-        if(buomount(directorio) == FALLO){
+        if(bumount(directorio) == FALLO){
             return FALLO;
         }
-
-        
 
         return EXITO;
     }
