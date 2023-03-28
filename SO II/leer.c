@@ -3,7 +3,8 @@
 // ./leer <nombre_dispositivo> <ninodo> 
 int main(int argc, char **argv){
     
-    if((argc =! 3) ||(argv[1] == NULL) ||(argv[2] == NULL)){
+    if((argc != 3)){
+        fprintf(stderr, "Sintaxis: ./leer <nombre_dispositivo> <ninodo>");
         return FALLO;
     }else{
         struct inodo inodo;
@@ -16,6 +17,7 @@ int main(int argc, char **argv){
         char buffer_texto[tamBuffer];
 
         if(bmount(directorio) == FALLO){
+            fprintf(stderr, "Error en montar el dispositivo");
             return FALLO;
         }
 
@@ -35,6 +37,7 @@ int main(int argc, char **argv){
         }
 
         if(leer_inodo(ninodo, &inodo)){
+            fprintf(stderr, "Error en leer inodo");
             return FALLO;
         }
 
@@ -47,6 +50,7 @@ int main(int argc, char **argv){
         }
 
         if(bumount(directorio) == FALLO){
+            fprintf(stderr, "Error en desmontar el dispositivo");
             return FALLO;
         }
 
