@@ -1,4 +1,5 @@
  #include "ficheros_basico.h"
+ #include <math.h>
 
 int binaryToDecimal(int byte[]);
 
@@ -81,7 +82,7 @@ int binaryToDecimal(int byte[]);
 * Output:   OUTPUT
 ---------------------------------------------------------------------------------------------------------*/
 
-int initMB(){
+int initMB2(){
 
     struct superbloque SB;
 
@@ -114,7 +115,7 @@ int initMB(){
     }
 
     if (nbloques == 0){
-        if (bwrite(SB.posPrimerBloqueMB,&bufferMB) == FALLO){
+        if (bwrite(SB.posPrimerBloqueMB,bufferMB) == FALLO){
             perror("initMB: error bwrite bufferMB");
             return FALLO;
         }
@@ -122,12 +123,12 @@ int initMB(){
         unsigned char bufferAux[BLOCKSIZE];
         memset(bufferAux,255,BLOCKSIZE);
         for (int i=0; i<nbloques; i++){
-            if (bwrite(SB.posPrimerBloqueMB + i,&bufferAux) == FALLO){
+            if (bwrite(SB.posPrimerBloqueMB + i,bufferAux) == FALLO){
                 perror("initMB: error bwrite bufferMB (+1 bloques)");
                 return FALLO;
             }
         }
-        if (bwrite(SB.posPrimerBloqueMB + nbloques,&bufferMB) == FALLO){
+        if (bwrite(SB.posPrimerBloqueMB + nbloques,bufferMB) == FALLO){
             perror("initMB: error bwrite bufferMB");
             return FALLO;
         }
@@ -144,63 +145,98 @@ int initMB(){
 
 }
 
-int initMB2(){    
+int initMB(){    
     
     struct superbloque SB;
-    
-    if(bread(posSB,&SB) == FALLO){
+    if (bread(posSB, &SB) == FALLO)
+    {
         return FALLO;
-    } 
+    }
 
-    char bufferMB[BLOCKSIZE];
-    int nbits = SB.posPrimerBloqueDatos;
-    int nbytes = nbits / 8;
-    int primerBloq = SB.posPrimerBloqueMB;
-    int totalBloq = 1;
+    // Buffer para MP
+    unsigned char buffer[BLOCKSIZE];
+    if (!memset(buffer, 0, BLOCKSIZE))
+    {
+        // Si no se puede reservr memoria
+        return FALLO;
+    } // Poner todo a 0s en buffer
 
-   //mirar si necesitamos bloques extra, o solo 1
-    if ((nbits / 8) / BLOCKSIZE != 0){
-        int bloqExtra = (nbits / 8) / BLOCKSIZE;
-        memset(bufferMB,255,BLOCKSIZE);
-        for(int i = 0; i < bloqExtra; i++){
-            if(bwrite(primerBloq, &bufferMB) == FALLO){
+    int nBloquesMetadatos = tamSB + tamMB(SB.totBloques) + tamAI(SB.totInodos); // bits que ocupan los Metadatos en MP
+
+    // Calcular bytes que ocupan en MP el número de bloques Metadatos
+    int nBytesMetaMP = nBloquesMetadatos / 8;  // bytes ocupados
+    int bitsRestantes = nBloquesMetadatos % 8; // bits restantes
+
+    // Calcular cuantos bloques  ocupan metadatos en MP
+    int bloquesOcupadosMPCompletos = nBytesMetaMP / BLOCKSIZE; // Bloques enteros
+
+    // Si al menos hay un bloque entero ocupado, ponemos todo a 1s en buffer
+    if (bloquesOcupadosMPCompletos >= 1)
+    {
+
+        if (!memset(buffer, 255, BLOCKSIZE))
+        {
+            return FALLO;
+        }
+
+        // Esbribir bloques enteros
+        for (int i = 0; i < bloquesOcupadosMPCompletos; i++)
+        {
+            // El bloque de MP empieza allá donde acaba el bloque de SB
+            // Ej: Si SB ocupa 1 bloque y este empieza en nbloque=0,
+            //  MP empieza en nbloque = 1;
+            if (bwrite(SB.posPrimerBloqueMB + i, buffer) == FALLO)
+            {
                 return FALLO;
             }
-            totalBloq++;
-            primerBloq++;
         }
-        
-    }
-    
-    //rellenamos el ultimo bloque
-    for (int i = 0; i < nbytes; i++){
-        bufferMB[i] = 255; // ponemos todos los bytes a 1 (elementos de la array)
+
+        if (!memset(buffer, 0, BLOCKSIZE))
+        {
+            return FALLO;
+        } // Volvemos a poner todo a 0s en buffer
     }
 
-    // calcular resto de bits que pueden quedar por meter
-    int rest = nbits % 8;
-    if (rest != 0){
-        //byte auxiliar
-        int byte[8];
-        for (int i = 0; i < rest; i++){
-           byte[i] = 1;
+    // Calcular nº de bytes que ocupan los bloques enteros
+    //  (nBytesOcupadosEnMP - BLOCKSIZE * bloquesOcupadosMPCompletos) = nBytesBloquesNoEnteros
+    int nBytesBloquesNoEnteros = nBytesMetaMP - BLOCKSIZE * bloquesOcupadosMPCompletos;
+
+    // Poner a 1 los bytes completos
+    for (int i = 0; i < nBytesBloquesNoEnteros; i++)
+    {
+        if (!memset(buffer + i, 255, 1))
+        {
+            return FALLO;
         }
-        bufferMB[nbytes] = binaryToDecimal(byte);
-    }else{
-        bufferMB[nbytes] = 0;
     }
 
-   //acabar de iniciar el resto de bits 
-    for (int aux = nbytes + 1; aux < BLOCKSIZE; aux++){
-        bufferMB[aux] = 0;
+    // Poner a 1 los bits restantes
+    if (bitsRestantes != 0)
+    {
+        unsigned int aux = 0;
+        int e = 7; // exponente (7 es el máximo ps 1B son 8 bits)
+        for (int i = 0; i < bitsRestantes; i++)
+        {
+            aux = aux + pow(2, e);
+            e--;
+        }
+        if (!memset(buffer + nBytesBloquesNoEnteros, aux, 1))
+        {
+            return FALLO;
+        }
     }
 
-    if(bwrite(SB.posPrimerBloqueMB, &bufferMB) == FALLO){
+    // Escribimos los bytes restantes
+    if (bwrite(SB.posPrimerBloqueMB + bloquesOcupadosMPCompletos, buffer) == FALLO)
+    {
         return FALLO;
     }
 
-    SB.cantBloquesLibres = SB.cantBloquesLibres -(tamMB(SB.totBloques) + tamSB + tamAI(SB.totInodos));
-    if(bwrite(posSB,&SB) == FALLO){
+    // Actualizamos SB
+    SB.cantBloquesLibres = SB.cantBloquesLibres - nBloquesMetadatos;
+
+    if (bwrite(posSB, &SB) == FALLO)
+    {
         return FALLO;
     }
 
@@ -285,12 +321,9 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
 
     unsigned int posbyte = nbloque/8;
     unsigned int posbit = nbloque%8;
-    unsigned nbloqueMB = posbyte/BLOCKSIZE; //numero de bloque de forma relativa al MB
+    unsigned int nbloqueMB = posbyte/BLOCKSIZE; //numero de bloque de forma relativa al MB
     unsigned int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB; //posicion absoluta del bloque en el dispositivo
     unsigned char bufferMB[BLOCKSIZE];
-
-    unsigned char mascara = 128; //10000000
-    mascara >>= posbit; //desplazamos el bit de la mascara al bit deseado
 
     //cargamos el bloque que contiene el bit para leer
     if(bread(nbloqueabs,bufferMB) == FALLO){
@@ -299,11 +332,16 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
 
     posbyte = posbyte % BLOCKSIZE; //localizar el byte dentro del bloque leido
 
+    unsigned char mascara = 128; //10000000
+    mascara = mascara >> posbit; //desplazamos el bit de la mascara al bit deseado
+
     //mirar si se debe escribir un 0 o 1
     if(bit == 1){
         bufferMB[posbyte] |= mascara;
-    }else{
+    }else if (bit==0){
         bufferMB[posbyte] &= ~mascara;
+    }else{
+        return FALLO;
     }
 
     if(bwrite(nbloqueabs,bufferMB) == FALLO){
@@ -372,7 +410,7 @@ int reservar_bloque(){
     unsigned char bufferAux[BLOCKSIZE]; //buffer auxiliar para encontrar el primer bloque con un 0
     memset(bufferAux,255,BLOCKSIZE); //llenamos el buffer aux con 1s
 
-    int nbloqueabs = SB.posPrimerBloqueMB;
+    unsigned int nbloqueabs = SB.posPrimerBloqueMB;
     bool found = false;
 
     while (found == false && nbloqueabs < SB.posUltimoBloqueMB){ //encontramos el primer bloque con un 0 y guardamos su contenido en bufferMB
@@ -392,17 +430,8 @@ int reservar_bloque(){
     }
 
     unsigned int posByte = 0;
-    found = false;
-
-    while (found == false && posByte < BLOCKSIZE){ //encontramos el primer byte con un 0
-
-        if (bufferMB[posByte] != 255){
-            found = true;
-            break;
-        }else{
-            posByte++;
-        }
-
+    while (bufferMB[posByte] == 255){
+        posByte++;
     }
 
     unsigned int posBit = 0;
@@ -416,7 +445,7 @@ int reservar_bloque(){
     }
 
     //buscamos el bloque fisico que representa el bit
-    unsigned int nbloque = ((nbloqueabs - SB.posPrimerBloqueMB) * BLOCKSIZE + posByte) * 8 + posBit;
+    int nbloque = ((nbloqueabs - SB.posPrimerBloqueMB) * BLOCKSIZE + posByte) * 8 + posBit;
     if(escribir_bit(nbloque,1) == FALLO){
         perror("reservar_bloque: Error al escribir el bit");
         return FALLO;
@@ -428,9 +457,9 @@ int reservar_bloque(){
         perror("reservar_bloque: Error bwrite SB");
         return FALLO;
     }
-
-    memset(bufferAux,0,BLOCKSIZE); //ponemos a 0s el bloque reservado
-    if (bwrite(nbloque,bufferAux) == FALLO){
+    unsigned char buffer[BLOCKSIZE];
+    memset(buffer,0,BLOCKSIZE); //ponemos a 0s el bloque reservado
+    if (bwrite(nbloque,buffer) == FALLO){
         perror("reservar_bloque: Error bwrite 0s");
         return FALLO;
     }
@@ -645,7 +674,7 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
 ---------------------------------------------------------------------------------------------------------*/
 int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar) {
     unsigned int ptr, ptr_ant;
-    int nRangoBL, nivel_punteros, indice;
+    unsigned int nRangoBL, nivel_punteros, indice;
     unsigned int buffer[NPUNTEROS];
 
     ptr = 0, ptr_ant = 0;
@@ -663,13 +692,13 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
             
                 if(nivel_punteros == nRangoBL) {
                     inodo->punterosIndirectos[nRangoBL - 1] = ptr;
-                    fprintf(stderr,GRIS_T "[traducir_bloque_inodo() → inodo.punterosIndirectos[%i] = %i (reservado BF %i para punteros_nivel%i\n",
+                    printf(GRIS_T "[traducir_bloque_inodo() → inodo.punterosIndirectos[%u] = %u (reservado BF %u para punteros_nivel%u\n",
                     nRangoBL-1, ptr, ptr, nivel_punteros);
                 } else {
                     buffer[indice] = ptr;
-                    fprintf(stderr,GRIS_T "[traducir_bloque_inodo() → punteros_nivel%i[%i] = %i (reservado BF %i para punteros_nivel%i)\n",
-                    nivel_punteros+1, indice, ptr, ptr, nivel_punteros);
                     bwrite(ptr_ant, buffer);
+                    printf(GRIS_T "[traducir_bloque_inodo() → punteros_nivel%u[%u] = %u (reservado BF %u para punteros_nivel%u)\n",
+                    nivel_punteros, indice, ptr, ptr, nivel_punteros);                   
                 }
                 memset(buffer, 0, BLOCKSIZE);
             }
@@ -692,11 +721,11 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
             inodo->ctime = time(NULL);
             if(nRangoBL == 0) {
                 inodo->punterosDirectos[nblogico] = ptr;
-                fprintf(stderr,GRIS_T "[traducir_bloque_inodo() → inodo.punterosDirectos[%i] = %i (reservado BF %i para BL %i)\n",
+                printf(GRIS_T "[traducir_bloque_inodo() → inodo.punterosDirectos[%u] = %u (reservado BF %u para BL %u)\n",
                 nblogico, ptr, ptr, nblogico);
             } else {
                 buffer[indice] = ptr;
-                fprintf(stderr,GRIS_T "[traducir_bloque_inodo() → inodo.punteros_nivel%d[%i] = %i (reservado BF %i para BL %i)\n"RESET,nivel_punteros +1,
+                printf(GRIS_T "[traducir_bloque_inodo() → inodo.punteros_nivel%u[%u] = %u (reservado BF %u para BL %u)\n"RESET,nRangoBL,
                 indice, ptr, ptr, nblogico);
                 bwrite(ptr_ant, buffer);
             }

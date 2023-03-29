@@ -20,9 +20,12 @@ void *buffer[BLOCKSIZE];
 int main(int argc, char **argv){
 
     directorio = argv[1];
-    bmount(directorio);
-    bread(posSB, buffer);
-    memcpy(&SB,buffer,sizeof(struct superbloque));
+    if (bmount(directorio) == FALLO){
+        return FALLO;
+    }
+    if (bread(posSB, &SB) == FALLO){
+        return FALLO;
+    }
 
 #if DEBUGSB
     printf("DATOS DEL SUPERBLOQUE\n");
@@ -109,24 +112,28 @@ int main(int argc, char **argv){
 #endif
 
 #if DEBUG5
-    int inodoRes = reservar_inodo('f',6);
+    int ninodo = reservar_inodo('f',6);
 
-    struct inodo inodoAux;
+    if (bread(posSB,&SB) == FALLO){
+        return FALLO;
+    }
+
+    struct inodo inodoRes;
     
-    printf("\nINODO %d. TRADUCCIÓN DE LOS BLOQUES LOGICOS 8,204,30.004,400.004,468.750\n",inodoRes);
-    leer_inodo(inodoRes,&inodoAux);
-    traducir_bloque_inodo(&inodoAux,8,1);
+    printf("\nINODO %d. TRADUCCIÓN DE LOS BLOQUES LOGICOS 8,204,30.004,400.004,468.750\n",ninodo);
+    leer_inodo(ninodo,&inodoRes);
+    traducir_bloque_inodo(&inodoRes,8,1);
     printf("\n");
-    traducir_bloque_inodo(&inodoAux,204,1);
+    traducir_bloque_inodo(&inodoRes,204,1);
     printf("\n");
-    traducir_bloque_inodo(&inodoAux,30004,1);
+    traducir_bloque_inodo(&inodoRes,30004,1);
     printf("\n");
-    traducir_bloque_inodo(&inodoAux,400004,1);
+    traducir_bloque_inodo(&inodoRes,400004,1);
     printf("\n");
-    traducir_bloque_inodo(&inodoAux,468750,1);
+    traducir_bloque_inodo(&inodoRes,468750,1);
 
-    printf("\nDATOS DEL INODO RESERVADO %d\n",inodoRes);
-    comprobarInodo(inodoRes,inodoAux);
+    printf("\nDATOS DEL INODO RESERVADO %d\n",ninodo);
+    comprobarInodo(ninodo,inodoRes);
 
     bread(posSB,&SB);
     printf("posPrimerInodoLibre = %d\n", SB.posPrimerInodoLibre);

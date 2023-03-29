@@ -20,7 +20,7 @@ int main(int argc, char **argv){
 
     //INICIALIZAR a 0's
     for (size_t i = 0; i < num_blocks; i++){
-        bwrite(i,&buffer);
+        bwrite(i,buffer);
         /*if(bw == FALLO){
             fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO (bwrite)\n"RESET);
         }else if (bw < BLOCKSIZE){
@@ -49,10 +49,10 @@ int main(int argc, char **argv){
     }
 
     //DESMONTAR DISCO
-    if(bumount() == -1){
+    if(bumount() == FALLO){
         fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
     }
         
-    return 0;
+    return EXITO;
 
 }
