@@ -4,13 +4,14 @@
 int main(int argc, char **argv){
     
     if((argc != 4)){
-        printf(ROJO_T "Sintaxis: ./escribir <nombre_dispositivo> <'$(cat fichero)'> <diferentes_inodos>\n");
-        printf(ROJO_T "Offsets: 9000, 209000, 30725000, 409605000, 480000000\n");
+        printf(ROJO_T "Sintaxis: ./escribir <nombre_dispositivo> <'$(cat fichero)'> <diferentes_inodos>\n"RESET);
+        printf(ROJO_T "Offsets: 9000, 209000, 30725000, 409605000, 480000000\n"RESET);
         printf(ROJO_T "Si diferentes_inodos = 0 se reserva un solo inodo para todos los offsets\n" RESET);
 
         return FALLO;
     }
-    printf("hola");
+
+    printf(ROJO_T "hola" RESET);
 
     //char *directorio = argv[1];
     int dif_inodos = atoi(argv[3]);
@@ -32,9 +33,6 @@ int main(int argc, char **argv){
         fprintf(stderr, "Error en montar el dispositivo");
         return FALLO;
     }
-
-    fprintf(stderr, "lksjdfnlksdnf");
-    fflush(stdout);
 
     for(int i = 0; i < 5; i++){
         fprintf(stderr, "aaaa");
