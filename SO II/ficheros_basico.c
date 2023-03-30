@@ -697,7 +697,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                 } else {
                     buffer[indice] = ptr;
                     bwrite(ptr_ant, buffer);
-                    printf(GRIS_T "[traducir_bloque_inodo() → punteros_nivel%u[%u] = %u (reservado BF %u para punteros_nivel%u)\n",
+                    printf(GRIS_T "[traducir_bloque_inodo() → inodo.punteros_nivel%u[%u] = %u (reservado BF %u para punteros_nivel%u)\n",
                     nivel_punteros, indice, ptr, ptr, nivel_punteros);                   
                 }
                 memset(buffer, 0, BLOCKSIZE);
@@ -725,7 +725,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                 nblogico, ptr, ptr, nblogico);
             } else {
                 buffer[indice] = ptr;
-                printf(GRIS_T "[traducir_bloque_inodo() → inodo.punteros_nivel%u[%u] = %u (reservado BF %u para BL %u)\n"RESET,nRangoBL,
+                printf(GRIS_T "[traducir_bloque_inodo() → inodo.punteros_nivel1[%u] = %u (reservado BF %u para BL %u)\n"RESET,
                 indice, ptr, ptr, nblogico);
                 bwrite(ptr_ant, buffer);
             }
