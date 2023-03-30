@@ -9,7 +9,7 @@ int main(int argc, char **argv){
     }else{
         struct inodo inodo;
 
-        char directorio = argv[1];
+        char *directorio = argv[1];
         int ninodo = atoi(argv[2]);
         int leidos = 0;
         int tamBuffer = 1500;

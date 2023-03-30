@@ -18,7 +18,6 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     int desp1;
     int desp2;
     int nbfisico;
-    int auxLeidos = 0;
     unsigned char buf_bloque[BLOCKSIZE];
 
     // Leemos inodo
@@ -43,7 +42,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     if(primerBL == ultimoBL){
 
         // Obtenemos el numero del bloque fisico
-        nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
+        nbfisico = traducir_bloque_inodo(&inodo, primerBL, 1);
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
 
@@ -72,7 +71,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
         //1. Primer bloque parcial escrito
         // Obtenemos el numero del bloque fisico
-        nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
+        nbfisico = traducir_bloque_inodo(&inodo, primerBL, 1);
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
 
@@ -99,7 +98,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         for(int i = primerBL + 1; i < ultimoBL; i++){
 
             // Obtenemos el numero del bloque fisico sobre cada iteracion
-            nbfisico = traducir_bloque_inodo(ninodo, i, 0);
+            nbfisico = traducir_bloque_inodo(&inodo, i, 0);
             // Miramos si hay bloque fisico, y si hay, entramos dentro del if
             if(nbfisico != FALLO){
                 
@@ -118,7 +117,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
         //3. Ultimo bloque parcial
         // Obtenemos el numero del bloque fisico
-        nbfisico = traducir_bloque_inodo(ninodo, ultimoBL, 1);
+        nbfisico = traducir_bloque_inodo(&inodo, ultimoBL, 1);
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
 
@@ -191,7 +190,6 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     int desp1;
     int desp2;
     int nbfisico;
-    int auxLeidos = 0;
     unsigned char buf_bloque[BLOCKSIZE];
 
     // Leemos inodo
@@ -228,7 +226,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     if(primerBL == ultimoBL){
 
         // Obtenemos el numero del bloque fisico
-        nbfisico = traducir_bloque_inodo(ninodo, primerBL, 0);
+        nbfisico = traducir_bloque_inodo(&inodo, primerBL, 0);
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
             
@@ -251,7 +249,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
         //1. Primer bloque parcial leido
         // Obtenemos el numero del bloque fisico
-        nbfisico = traducir_bloque_inodo(ninodo, primerBL, 0);
+        nbfisico = traducir_bloque_inodo(&inodo, primerBL, 0);
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
             
@@ -273,7 +271,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         for(int i = primerBL + 1; i < ultimoBL; i++){
 
             // Obtenemos el numero del bloque fisico sobre cada iteracion
-            nbfisico = traducir_bloque_inodo(ninodo, i, 0);
+            nbfisico = traducir_bloque_inodo(&inodo, i, 0);
             // Miramos si hay bloque fisico, y si hay, entramos dentro del if
             if(nbfisico != FALLO){
                 
@@ -295,7 +293,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
         //3. Ultimo bloque parcial
         // Obtenemos el numero del bloque fisico del ultimo bloque
-        nbfisico = traducir_bloque_inodo(ninodo, ultimoBL, 0);
+        nbfisico = traducir_bloque_inodo(&inodo, ultimoBL, 0);
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
             

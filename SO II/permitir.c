@@ -3,7 +3,7 @@
 //permitir <nombre_dispositivo> <ninodo> <permisos>
 int main(int argc, char **argv){
 
-    if((argv[1] == NULL) ||(argv[2] == NULL) || (argv[3] == NULL)){
+    if(argc != 4){
         return FALLO;
     }else{
         char *directorio = argv[1];
