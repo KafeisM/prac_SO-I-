@@ -692,7 +692,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
             
                 if(nivel_punteros == nRangoBL) {
                     inodo->punterosIndirectos[nRangoBL - 1] = ptr;
-                    printf(GRIS_T "[traducir_bloque_inodo() → inodo.punterosIndirectos[%u] = %u (reservado BF %u para punteros_nivel%u\n",
+                    printf(GRIS_T "[traducir_bloque_inodo() → inodo.punterosIndirectos[%u] = %u (reservado BF %u para punteros_nivel%u)\n",
                     nRangoBL-1, ptr, ptr, nivel_punteros);
                 } else {
                     buffer[indice] = ptr;
