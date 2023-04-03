@@ -698,7 +698,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                     buffer[indice] = ptr;
                     bwrite(ptr_ant, buffer);
                     printf(GRIS_T "[traducir_bloque_inodo() → inodo.punteros_nivel%u[%u] = %u (reservado BF %u para punteros_nivel%u)\n",
-                    nivel_punteros, indice, ptr, ptr, nivel_punteros);                   
+                    nivel_punteros+1, indice, ptr, ptr, nivel_punteros);                   
                 }
                 memset(buffer, 0, BLOCKSIZE);
             }
