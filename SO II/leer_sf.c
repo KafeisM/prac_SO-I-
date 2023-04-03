@@ -6,7 +6,7 @@
 #define DEBUG2  0
 #define DEBUG3  0
 #define DEBUG4  0
-#define DEBUG5  0
+#define DEBUG5  1
 
 
 void comprobarMB();

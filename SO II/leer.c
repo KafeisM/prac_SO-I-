@@ -8,7 +8,7 @@ int main(int argc, char **argv){
         return FALLO;
     }else{
         struct inodo inodo;
-
+        char *directorio = argv[1];
         int ninodo = atoi(argv[2]);
 
         int tamBuffer = 1500;
@@ -17,7 +17,7 @@ int main(int argc, char **argv){
 
         memset(buffer_texto,0,tamBuffer);
 
-        if(bmount(argv[1]) == FALLO){
+        if(bmount(directorio) == FALLO){
             fprintf(stderr, "Error en montar el dispositivo");
             return FALLO;
         }

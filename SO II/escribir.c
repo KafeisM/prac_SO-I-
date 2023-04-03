@@ -3,7 +3,7 @@
 // ./escribir <nombre_dispositivo> <"$(cat fichero)"> <diferentes_inodos>
 int main(int argc, char **argv){
 
-    //char *directorio = argv[1];
+    char *directorio = argv[1];
     int dif_inodos = atoi(argv[3]);
     int escritos;
     struct STAT p_stat;
@@ -18,17 +18,14 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    printf("longitud texto: %ld\n\n", strlen(argv[2]));
+    printf("longitud texto: %ld\n\n", strlen(argv[2]));   
 
-    
-    
-
-    if(bmount(argv[1]) == FALLO){
+    if(bmount(directorio) == FALLO){
         fprintf(stderr, "Error en montar el dispositivo");
         return FALLO;
     }
 
-    int ninodo = reservar_inodo('f', 6);
+    unsigned int ninodo = reservar_inodo('f', 6);
     if(ninodo == FALLO){
         fprintf(stderr, "Error en reservar inodo");
         return FALLO;
