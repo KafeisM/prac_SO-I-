@@ -362,7 +362,7 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
     p_stat->tipo = inodos.tipo;
     p_stat->tamEnBytesLog = inodos.tamEnBytesLog;
     p_stat->numBloquesOcupados = inodos.numBloquesOcupados;
-    //printf("%d\n",inodos.numBloquesOcupados);
+    //printf("aux: %d\n",inodos.numBloquesOcupados);
 
     return EXITO;
 

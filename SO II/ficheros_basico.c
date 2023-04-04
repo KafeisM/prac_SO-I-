@@ -732,6 +732,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
         }    
     }
 
+    
     //printf("%d",inodo->numBloquesOcupados);
     
     return ptr;
