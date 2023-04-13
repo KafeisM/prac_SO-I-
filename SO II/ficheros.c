@@ -234,8 +234,6 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
             // Escribimos nbytes, del (buf_bloque + desp1) en la posición buf_original
             memcpy(buf_original, buf_bloque + desp1, nbytes);
-        }else{
-            return FALLO;
         }
         // Los bytes leidos seran los mismos que los que nos pasan por parametro
         leidos = nbytes;
@@ -258,8 +256,6 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             // Escribimos (BLOCKSIZE - desp1) bytes, del (buf_bloque + desp1) en la posición buf_original
             memcpy(buf_original, buf_bloque + desp1, BLOCKSIZE - desp1);
 
-        }else{
-            return FALLO;
         }
         // Los bytes leidos en esta parte van a ser la longitud del bloque menos el desplazamiento
         leidos = BLOCKSIZE - desp1;
@@ -280,8 +276,6 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
                 // Escribimos (BLOCKSIZE) bytes, del (buf_bloque) en la posición (buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZ)
                 memcpy(buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE, buf_bloque, BLOCKSIZE);
 
-            }else{
-                return FALLO;
             }
             // Los bytes leidos en esta parte van a ser la longitud del bloque entero
             leidos += BLOCKSIZE;
@@ -302,18 +296,13 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             // Escribimos (desp2 + 1) bytes, del (buf_bloque) en la posición (buf_original + (nbytes - desp2 - 1))
             memcpy(buf_original + (nbytes - desp2 - 1), buf_bloque, desp2 + 1);
 
-        }else{
-            return FALLO;
         }
         // Los bytes leidos en esta parte van a ser la longitud del desplazamiento final + 1
         leidos += desp2 + 1;
     }
 
     //Vamos a actualizar atime
-    //Primero leemos el inodo
-    if(leer_inodo(ninodo, &inodo) == FALLO){
-        return leidos;
-    }
+    
     //Modificamos atime
     inodo.atime = time(NULL);
     //Lo volvemos a escribir
@@ -324,10 +313,8 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     // Si los bytes leidos no coinciden con los bytes que nos han pasado por parametro devuelve FALLO, 
     // sino devuelve el numero de bytes leidos
     if(leidos != nbytes){
-        printf("mi_read_f: MAL\n\n");
         return FALLO;
     }else {
-        printf("mi_read_f: BIEN\n");
         return nbytes;
     }
 
