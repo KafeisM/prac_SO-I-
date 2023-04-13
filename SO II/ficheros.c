@@ -142,10 +142,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     }
 
     //Vamos a actualizar mtime y ctime
-    //Primero leemos el inodo
-    if(leer_inodo(ninodo, &inodo) == FALLO){
-        return escritos;
-    }
+
     // Miramos si vamos hemos escrito más alla del EOF
     if((offset + nbytes) > inodo.tamEnBytesLog){
         inodo.tamEnBytesLog = nbytes + offset;
