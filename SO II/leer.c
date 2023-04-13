@@ -40,7 +40,7 @@ int main(int argc, char **argv){
             return FALLO;
         }
 
-        fprintf(stderr, "total_bytesleidos: %d\n", leidos);
+        fprintf(stderr, "\ntotal_bytesleidos: %d\n", totalLeidos);
         fprintf(stderr, "tamEnBytesLog: %d\n", inodo.tamEnBytesLog);
 
         if(bumount() == FALLO){

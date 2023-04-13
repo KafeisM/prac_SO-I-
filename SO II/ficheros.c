@@ -161,7 +161,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         printf("mi_write_f: MAL\n\n");
         return FALLO;
     }else {
-        printf("mi_write_f: BIEN\n");
+        //printf("mi_write_f: BIEN\n");
         return nbytes;
     }
 

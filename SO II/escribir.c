@@ -9,6 +9,7 @@ int main(int argc, char **argv){
     struct STAT p_stat;
       
     int offsets[5] = {9000, 209000, 30725000, 409605000, 480000000};
+    int longitidOffsets = sizeof(offsets)/sizeof(int);
     
     if((argc != 4)){
         fprintf(stderr,ROJO_T "Sintaxis: ./escribir <nombre_dispositivo> <'$(cat fichero)'> <diferentes_inodos>\n"RESET);
@@ -18,7 +19,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    printf("longitud texto: %ld\n\n", strlen(argv[2]));   
+    printf("Longitud texto: %ld\n\n", strlen(argv[2]));   
 
     if(bmount(directorio) == FALLO){
         fprintf(stderr, "Error en montar el dispositivo");
@@ -31,9 +32,9 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    for(int i = 0; i < (sizeof(offsets)/sizeof(int)); i++){
-        fprintf(stdout, "ninodo: %i\n", ninodo);
-        fprintf(stdout, "offset: %i\n", offsets[i]);
+    for(int i = 0; i < longitidOffsets; i++){
+        fprintf(stdout, "Nº inodo reservado: %i\n", ninodo);
+        fprintf(stdout, "Offset: %i\n", offsets[i]);
 
         escritos = mi_write_f(ninodo, argv[2], offsets[i], strlen(argv[2]));
 
@@ -47,8 +48,8 @@ int main(int argc, char **argv){
         if(mi_stat_f(ninodo, &p_stat) == FALLO){
             return FALLO;
         }else{
-            printf("Tamaño en bytes lógico del inodo: %i\n", p_stat.tamEnBytesLog);
-            printf("Nº de bloques ocupados: %i\n\n", p_stat.numBloquesOcupados);
+            printf("stat.tamEnBytesLog: %i\n", p_stat.tamEnBytesLog);
+            printf("stat.numBloquesOcupados: %i\n\n", p_stat.numBloquesOcupados);
         }
 
         //Si <diferentes_inodods> = 1, hay que reservar inodos para cada offset
