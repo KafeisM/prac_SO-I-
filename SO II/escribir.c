@@ -37,7 +37,6 @@ int main(int argc, char **argv){
         fprintf(stdout, "Offset: %i\n", offsets[i]);
 
         escritos = mi_write_f(ninodo, argv[2], offsets[i], strlen(argv[2]));
-        printf("final\n");
         
         if(escritos == FALLO){
             return FALLO;

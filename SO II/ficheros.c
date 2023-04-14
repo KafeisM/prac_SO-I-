@@ -27,6 +27,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     //Miramos si los permisos corresponden a los de escribir
     if ((inodo.permisos & 2) != 2){
+        fprintf(stderr, ROJO_T "No hay permisos de escritura\n" RESET);
         return escritos;
     }
 
@@ -79,7 +80,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             }
 
             // Escribimos nbytes, del buf_original en la posición (buf_bloque + desp1)
-            memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - 1);
+            memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);
 
             // Escribimos el bloque fisico
             if(bwrite(nbfisico, buf_bloque) == FALLO){
@@ -136,8 +137,8 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     //Vamos a actualizar mtime y ctime
 
     // Miramos si vamos hemos escrito más alla del EOF
-    if((offset + nbytes) > inodo.tamEnBytesLog){
-        inodo.tamEnBytesLog = nbytes + offset;
+    if((ultimoBL * BLOCKSIZE + desp2 + 1) > inodo.tamEnBytesLog){
+        inodo.tamEnBytesLog = ultimoBL * BLOCKSIZE + desp2 + 1;
         inodo.ctime = time(NULL);
     }
     //Modificamos mtime
@@ -154,8 +155,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         return FALLO;
     }else {
         //printf("mi_write_f: BIEN\n");
-        printf("nbytes: %d\n", nbytes);
-        return escritos;
+        return nbytes;
     }
 
     return EXITO;
@@ -189,6 +189,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
     //Miramos si los permisos corresponden a los de leer
     if ((inodo.permisos & 4) != 4){
+        +fprintf(stderr, ROJO_T "No hay permisos de lectura\n" RESET);
         return leidos;
     }
 
