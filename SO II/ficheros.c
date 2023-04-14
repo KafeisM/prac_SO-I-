@@ -59,8 +59,6 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
                 return FALLO;
             }
 
-        }else{
-            return FALLO;
         }
         // Los bytes leidos seran los mismos que los que nos pasan por parametro
         escritos = nbytes;
@@ -88,8 +86,6 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
                 return FALLO;
             }
 
-        }else{
-            return FALLO;
         }
         // Los bytes escritos en esta parte van a ser la longitud del bloque menos el desplazamiento
         escritos += BLOCKSIZE - desp1;
@@ -98,7 +94,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         for(int i = primerBL + 1; i < ultimoBL; i++){
 
             // Obtenemos el numero del bloque fisico sobre cada iteracion
-            nbfisico = traducir_bloque_inodo(&inodo, i, 0);
+            nbfisico = traducir_bloque_inodo(&inodo, i, 1);
             // Miramos si hay bloque fisico, y si hay, entramos dentro del if
             if(nbfisico != FALLO){
                 
@@ -107,8 +103,6 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
                     return FALLO;
                 }
 
-            }else{
-                return FALLO;
             }
             // Los bytes leidos en esta parte van a ser la longitud del bloque entero
             escritos += BLOCKSIZE;
@@ -128,14 +122,12 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
             // Escribimos nbytes, del buf_original + (nbytes - (desp2 + 1)) en la posición buf_bloque
             memcpy(buf_bloque, buf_original + (nbytes - (desp2 + 1)), desp2 + 1);
-
+            
             // Escribimos el bloque fisico
             if(bwrite(nbfisico, buf_bloque) == FALLO){
                 return FALLO;
             }
 
-        }else{
-            return FALLO;
         }
         // Los bytes escritos seran el desplazamiento final mas 1
         escritos += desp2 + 1;
@@ -162,7 +154,8 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         return FALLO;
     }else {
         //printf("mi_write_f: BIEN\n");
-        return nbytes;
+        printf("nbytes: %d\n", nbytes);
+        return escritos;
     }
 
     return EXITO;
