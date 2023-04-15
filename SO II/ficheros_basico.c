@@ -714,6 +714,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
         if(ptr > 0){ //si existe bloque de datos
             liberar_bloque(ptr);
             liberado++;
+            printf("[liberar_bloques_inodo()→ liberado BF %i de datos para BL %i]\n", ptr, nBL);
             if(nRangoBL == 0){ //es un puntero directo
                 inodo->punterosDirectos[nBL] = 0;
             }else{
@@ -726,6 +727,9 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
                         // No cuelgan mas bloques ocupados, hay que liberar el bloque de punteros
                         liberar_bloque(ptr);
                         liberado++;
+
+                        printf("[liberar_bloques_inodo()→ liberado BF %i de punteros_nivel%i correspondiente al BL %i]\n", 
+                        ptr, nivel_punteros, nBL);
 
                         //INTRODUCIR AQUI LA MEJORA SALTANDO LOS BLOQUES QUE NO SEA NECESARIO EXPLORAR
 
