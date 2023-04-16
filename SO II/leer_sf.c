@@ -56,9 +56,9 @@ int main(int argc, char **argv){
 
     printf("totInodos = %d\n", SB.totInodos);
 
-    printf("sizeof struct superbloque is: %lu\n", sizeof(struct superbloque));
+    //printf("sizeof struct superbloque is: %lu\n", sizeof(struct superbloque));
 
-    printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
+    //printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
 #endif
 
 #if DEBUG1

@@ -690,6 +690,8 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
 
     memset(bufAux_punteros,0,BLOCKSIZE);
 
+    fprintf(stderr, "[liberar_bloques_inodo() -> primer BL: %i, último BL: %i]\n",primerBL, ultimoBL);
+
     for(nBL = primerBL; nBL <= ultimoBL; nBL++){ //recorrido de los bloques logicos
         nRangoBL = obtener_nRangoBL(inodo,nBL,&ptr); //0:D, 1:I0, 2:I1; 3:I2
 
@@ -754,7 +756,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
 
     }
     
-
+    fprintf(stderr, "[liberar_bloques_inodo() -> total bloques liberados: %i]\n", liberado);
     return liberado;
 }
 
