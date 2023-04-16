@@ -689,8 +689,9 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
     }
 
     memset(bufAux_punteros,0,BLOCKSIZE);
+    ptr = 0;
 
-    fprintf(stderr, "[liberar_bloques_inodo() -> primer BL: %i, último BL: %i]\n",primerBL, ultimoBL);
+    fprintf(stderr, GRIS_T"[liberar_bloques_inodo() -> primer BL: %i, último BL: %i]\n",primerBL, ultimoBL);
 
     for(nBL = primerBL; nBL <= ultimoBL; nBL++){ //recorrido de los bloques logicos
         nRangoBL = obtener_nRangoBL(inodo,nBL,&ptr); //0:D, 1:I0, 2:I1; 3:I2
@@ -704,6 +705,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
         while(ptr > 0 && nivel_punteros > 0){ //cuelgan bloques de punteros
             indice = obtener_indice(nBL,nivel_punteros);
             if(indice == 0 || nBL == primerBL){
+                
                 if(bread(ptr,bloques_punteros[nivel_punteros-1])==FALLO){
                     return FALLO;
                 }
@@ -719,6 +721,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
             liberar_bloque(ptr);
             liberado++;
             fprintf(stderr,"[liberar_bloques_inodo()→ liberado BF %i de datos para BL %i]\n", ptr, nBL);
+
             if(nRangoBL == 0){ //es un puntero directo
                 inodo->punterosDirectos[nBL] = 0;
             }else{
@@ -756,7 +759,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
 
     }
     
-    fprintf(stderr, "[liberar_bloques_inodo() -> total bloques liberados: %i]\n", liberado);
+    fprintf(stderr, "[liberar_bloques_inodo() -> total bloques liberados: %i]\n"RESET, liberado);
     return liberado;
 }
 
