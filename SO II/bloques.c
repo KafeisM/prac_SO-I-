@@ -1,3 +1,5 @@
+/*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
+
 #include "bloques.h"
 
 static int descriptor = 0;

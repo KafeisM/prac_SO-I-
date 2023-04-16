@@ -1,3 +1,5 @@
+/*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
+
 #include "ficheros.h"
 
 //permitir <nombre_dispositivo> <ninodo> <permisos>

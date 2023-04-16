@@ -1,3 +1,5 @@
+/*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
+
 #include "ficheros.h"
 
 // ./escribir <nombre_dispositivo> <"$(cat fichero)"> <diferentes_inodos>

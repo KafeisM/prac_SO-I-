@@ -1,3 +1,5 @@
+/*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
+
 #include "ficheros.h"
 
 // ./leer <nombre_dispositivo> <ninodo>
@@ -11,8 +13,10 @@ int main(int argc, char **argv){
     struct inodo inodo;
     char *directorio = argv[1];
     int ninodo = atoi(argv[2]);
-    int totalLeidos = 0;
+
     int tamBuffer = 1500;
+
+    int totalLeidos = 0;
     unsigned int offset = 0;
     char buffer_texto[tamBuffer];
 
