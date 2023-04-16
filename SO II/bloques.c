@@ -4,10 +4,15 @@
 
 static int descriptor = 0;
 
+/*---------------------------------------------------------------------------------------------------------
+* Función para montar el dispositiivo virtual
+* Input:    *camino: nombre del dispositivo
+* Output:   FALLO o descriptor de fichero
+---------------------------------------------------------------------------------------------------------*/
 int bmount(const char *camino){
 
     umask(000);
-    descriptor = open(camino,O_RDWR | O_CREAT,0666);
+    descriptor = open(camino,O_RDWR | O_CREAT,0666);    //abrimos fichero existente
     if (descriptor < 0){
         perror("Error en la apertura del fichero");
         return FALLO;
@@ -16,20 +21,34 @@ int bmount(const char *camino){
 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función para desmontar el disposiitivo virtual
+* Input:    -
+* Output:   FALLO o EXITO
+---------------------------------------------------------------------------------------------------------*/
 int bumount(){
 
+    //Cerramos descriptor
     if (close(descriptor) < 0){
+        fprintf(stderr, ROJO_T "bumount: Error desmontar dispositivo" RESET);
         return FALLO;
     }
     return EXITO;
 
 }
 
-
+/*---------------------------------------------------------------------------------------------------------
+* Escribe un bloque en el dispositivo virtual, en el bloque fisico especificado por nbloque
+* Input:    nbloque: numero de bloque físico
+*           *buf: apunta a un buffer de memoria
+* Output:   FALLO o numero de bytes escritos
+---------------------------------------------------------------------------------------------------------*/
 int bwrite(unsigned int nbloque, const void *buf){
 
+    //movemos el puntero del fichero en el offset correcto
     lseek(descriptor,nbloque * BLOCKSIZE,SEEK_SET);
 
+    //Volcamos el contenido del buffer en dicha posicion del dispositivo virtual
     size_t bytes_escritos = write(descriptor, buf, BLOCKSIZE);
 
     if (bytes_escritos == FALLO){
@@ -41,13 +60,21 @@ int bwrite(unsigned int nbloque, const void *buf){
 
 }
 
-
+/*---------------------------------------------------------------------------------------------------------
+* Lee un bloque del dispositivo virtual, que se corresponde con el bloque físico especificado en nbloque
+* Input:    nbloque: numero de bloque físico
+*           *buf: apunta a un buffer de memoria
+* Output:   FALLO o numero de bytes leidos
+---------------------------------------------------------------------------------------------------------*/
 int bread(unsigned int nbloque, void *buf){
 
+    //calculamos el desplazamiento dentro del dispositivo virtual donde hay que leer
     off_t desplazamiento = nbloque * BLOCKSIZE;
 
+    //movemos el puentero del fichero en el offset correcto
     lseek(descriptor,desplazamiento,SEEK_SET);
 
+    //volcamos en el buffer el contenido de los nbytes a partir de dicha posición del dispositivo virtual
     size_t bytes_leidos = read(descriptor,  buf,BLOCKSIZE);
 
     if (bytes_leidos == FALLO){
