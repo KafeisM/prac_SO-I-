@@ -3,7 +3,9 @@
 #include "ficheros_basico.h"
 #include "bloques.h"
 
+//mensajes de depuración 
 #define DEBUGSB 1
+#define DEBUGSBAUX 0
 #define DEBUG1  0
 #define DEBUG2  0
 #define DEBUG3  0
@@ -11,25 +13,30 @@
 #define DEBUG5  0
 
 
+//Funciones auxiliares
 void comprobarMB();
 void comprobarBloques();
 void comprobarInodo(int inRes, struct inodo inodo);
 
+//Variables globales
 const char *directorio;
 struct superbloque SB;
 void *buffer[BLOCKSIZE];
 
 int main(int argc, char **argv){
 
+    //montar el dispositivo
     directorio = argv[1];
     if (bmount(directorio) == FALLO){
         return FALLO;
     }
+
+    //leer el supernloque
     if (bread(posSB, &SB) == FALLO){
         return FALLO;
     }
 
-#if DEBUGSB
+#if DEBUGSB //Imprimir datos del superbloque
     printf("DATOS DEL SUPERBLOQUE\n");
 
     printf("posPrimerBloqueMB = %d\n", SB.posPrimerBloqueMB);
@@ -56,12 +63,16 @@ int main(int argc, char **argv){
 
     printf("totInodos = %d\n", SB.totInodos);
 
-    //printf("sizeof struct superbloque is: %lu\n", sizeof(struct superbloque));
+#if DEBUGSBAUX // comprobar tamaño en bytes de los strucrts
 
-    //printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
+    printf("sizeof struct superbloque is: %lu\n", sizeof(struct superbloque));
+    printf ("sizeof struct inodo is: %lu\n", sizeof(struct inodo));
+
+    #endif
+
 #endif
 
-#if DEBUG1
+#if DEBUG1 //Comprobacion de la estructura de los inodos, recorrer la lista
     printf("\nRECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
     struct inodo inodos[BLOCKSIZE / INODOSIZE];
     int cont = 0;
@@ -95,25 +106,22 @@ int main(int argc, char **argv){
     }
 #endif
 
-#if DEBUG2
-    //comprobar reservar/liberar bloque
+#if DEBUG2 //comprobar reservar/liberar bloque
     printf("\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
     comprobarBloques();
 #endif
 
-#if DEBUG3
-    //comprobar leer/escribir bit
+#if DEBUG3 //comprobar leer/escribir bit
     printf("\nMAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
     comprobarMB();
 #endif
 
-#if DEBUG4
-    //comrobar datos del directorio raiz
+#if DEBUG4 //comprobar datos del directorio raiz
     printf("\nDATOS DEL DIRECTORIO RAIZ\n");
     comprobarInodo(SB.posInodoRaiz); //directorio raiz es el inodo 0
 #endif
 
-#if DEBUG5
+#if DEBUG5 //comprobar la reserva de un inodo y sus correspondientes datos
     int ninodo = reservar_inodo('f',6);
 
     if (bread(posSB,&SB) == FALLO){
@@ -146,7 +154,7 @@ int main(int argc, char **argv){
     return EXITO;
 }
 
-
+//Funciones auxiliares
 
 void comprobarMB(){
     printf("posSB: %d -> leer_bit(%d) = %d\n",0,0,leer_bit(0));

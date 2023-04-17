@@ -24,19 +24,19 @@ int main(int argc, char **argv){
 
     //Montamos dispositivo virtual
     if(bmount(directorio) == FALLO){
-        fprintf(stderr, ROJO_T "permisos: Error montar dispositivo" RESET);
+        fprintf(stderr, ROJO_T "permitir.c: Error bmount\n" RESET);
         return FALLO;
     }
 
     //Modificamos permisos pasados por parametro al inodo pasado por parametro
     if(mi_chmod_f(ninodo, permisos) == FALLO){
-        fprintf(stderr, ROJO_T "permisos: Error mi_chmod_f" RESET);
+        fprintf(stderr, ROJO_T "permitir.c: Error mi_chmod_f\n" RESET);
         return FALLO;
     }
 
     //Desmontamos dispositivo virtual
     if(bumount(directorio) == FALLO){
-        fprintf(stderr, ROJO_T "permisos: Error desmontar dispositivo" RESET);
+        fprintf(stderr, ROJO_T "permitir.c: Error bumount\n" RESET);
         return FALLO;
     }
 

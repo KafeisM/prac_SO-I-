@@ -33,7 +33,7 @@ int main(int argc, char **argv){
 
     //Montamos dispositivo virtual
     if (bmount(directorio) == FALLO){
-        fprintf(stderr, "Error en montar el dispositivo");
+        fprintf(stderr, ROJO_T"leer.c: Error en bmount\n"RESET);
         return FALLO;
     }
 
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
 
     //Leemos inodo
     if (leer_inodo(ninodo, &inodo)){
-        fprintf(stderr, "Error en leer inodo");
+        fprintf(stderr, ROJO_T"leer.c: Error en leer inodo\n"RESET);
         return FALLO;
     }
 
@@ -64,7 +64,7 @@ int main(int argc, char **argv){
 
     //Desmontamos dispositivo virtual
     if (bumount() == FALLO){
-        fprintf(stderr, "Error en desmontar el dispositivo");
+        fprintf(stderr, ROJO_T"leer.c: Error en desmontar el dispositivo\n"RESET);
         return FALLO;
     }
 

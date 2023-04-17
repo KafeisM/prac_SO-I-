@@ -14,7 +14,7 @@ int bmount(const char *camino){
     umask(000);
     descriptor = open(camino,O_RDWR | O_CREAT,0666);    //abrimos fichero existente
     if (descriptor < 0){
-        perror("Error en la apertura del fichero");
+        fprintf(stderr,ROJO_T"bmoubt: Error en la apertura del fichero " RESET);
         return FALLO;
     }
     return descriptor;
@@ -30,7 +30,7 @@ int bumount(){
 
     //Cerramos descriptor
     if (close(descriptor) < 0){
-        fprintf(stderr, ROJO_T "bumount: Error desmontar dispositivo" RESET);
+        fprintf(stderr, ROJO_T "bumount: Error desmontar dispositivo " RESET);
         return FALLO;
     }
     return EXITO;
@@ -52,7 +52,7 @@ int bwrite(unsigned int nbloque, const void *buf){
     size_t bytes_escritos = write(descriptor, buf, BLOCKSIZE);
 
     if (bytes_escritos == FALLO){
-        fprintf(stderr,"Error bwrite %d: %s\n",errno,strerror(errno));
+        fprintf(stderr,ROJO_T"bwrite %d: %s\n"RESET,errno,strerror(errno));
         return FALLO;
     }
 
@@ -78,7 +78,7 @@ int bread(unsigned int nbloque, void *buf){
     size_t bytes_leidos = read(descriptor,  buf,BLOCKSIZE);
 
     if (bytes_leidos == FALLO){
-        fprintf(stderr,"Error bread %d: %s\n",errno,strerror(errno));
+        fprintf(stderr,ROJO_T"bread %d: %s\n"RESET,errno,strerror(errno));
         return FALLO;
     }
 

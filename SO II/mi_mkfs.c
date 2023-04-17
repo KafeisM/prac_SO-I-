@@ -22,37 +22,30 @@ int main(int argc, char **argv){
 
     //INICIALIZAR a 0's
     for (size_t i = 0; i < num_blocks; i++){
-        bwrite(i,buffer);
-        /*if(bw == FALLO){
-            fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO (bwrite)\n"RESET);
-        }else if (bw < BLOCKSIZE){
-            fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO (bwrite - blocksize)\n"RESET);
-        }*/
+        bwrite(i,buffer);  
     }
 
-    initSB(num_blocks, num_blocks/4);
+    //INICIALIZAR EL SUPERBLOQUE
+    initSB(num_blocks, num_blocks/4);   
 
-    /*if(isb == FALLO){
-        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE %i \n"RESET,isb);
-    }else if (isb < BLOCKSIZE){
-        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE SUPERBLOQUE (bwrite - blocksize)\n"RESET);
-    }*/
-
+    //INICIALIZAR EL MAPA DE BITS
     if(initMB() == FALLO){
-        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE MAPA DE BITS\n"RESET);
+        fprintf(stderr,ROJO_T"mi_mkfs: ERROR INICIALIZACIÓN DE MAPA DE BITS\n"RESET);
     }
 
+    //INICIALIZAR LA ARRAY DE INODOS
     if(initAI() == FALLO){
-        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE ARRAY DE INODOS\n"RESET);
+        fprintf(stderr,ROJO_T"mi_mkfs: ERROR INICIALIZACIÓN DE ARRAY DE INODOS\n"RESET);
     }
 
-    if(reservar_inodo('d',7) == FALLO){ //CREAR INODO RAIZ
-        fprintf(stderr,ROJO_T"ERROR EN LA CREACIÓN DEL DIRECTORIO RAÍZ");
+    //CREAR INODO RAIZ
+    if(reservar_inodo('d',7) == FALLO){ 
+        fprintf(stderr,ROJO_T"mi_mkfs: ERROR EN LA CREACIÓN DEL DIRECTORIO RAÍZ");
     }
 
     //DESMONTAR DISCO
     if(bumount() == FALLO){
-        fprintf(stderr,ROJO_T"ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
+        fprintf(stderr,ROJO_T"mi_mkfs: ERROR INICIALIZACIÓN DE FICHERO\n"RESET);
     }
         
     return EXITO;

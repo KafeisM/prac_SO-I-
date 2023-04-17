@@ -34,14 +34,14 @@ int main(int argc, char **argv){
 
     //Montamos dispositivo virtual
     if(bmount(directorio) == FALLO){
-        fprintf(stderr, "Error en montar el dispositivo");
+        fprintf(stderr,ROJO_T "escribir.c: Error en bmount\n" RESET);
         return FALLO;
     }
 
     //Reservamos inodo
     unsigned int ninodo = reservar_inodo('f', 6);
     if(ninodo == FALLO){
-        fprintf(stderr, "Error en reservar inodo");
+        fprintf(stderr, ROJO_T "escribir.c: Error en reservar_inodo\n"RESET);
         return FALLO;
     }
 
@@ -54,6 +54,7 @@ int main(int argc, char **argv){
         escritos = mi_write_f(ninodo, argv[2], offsets[i], strlen(argv[2]));
         
         if(escritos == FALLO){
+            fprintf(stderr,ROJO_T "escribir.c: Error en mi_write_f\n" RESET);
             return FALLO;
         }
 
@@ -61,6 +62,7 @@ int main(int argc, char **argv){
 
         //Obtenemos los datos
         if(mi_stat_f(ninodo, &p_stat) == FALLO){
+            fprintf(stderr,ROJO_T "escribir.c: Error en mi_stat_f\n" RESET);
             return FALLO;
         }else{
             //Imprimimos por pantalla tamaño en bytes lógico del inodo y nº de bloques ocupados
@@ -80,7 +82,7 @@ int main(int argc, char **argv){
 
     //Desmontamos dispositivo virtual
     if(bumount() == FALLO){
-        fprintf(stderr, "Error en desmontar el dispositivo");
+        fprintf(stderr,ROJO_T "escribir.c: Error en bumount\n" RESET);
         return FALLO;
     }
 

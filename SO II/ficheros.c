@@ -24,7 +24,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     // Leemos inodo
     if(leer_inodo(ninodo, &inodo) == FALLO){
-        fprintf(stderr, ROJO_T "mi_write_f: Error leer_inodo" RESET);
+        fprintf(stderr, ROJO_T "mi_write_f: Error leer_inodo\n" RESET);
         return escritos;
     }
 
@@ -52,7 +52,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_write_f: Error bread" RESET);
+                fprintf(stderr, ROJO_T "mi_write_f: Error bread\n" RESET);
                 return FALLO;
             }
 
@@ -61,7 +61,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
             // Escribimos el bloque fisico
             if(bwrite(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_write_f: Error bwrite" RESET);
+                fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
                 return FALLO;
             }
 
@@ -81,7 +81,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_write_f: Error bread" RESET);
+                fprintf(stderr, ROJO_T "mi_write_f: Error bread\n" RESET);
                 return FALLO;
             }
 
@@ -90,7 +90,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
             // Escribimos el bloque fisico
             if(bwrite(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_write_f: Error bwrite" RESET);
+                fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
                 return FALLO;
             }
 
@@ -108,7 +108,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
                 
                 // Escribimos el bloque correspondiente
                 if(bwrite(nbfisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE) == FALLO){
-                    fprintf(stderr, ROJO_T "mi_write_f: Error bwrite" RESET);
+                    fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
                     return FALLO;
                 }
 
@@ -126,7 +126,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_write_f: Error bread" RESET);
+                fprintf(stderr, ROJO_T "mi_write_f: Error bread\n" RESET);
                 return FALLO;
             }
 
@@ -135,7 +135,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             
             // Escribimos el bloque fisico
             if(bwrite(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_write_f: Error bwrite" RESET);
+                fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
                 return FALLO;
             }
 
@@ -155,14 +155,14 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     inodo.mtime = time(NULL);
     //Lo volvemos a escribir
     if(escribir_inodo(ninodo, &inodo) == FALLO){
-        fprintf(stderr, ROJO_T "mi_write_f: Error escribir_inodo" RESET);
+        fprintf(stderr, ROJO_T "mi_write_f: Error escribir_inodo\n" RESET);
         return escritos;
     }
 
     // Si los bytes escritos no coinciden con los bytes que nos han pasado por parametro devuelve FALLO, 
     // sino devuelve el numero de bytes leidos
     if(escritos != nbytes){
-        fprintf(stderr, ROJO_T "mi_read_f: Error escritos" RESET);
+        fprintf(stderr, ROJO_T "mi_read_f: Error escritos\n" RESET);
         return FALLO;
     }else {
         return nbytes;
@@ -194,7 +194,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
     // Leemos inodo
     if(leer_inodo(ninodo, &inodo) == FALLO){
-        fprintf(stderr, ROJO_T "mi_read_f: Error leer_inodo" RESET);
+        fprintf(stderr, ROJO_T "mi_read_f: Error leer_inodo\n" RESET);
         return leidos;
     }
 
@@ -234,7 +234,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_read_f: Error bread" RESET);
+                fprintf(stderr, ROJO_T "mi_read_f: Error bread\n" RESET);
                 return FALLO;
             }
 
@@ -256,7 +256,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_read_f: Error bread" RESET);
+                fprintf(stderr, ROJO_T "mi_read_f: Error bread\n" RESET);
                 return FALLO;
             }
 
@@ -277,7 +277,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
                 
                 // Leemos el bloque fisico
                 if(bread(nbfisico, buf_bloque) == FALLO){
-                    fprintf(stderr, ROJO_T "mi_read_f: Error bread" RESET);
+                    fprintf(stderr, ROJO_T "mi_read_f: Error bread\n" RESET);
                     return FALLO;
                 }
 
@@ -298,7 +298,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
-                fprintf(stderr, ROJO_T "mi_read_f: Error bread" RESET);
+                fprintf(stderr, ROJO_T "mi_read_f: Error bread\n" RESET);
                 return FALLO;
             }
 
@@ -316,14 +316,14 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     inodo.atime = time(NULL);
     //Lo volvemos a escribir
     if(escribir_inodo(ninodo, &inodo) == FALLO){
-        fprintf(stderr, ROJO_T "mi_read_f: Error escribir_inodo" RESET);
+        fprintf(stderr, ROJO_T "mi_read_f: Error escribir_inodo\n" RESET);
         return leidos;
     }
 
     // Si los bytes leidos no coinciden con los bytes que nos han pasado por parametro devuelve FALLO, 
     // sino devuelve el numero de bytes leidos
     if(leidos != nbytes){
-        fprintf(stderr, ROJO_T "mi_read_f: Error leidos" RESET);
+        fprintf(stderr, ROJO_T "mi_read_f: Error leidos\n" RESET);
         return FALLO;
     }else {
         return nbytes;
@@ -347,7 +347,7 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
 
     //Leemos inodo
     if(leer_inodo(ninodo, &inodos) == FALLO){
-        fprintf(stderr, ROJO_T "mi_stat_f: Error leer_inodo" RESET);
+        fprintf(stderr, ROJO_T "mi_stat_f: Error leer_inodoºn\n" RESET);
         return FALLO;
     }
 
@@ -378,7 +378,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
 
     //Leemos inodo
     if(leer_inodo(ninodo, &inodos) == FALLO){
-        fprintf(stderr, ROJO_T "mi_chmod_f: Error leer_inodo" RESET);
+        fprintf(stderr, ROJO_T "mi_chmod_f: Error leer_inodo\n" RESET);
         return FALLO;
     }
 
@@ -387,7 +387,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
 
     //Escribimos inodo
     if(escribir_inodo(ninodo, &inodos) == FALLO){
-        fprintf(stderr, ROJO_T "mi_chmod_f: Error escribir_inodo" RESET);
+        fprintf(stderr, ROJO_T "mi_chmod_f: Error escribir_inodo\n" RESET);
         return FALLO;
     }
 

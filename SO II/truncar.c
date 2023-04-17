@@ -14,13 +14,13 @@ int main(int argc, char **argv){
     int nbytes = atoi(argv[3]);
 
     if (bmount(dir) == FALLO){
-        fprintf(stderr, ROJO_T"Error bmount.\n"RESET);
+        fprintf(stderr, ROJO_T"truncar.c: Error bmount\n"RESET);
         return FALLO;
     }
 
     if (nbytes == 0){
         if (liberar_inodo(ninodo) == FALLO){
-            fprintf(stderr, ROJO_T"Error liberar_inodo.\n"RESET);
+            fprintf(stderr, ROJO_T"truncar.c: Error liberar_inodo\n"RESET);
             return FALLO;
         }
     }else{
@@ -29,7 +29,7 @@ int main(int argc, char **argv){
 
     struct STAT p_stat;
     if (mi_stat_f(ninodo, &p_stat) == FALLO){
-        fprintf(stderr, ROJO_T"Error mi_stat_f.\n"RESET);
+        fprintf(stderr, ROJO_T"truncar.c: Error mi_stat_f\n"RESET);
         return FALLO;
     }
 
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
     printf("numBloquesOcupados=%d\n", p_stat.numBloquesOcupados);
 
     if (bumount() == FALLO){
-        fprintf(stderr,"Error bumount\n");
+        fprintf(stderr,ROJO_T"truncar.c: Error bumount\n"RESET);
         return FALLO;
     }
 
