@@ -2,6 +2,7 @@
 
 #include <string.h> 
 #include "ficheros_basico.h"
+#include "directorios.h"
 
 static int descriptor = 0;
 
