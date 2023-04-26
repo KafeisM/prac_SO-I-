@@ -16,7 +16,6 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
     bool dir = false;
 
     if(camino[0] == '/'){
-
         //buscamos la siguiente '/'
         for(int i = 1; i < strlen(camino);i++){
             if(camino[i] == '/'){
@@ -31,7 +30,6 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
         if(!dir){ //miramos si no es un directorio
             strncpy(inicial,camino+1,sizeof(char)*strlen(camino)-1); 
             strcpy(tipo,"f");
-
             //en caso de fichero no guardamos nada en final
         }
 
@@ -44,7 +42,7 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
 }
 
 int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo, unsigned int *p_inodo_dir, unsigned int *p_entrada, char reservar, unsigned char permisos){
-    return FALLO;
+    return 0;
 }
 
 void mostrar_error_buscar_entrada(int error) {
