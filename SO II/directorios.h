@@ -1,5 +1,6 @@
 /*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
 #include "ficheros.h"
+#include <string.h>
 
 #define TAMNOMBRE 60 //tamaño del nombre del directorio, en Ext2 = 256
 

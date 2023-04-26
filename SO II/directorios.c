@@ -1,7 +1,7 @@
 /*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
 
 #include "directorios.h"
-#include <string.h>
+
 
 /*---------------------------------------------------------------------------------------------------------
 * Dada una cadena de (camino que empieze por '/') separa su contenido
