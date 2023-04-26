@@ -1,7 +1,6 @@
 /*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
 
 #include "ficheros_basico.h"
-#include "directorios.h"
 
 static int descriptor = 0;
 

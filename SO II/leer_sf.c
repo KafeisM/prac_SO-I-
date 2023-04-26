@@ -2,7 +2,6 @@
 
 #include "ficheros_basico.h"
 #include "bloques.h"
-#include "directorios.h"
 
 //mensajes de depuración 
 #define DEBUGSB 1
