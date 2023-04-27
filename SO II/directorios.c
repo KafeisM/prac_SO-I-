@@ -24,7 +24,7 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
             dir = true;
             strncpy(inicial, camino + 1, sizeof(char) * i - 1); // guardar la porcion entre los 2 primeros '/'
             strcpy(final, camino + 1);                          // guardar el resto del camino a partir del segundo '/'
-            strcpy(tipo, "d");                                  // indicamos que es tipo directorio
+            strcpy(tipo, "d");
             break;
         }
     }
@@ -41,6 +41,7 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
 int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo, unsigned int *p_inodo_dir, unsigned int *p_entrada,
 char reservar, unsigned char permisos){
 
+    //variables
     struct entrada entrada;
     struct inodo inodo_dir;
     char inicial[sizeof(entrada.nombre)];
@@ -60,6 +61,8 @@ char reservar, unsigned char permisos){
         *p_entrada = 0;
         return EXITO;
     }
+
+    fprintf(stderr, ROJO_T"Llego buscar entrada"RESET); 
 
     if (extraer_camino(camino_parcial, inicial, final, &tipo) == FALLO){
         fprintf(stderr, ROJO_T"buscar_entrada(): Error camino incorrecto\n"RESET);
@@ -106,7 +109,7 @@ char reservar, unsigned char permisos){
                 return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
             }
 
-            if (inodo_dir.permisos & 2 != 2){
+            if ((inodo_dir.permisos & 2) != 2){
                 return ERROR_PERMISO_ESCRITURA;
             }else{
                 strcpy(entrada.nombre, inicial);
