@@ -238,11 +238,12 @@ void mostrar_buscar_entrada(char *camino, char reservar){
 
 
   printf("\ncamino: %s, reservar: %d\n", camino, reservar);
+  error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6);
 
-  if(extraer_camino(camino,"","","") == FALLO){
+  /*if(extraer_camino(camino,"","","") == FALLO){
     fprintf(stderr,ROJO_T"ERROR CAMINO INCORRECTO\n"RESET);
-  }
-  if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6)) < 0) {
+  }*/
+  if (error < 0) {
     mostrar_error_buscar_entrada(error);
   }
 

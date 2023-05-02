@@ -54,7 +54,7 @@ char reservar, unsigned char permisos){
     if (strcmp(camino_parcial, "/") == 0){
         struct superbloque SB;
         if (bread(posSB, &SB) == FALLO){
-            fprintf(stderr, ROJO_T"buscar_entrada(): Error bread SB\n"RESET);
+            //fprintf(stderr, ROJO_T"buscar_entrada(): Error bread SB\n"RESET);
             return FALLO;
         }
         *p_inodo = SB.posInodoRaiz;
@@ -62,10 +62,9 @@ char reservar, unsigned char permisos){
         return EXITO;
     }
 
-    fprintf(stderr, ROJO_T"Llego buscar entrada"RESET); 
 
     if (extraer_camino(camino_parcial, inicial, final, &tipo) == FALLO){
-        fprintf(stderr, ROJO_T"buscar_entrada(): Error camino incorrecto\n"RESET);
+        //fprintf(stderr, ROJO_T"buscar_entrada(): Error camino incorrecto\n"RESET);
         return ERROR_CAMINO_INCORRECTO;
     }
 
@@ -114,7 +113,7 @@ char reservar, unsigned char permisos){
             }else{
                 strcpy(entrada.nombre, inicial);
                 if (tipo == 'd'){
-                    if (strcmp(final, "/") == EXITO){
+                    if (strcmp(final, "/") == 0){
                         entrada.ninodo = reservar_inodo(tipo, permisos);
                         printf("[buscar_entrada() -> reservado_inodo: %d  tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
                     }else{
