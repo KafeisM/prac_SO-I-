@@ -18,22 +18,27 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
         return FALLO;
     }
 
-    // buscamos la siguiente '/'
-    for (int i = 1; i < strlen(camino); i++){
-        if (camino[i] == '/'){
-            dir = true;
-            strncpy(inicial, camino + 1, sizeof(char) * i - 1); // guardar la porcion entre los 2 primeros '/'
-            strcpy(final, camino + 1);                          // guardar el resto del camino a partir del segundo '/'
+    // buscamos la primera barra y truncamos el camino
+    char *resto = strchr((camino + 1), '/');
+    strcpy(tipo, "f");
+
+    if (resto){
+        //Inicial = camino - resto (
+        strncpy(inicial, (camino + 1), (strlen(camino) - strlen(resto) - 1));
+        //Final = resto
+        strcpy(final, resto);
+
+        //Miramos si es un directorio
+        if (final[0] == '/'){
             strcpy(tipo, "d");
-            break;
+            dir = true;
         }
     }
 
     if (!dir){ // miramos si no es un directorio
         strncpy(inicial, camino + 1, sizeof(char) * strlen(camino) - 1);
-        strcpy(tipo, "f");
-        // en caso de fichero no guardamos nada en final
-    }
+        strcpy(final, "");
+        }
 
     return EXITO;
 }
@@ -157,28 +162,27 @@ char reservar, unsigned char permisos){
 }
 
 void mostrar_error_buscar_entrada(int error){
-    // fprintf(stderr, "Error: %d\n", error);
     switch (error){
     case -2:
-        fprintf(stderr, "Error: Camino incorrecto.\n");
+        fprintf(stderr,ROJO_T "Error: Camino incorrecto.\n"RESET);
         break;
     case -3:
-        fprintf(stderr, "Error: Permiso denegado de lectura.\n");
+        fprintf(stderr,ROJO_T "Error: Permiso denegado de lectura.\n"RESET);
         break;
     case -4:
-        fprintf(stderr, "Error: No existe el archivo o el directorio.\n");
+        fprintf(stderr,ROJO_T "Error: No existe el archivo o el directorio.\n"RESET);
         break;
     case -5:
-        fprintf(stderr, "Error: No existe algún directorio intermedio.\n");
+        fprintf(stderr,ROJO_T "Error: No existe algún directorio intermedio.\n"RESET);
         break;
     case -6:
-        fprintf(stderr, "Error: Permiso denegado de escritura.\n");
+        fprintf(stderr,ROJO_T "Error: Permiso denegado de escritura.\n"RESET);
         break;
     case -7:
-        fprintf(stderr, "Error: El archivo ya existe.\n");
+        fprintf(stderr,ROJO_T "Error: El archivo ya existe.\n"RESET);
         break;
     case -8:
-        fprintf(stderr, "Error: No es un directorio.\n");
+        fprintf(stderr,ROJO_T "Error: No es un directorio.\n"RESET);
         break;
     }
 }

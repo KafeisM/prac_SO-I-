@@ -5,6 +5,7 @@
 #define ROJO_T "\x1b[31m"
 #define NEGRITA "\x1b[1m"
 #define GRIS_T "\x1b[94m"
+#define AZUL_T "\x1b[34m"
 
 #include <stdio.h>  //printf(), fprintf(), stderr, stdout, stdin
 #include <fcntl.h> //O_WRONLY, O_CREAT, O_TRUNC

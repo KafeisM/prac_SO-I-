@@ -237,7 +237,7 @@ void mostrar_buscar_entrada(char *camino, char reservar){
   int error;
 
 
-  printf("\ncamino: %s, reservar: %d\n", camino, reservar);
+  fprintf(stdout, AZUL_T"\ncamino: %s, reservar: %d\n"RESET, camino, reservar);
   error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6);
 
   /*if(extraer_camino(camino,"","","") == FALLO){
