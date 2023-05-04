@@ -22,6 +22,9 @@
 #define MAGENTA "\x1b[35m"
 #define CYAN "\x1b[36m"
 
+#define LBLUE "\x1b[94m"
+#define LRED "\x1b[91m"
+
 struct entrada
 {
     char nombre[TAMNOMBRE];
