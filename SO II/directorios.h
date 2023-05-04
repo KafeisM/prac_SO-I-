@@ -12,6 +12,16 @@
 #define ERROR_ENTRADA_YA_EXISTENTE -7
 #define ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO -8
 
+#define TAMFILA 100
+#define TAMBUFFER (TAMFILA*1000) //suponemos un máx de 1000 entradas, aunque debería ser SB.totInodos
+
+#define ROJO "\x1b[31m"
+#define VERDE "\x1b[32m"
+#define AMARILLO "\x1b[33m"
+#define AZUL "\x1b[34m"
+#define MAGENTA "\x1b[35m"
+#define CYAN "\x1b[36m"
+
 struct entrada
 {
     char nombre[TAMNOMBRE];
@@ -21,3 +31,5 @@ struct entrada
 void mostrar_error_buscar_entrada(int error);
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo);
 int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo, unsigned int *p_inodo_dir, unsigned int *p_entrada, char reservar, unsigned char permisos);
+int mi_creat(const char *camino, unsigned char permisos);
+int mi_dir(const char *camino, char *buffer, char tipo);
