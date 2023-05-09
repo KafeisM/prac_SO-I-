@@ -15,21 +15,21 @@
 #define TAMFILA 100
 #define TAMBUFFER (TAMFILA*1000) //suponemos un máx de 1000 entradas, aunque debería ser SB.totInodos
 
-#define ROJO "\x1b[31m"
-#define VERDE "\x1b[32m"
-#define AMARILLO "\x1b[33m"
-#define AZUL "\x1b[34m"
-#define MAGENTA "\x1b[35m"
-#define CYAN "\x1b[36m"
-
-#define LBLUE "\x1b[94m"
-#define LRED "\x1b[91m"
+#define TAMNOMBRE 60 //tamaño del nombre de directorio o fichero
+#define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
+#define CACHE 10
 
 struct entrada
 {
     char nombre[TAMNOMBRE];
     unsigned int ninodo;
 };
+
+struct UltimaEntrada{
+  char camino [TAMNOMBRE*PROFUNDIDAD];
+  int p_inodo;
+};
+
 
 void mostrar_error_buscar_entrada(int error);
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo);

@@ -2,7 +2,7 @@
 
 #include "directorios.h"
 
-static struct UltimaEntrada UltimaEntradaEscritura;
+static struct UltimaEntrada UltimasEntradas[CACHE];
 
 /*---------------------------------------------------------------------------------------------------------
 * Dada una cadena de (camino que empieze por '/') separa su contenido
@@ -336,17 +336,24 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     unsigned int p_entrada = 0;
     int error;
 
-    if(strcmp(UltimaEntradaEscritura.camino, camino) == 0){ //Si la escritura es sobre el mismo inodo
-        p_inodo = UltimaEntradaEscritura.p_inodo;
-    }else{
-        
-    }
+    for(int i = 0; i < CACHE; i++){
+        if(strcmp(UltimasEntradas[i].camino, camino) == 0){ //Si la escritura es sobre el mismo inodo
+            p_inodo = UltimasEntradas[i].p_inodo;
+        }else{
+            error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+            if(error < 0){
+                return FALLO;
+            }else{
+                strcpy(UltimasEntradas[i].camino, camino);
+                UltimasEntradas[i].p_inodo = p_inodo;
+            }
 
 
-    error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
-    if(error < 0){
-        return FALLO;
-    }else{
-        mi_write_f(p_inodo, buf, offset, nbytes);
+        }
     }
+
+    
+
+
+    
 }
