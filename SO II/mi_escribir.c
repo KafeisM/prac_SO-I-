@@ -5,10 +5,11 @@
 int main(int argc, char **argv){
 
     char *directorio = argv[1];
-    int dif_inodos = atoi(argv[3]);
-    int escritos;
-    struct STAT p_stat;
+    char ruta = argv[2];
     int longitud = strlen(argv[2]);
+    char buf = argv[3];
+    unsigned int longTexto = strlen(argv[3]);
+    unsigned int offset = argv[4];
     int bytes_escritos;
     int error;
       
@@ -27,13 +28,13 @@ int main(int argc, char **argv){
     }  
 
     //Obtenemos la longitud del fichero a través del strlen
-    printf("Longitud texto: %ld\n\n", longitud); 
+    printf("Longitud texto: %ld\n", longTexto); 
 
-    //bytes_escritos = mi_write();
-    /*if(mi_write()== FALLO){
+    bytes_escritos = mi_write(ruta, buf, offset, longTexto);
+    if(bytes_escritos < 0){
         mostrar_error_buscar_entrada(bytes_escritos);
         return FALLO;
-    }*/
+    }
 
     //Montamos dispositivo virtual
     if(bmount(directorio) == FALLO){
@@ -41,15 +42,13 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    
-
     //Desmontamos dispositivo virtual
     if(bumount() == FALLO){
         fprintf(stderr,ROJO_T "escribir.c: Error en bumount\n" RESET);
         return FALLO;
     }
-
-    return EXITO;
+    
+    printf("Bytes escritos = %d", bytes_escritos);
 
     return EXITO;
 }
