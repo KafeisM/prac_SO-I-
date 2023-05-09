@@ -29,7 +29,7 @@ int main(int argc, char **argv){
     //Obtenemos la longitud del fichero a través del strlen
     printf("Longitud texto: %ld\n\n", longitud); 
 
-    bytes_escritos = mi_write();
+    //bytes_escritos = mi_write();
     if(mi_write()== FALLO){
         mostrar_error_buscar_entrada(bytes_escritos);
         return FALLO;
