@@ -30,10 +30,10 @@ int main(int argc, char **argv){
     printf("Longitud texto: %ld\n\n", longitud); 
 
     //bytes_escritos = mi_write();
-    if(mi_write()== FALLO){
+    /*if(mi_write()== FALLO){
         mostrar_error_buscar_entrada(bytes_escritos);
         return FALLO;
-    }
+    }*/
 
     //Montamos dispositivo virtual
     if(bmount(directorio) == FALLO){
