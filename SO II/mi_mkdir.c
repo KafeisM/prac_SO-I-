@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv){
 
-    unsigned char permisos = atoi(argv[2]);
+    unsigned int permisos = atoi(argv[2]);
     int longitud = strlen(argv[3]);
     unsigned char directorio = argv[1];
 

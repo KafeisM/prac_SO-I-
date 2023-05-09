@@ -307,3 +307,23 @@ int mi_dir(const char *camino, char *buffer){
     
     return nEntradas;
 }
+
+
+
+int mi_chmod(const char *camino, unsigned char permisos){
+    unsigned int p_inodo_dir = 0;
+    unsigned int p_inodo = 0;
+    unsigned int p_entrada = 0;
+    int error;
+    error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 6);
+   
+    if (error < 0) {
+        return error;
+    }
+
+    if(mi_chmod_f(p_inodo,permisos)){
+        return FALLO;
+    }
+    
+    return EXITO;
+}
