@@ -27,18 +27,19 @@ int main(int argc, char **argv){
         return FALLO;
     }  
 
+    //Montamos dispositivo virtual
+    if(bmount(directorio) == FALLO){
+        fprintf(stderr,ROJO_T "Error en bmount\n" RESET);
+        return FALLO;
+    }
+
     //Obtenemos la longitud del fichero a través del strlen
     printf("Longitud texto: %ld\n", longTexto); 
 
     bytes_escritos = mi_write(ruta, buf, offset, longTexto);
+
     if(bytes_escritos < 0){
         mostrar_error_buscar_entrada(bytes_escritos);
-        return FALLO;
-    }
-
-    //Montamos dispositivo virtual
-    if(bmount(directorio) == FALLO){
-        fprintf(stderr,ROJO_T "Error en bmount\n" RESET);
         return FALLO;
     }
 
@@ -48,7 +49,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
     
-    printf("Bytes escritos = %d", bytes_escritos);
+    printf("Bytes escritos = %d\n", bytes_escritos);
 
     return EXITO;
 }
