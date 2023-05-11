@@ -1,19 +1,20 @@
 #include "directorios.h"
 
-//Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>
+//Sintaxis: ./mi_cat <disco> </ruta_fichero>
 
 int main(int argc, char **argv){
+    //muestra TODO el contenido de un fichero
 
     char *directorio = argv[1];
     char *ruta = argv[2];
     int longitud = strlen(argv[2]);
-    char buf = argv[3];
-    unsigned int longTexto = strlen(argv[3]);
-    unsigned int offset = argv[4];
-    int bytes_escritos;
+    int bytes_leidos;
+    int tambuffer = BLOCKSIZE * 4;
+    char buf[tambuffer]; 
+    int offset = 0;
 
-    if(argc != 5){
-        fprintf(stderr, ROJO_T "Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>\n");
+    if(argc != 3){
+        fprintf(stderr, ROJO_T "Sintaxis: ./mi_cat <disco> </ruta_fichero>\n");
         return FALLO;
     }
 
@@ -29,15 +30,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    //Obtenemos la longitud del fichero a través del strlen
-    printf("Longitud texto: %ld\n", longTexto); 
-
-    bytes_escritos = mi_write(ruta, buf, offset, longTexto);
-
-    if(bytes_escritos < 0){
-        mostrar_error_buscar_entrada(bytes_escritos);
-        return FALLO;
-    }
+    bytes_leidos = mi_read(ruta, buf, offset, tambuffer);
 
     //Desmontamos dispositivo virtual
     if(bumount() == FALLO){
@@ -45,7 +38,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
     
-    printf("Bytes escritos = %d\n", bytes_escritos);
+    printf("Bytes leidos = %d\n", bytes_leidos);
 
     return EXITO;
 }
