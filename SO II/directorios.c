@@ -336,6 +336,64 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     unsigned int p_inodo = 0;
     unsigned int p_entrada = 0;
     int error;
+    int bytes_escritos;
+
+    // miramos en la cache para ver si la lectura es sobre un inodo que tenemos guardadp
+    for (int i = 0; i < (maxcaxhe - 1) && !found; i++){
+
+        if (strcmp(UltimasEntradas[i].camino, camino) == 0){ // Si la escritura es sobre el mismo inodo
+            p_inodo = UltimasEntradas[i].p_inodo;
+            found = true;
+        }
+    }
+
+    // si no se ha encontrado, buscamos su inodo con buscar entrada y actualizamos la cache
+    if (!found){
+        error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 2);
+        if (error < 0){
+            return error;
+        }
+
+        // miramos si la cache aun no está llena
+        if (maxcaxhe > 0){
+            // metemos en la cache el camino actual con su correspondiente inodo
+            strcpy(UltimasEntradas[CACHE - maxcaxhe].camino, camino);
+            UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
+            maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
+
+            fprintf(stderr, AZUL_T"[mi_write() → Actualizamos la caché de lectura]\n",RESET);
+
+        }else{
+            // si esta llena debemos remplazar el elemento mas antiguo (modelo FIFO)
+            for (int i = 0; i < CACHE - 1; i++){
+                // movemos todas las entradas hacia la izquierda (eliminado el mas aniguo y dejando espacio para la nueva entrada)
+                strcpy(UltimasEntradas[i].camino, UltimasEntradas[i + 1].camino);
+                UltimasEntradas[i].p_inodo = UltimasEntradas[i + 1].p_inodo;
+            }
+
+            // añadimos la nueva entrada
+            strcpy(UltimasEntradas[CACHE - 1].camino, camino);
+            UltimasEntradas[CACHE - 1].p_inodo = p_inodo;
+
+            fprintf(stderr, AZUL_T"[mi_write() → Actualizamos la caché de lectura]\n",RESET);
+        }
+    }
+
+    //Escribimos en el archivo
+    bytes_escritos = mi_write_f(p_inodo, buf, offset, nbytes);
+    if (bytes_escritos == FALLO){
+        bytes_escritos = 0;
+    }
+    return bytes_escritos;
+}
+
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes){
+
+    bool found = false;
+    unsigned int p_inodo_dir = 0;
+    unsigned int p_inodo = 0;
+    unsigned int p_entrada = 0;
+    int error;
     int bytes_leidos;
 
     // miramos en la cache para ver si la lectura es sobre un inodo que tenemos guardadp
@@ -377,12 +435,13 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
 
             fprintf(stderr, AZUL_T"[mi_read() → Actualizamos la caché de lectura]\n",RESET);
         }
+        
     }
 
-    //realizamos la lecetura 
-    bytes_leidos = mi_read_f(p_inodo,buf,offset,nbytes);
-    if(bytes_leidos == FALLO){
-        return FALLO;
+    //Escribimos en el archivo
+    bytes_leidos = mi_read_f(p_inodo, buf, offset, nbytes);
+    if (bytes_leidos == FALLO){
+        bytes_leidos = 0;
     }
     return bytes_leidos;
 }
