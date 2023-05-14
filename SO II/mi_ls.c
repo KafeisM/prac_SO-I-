@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 
     total = mi_dir(argv[2], buffer);
 
-    if(total < 0){
+    if(total <= 0){
         return FALLO;
     }else{
         printf("Total: %d\n", total);

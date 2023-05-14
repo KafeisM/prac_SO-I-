@@ -78,8 +78,7 @@ char reservar, unsigned char permisos){
 
     printf("[buscar_entrada()->inicial: %s, final: %s, reservar: %d]\n", inicial, final, reservar);
 
-    leer_inodo(*p_inodo_dir, &inodo_dir);
-    if((inodo_dir.permisos & 4) != 4){
+    if (leer_inodo(*p_inodo_dir, &inodo_dir) == FALLO){
         return ERROR_PERMISO_LECTURA;
     }
 
@@ -247,7 +246,7 @@ int mi_dir(const char *camino, char *buffer){
 
     for(int i = 0; i < nEntradas; i++){
 
-        if (leer_inodo(entradas[i % (BLOCKSIZE / sizeof(struct entrada))].ninodo, &inodo) < 0){
+        if (leer_inodo(entradas[i % (BLOCKSIZE / sizeof(struct entrada))].ninodo, &inodo) == FALLO){
             return FALLO;
         }
 
