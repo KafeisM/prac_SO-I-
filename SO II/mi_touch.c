@@ -13,7 +13,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    if(permisos < 0 && permisos > 7){
+    if(permisos < 0 || permisos > 7){
         fprintf(stderr, ROJO_T "Permisos incorrectos\n");
         return FALLO;
     }

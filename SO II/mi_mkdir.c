@@ -4,16 +4,15 @@
 
 int main(int argc, char **argv){
 
-    unsigned int permisos = atoi(argv[2]);
+    int permisos = atoi(argv[2]);
     int longitud = strlen(argv[3]);
-    unsigned char directorio = argv[1];
-
+    
     if(argc != 4){
         fprintf(stderr, ROJO_T "Sintaxis: ./mi_mkdir <disco> <permisos> </ruta>\n");
         return FALLO;
     }
 
-    if(permisos < 0 && permisos > 7){
+    if(permisos < 0 || permisos > 7){
         fprintf(stderr, ROJO_T "Permisos incorrectos\n");
         return FALLO;
     }
@@ -25,7 +24,7 @@ int main(int argc, char **argv){
     }else{//Si no lo es
         
         //Montamos disco
-        if(bmount(directorio) == FALLO){
+        if(bmount(argv[1]) == FALLO){
             return FALLO;
         }
 

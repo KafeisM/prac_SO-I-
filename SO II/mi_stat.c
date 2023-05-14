@@ -9,13 +9,14 @@ int main(int argc, char const *argv[]){
     }
 
     struct STAT p_stat;
+    int p_inodo;
     
     if (bmount(argv[1]) == FALLO){
         fprintf(stderr, ROJO_T "Error en la creación del disco\n");
         return FALLO;
     }
 
-    int p_inodo = mi_stat(argv[2], &p_stat);
+    p_inodo = mi_stat(argv[2], &p_stat);
 
     if (p_inodo < 0){
         mostrar_error_buscar_entrada(p_inodo);

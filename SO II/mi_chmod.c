@@ -1,11 +1,9 @@
-#include "directorios.h";
+#include "directorios.h"
 
 //Sintaxis: ./mi_chmod <disco> <permisos> </ruta>
 int main(int argc, char const *argv[]){
 
     unsigned int permisos = atoi(argv[2]);
-    int longitud = strlen(argv[3]);
-    unsigned char directorio = argv[3];
 
     if(argc != 4){
         fprintf(stderr, ROJO_T "Sintaxis: ./mi_chmod <disco> <permisos> </ruta>\n");
@@ -17,7 +15,7 @@ int main(int argc, char const *argv[]){
         return FALLO;
     }else{
         bmount(argv[1]);
-        int error = mi_chmod(directorio,permisos);
+        int error = mi_chmod(argv[3],permisos);
         if(error < 0){
             mostrar_error_buscar_entrada(error);
             return FALLO;

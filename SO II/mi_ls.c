@@ -5,8 +5,6 @@
 int main(int argc, char **argv){
     //lista el contenido de un directorio
 
-    int longitud = strlen(argv[2]);
-    unsigned char directorio = argv[1];
     char buffer[TAMBUFFER];
     int total;
 
@@ -15,7 +13,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    if(bmount(directorio) == FALLO){
+    if(bmount(argv[1]) == FALLO){
         return FALLO;
     }
 
