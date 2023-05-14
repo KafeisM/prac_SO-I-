@@ -11,7 +11,7 @@
 #define DEBUG3  0
 #define DEBUG4  0
 #define DEBUG5  0
-#define DEBUG6  1
+#define DEBUG6  0
 
 
 //Funciones auxiliares

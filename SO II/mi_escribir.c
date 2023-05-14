@@ -7,9 +7,9 @@ int main(int argc, char **argv){
     char *directorio = argv[1];
     char *ruta = argv[2];
     int longitud = strlen(argv[2]);
-    char buf = argv[3];
+    char *buf = argv[3];
     unsigned int longTexto = strlen(argv[3]);
-    unsigned int offset = argv[4];
+    unsigned int offset = atoi(argv[4]);
     int bytes_escritos;
 
     if(argc != 5){
@@ -30,7 +30,7 @@ int main(int argc, char **argv){
     }
 
     //Obtenemos la longitud del fichero a través del strlen
-    printf("Longitud texto: %ld\n", longTexto); 
+    printf("Longitud texto: %d\n", longTexto); 
 
     bytes_escritos = mi_write(ruta, buf, offset, longTexto);
 
