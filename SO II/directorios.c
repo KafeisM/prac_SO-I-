@@ -462,3 +462,60 @@ int mi_stat(const char *camino, struct STAT *p_stat){
     mi_stat_f(p_inodo, p_stat);
     return p_inodo;
 }
+
+int mi_link(const char *camino1, const char *camino2){
+
+    struct superbloque SB; 
+    if (bread(posSB, &SB) == FALLO){
+        fprintf(stderr, ROJO_T"mi_link(): error bread"RESET);
+        return FALLO;
+    }
+
+    unsigned int p_inodo_dir1, p_inodo1, p_entrada1 = 0;
+    p_inodo_dir1 = p_inodo1 = SB.posInodoRaiz;
+    unsigned int p_inodo_dir2, p_inodo2, p_entrada2 = 0;
+    p_inodo_dir2 = p_inodo2 = SB.posInodoRaiz;
+    int error;
+
+    error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
+    if (error < 0){
+        return error;
+    }
+
+    error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 0, 4);
+    if (error < 0){
+        return error;
+    }
+
+    struct entrada entrada;
+    if (mi_read_f(p_inodo_dir2, &entrada, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) < 0){
+        fprintf(stderr, ROJO_T"mi_link(): error mi_read_f"RESET);
+        return FALLO;
+    }
+    entrada.ninodo = p_inodo1;
+
+    if (mi_write_f(p_inodo_dir2, &entrada, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) < 0){
+        fprintf(stderr, ROJO_T"mi_link(): error mi_write_f"RESET);
+        return FALLO;
+    }
+
+    if (liberar_inodo(p_inodo2) < 0){
+        fprintf(stderr, ROJO_T"mi_link(): error liberar_inodo"RESET);
+        return FALLO;
+    }
+
+    struct inodo inodo;
+    if (leer_inodo(p_inodo1, &inodo) < 0){
+        fprintf(stderr, ROJO_T"mi_link(): error leer_inodo"RESET);
+        return FALLO;
+    }
+    inodo.nlinks++;
+    inodo.ctime = time(NULL);
+    if (escribir_inodo(p_inodo1, &inodo) < 0){
+        fprintf(stderr, ROJO_T"mi_link(): error escribir_inodo"RESET);
+        return FALLO;
+    }
+
+    return EXITO;
+
+}
