@@ -78,7 +78,8 @@ char reservar, unsigned char permisos){
 
     printf("[buscar_entrada()->inicial: %s, final: %s, reservar: %d]\n", inicial, final, reservar);
 
-    if (leer_inodo(*p_inodo_dir, &inodo_dir) == FALLO){
+    leer_inodo(*p_inodo_dir, &inodo_dir);
+    if((inodo_dir.permisos & 4) != 4){
         return ERROR_PERMISO_LECTURA;
     }
 

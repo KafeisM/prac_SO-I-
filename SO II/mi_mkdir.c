@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv){
 
-    int permisos = atoi(argv[2]);
+    unsigned char permisos = atoi(argv[2]);
     int longitud = strlen(argv[3]);
     
     if(argc != 4){
@@ -12,7 +12,7 @@ int main(int argc, char **argv){
         return FALLO;
     }
 
-    if(permisos < 0 || permisos > 7){
+    if(atoi(argv[2]) < 0 || atoi(argv[2]) > 7){
         fprintf(stderr, ROJO_T "Permisos incorrectos\n");
         return FALLO;
     }
