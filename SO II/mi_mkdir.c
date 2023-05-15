@@ -13,7 +13,7 @@ int main(int argc, char **argv){
     }
 
     if(atoi(argv[2]) < 0 || atoi(argv[2]) > 7){
-        fprintf(stderr, ROJO_T "Permisos incorrectos\n");
+        fprintf(stderr, ROJO_T "Error: Los permisos no son válidos. Modo <<%d>> inválido.\n"RESET,atoi(argv[2]));
         return FALLO;
     }
 
