@@ -96,6 +96,10 @@ char reservar, unsigned char permisos){
         return ERROR_PERMISO_LECTURA;
     }
 
+    if ((inodo_dir.permisos & 4) != 4){
+        return ERROR_PERMISO_LECTURA;
+    }
+
     //buffer de lectura
     struct entrada bufferLectura[BLOCKSIZE/sizeof(struct entrada)];
     memset(bufferLectura, 0, (BLOCKSIZE/sizeof(struct entrada)*sizeof(struct entrada)));
@@ -206,8 +210,11 @@ void mostrar_error_buscar_entrada(int error){
 
 int mi_creat(const char *camino, unsigned char permisos){
     //crea fichero/directorio y su entrada de directorio
-    unsigned int p_inodo_dir = 0;
-    unsigned int p_inodo = 0;
+    struct superbloque SB;
+    bread(posSB, &SB);
+    unsigned int p_inodo_dir;
+    unsigned int p_inodo;
+    p_inodo_dir = p_inodo = SB.posInodoRaiz;
     unsigned int p_entrada = 0;
 
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
