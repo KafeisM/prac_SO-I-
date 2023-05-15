@@ -75,6 +75,7 @@ char reservar, unsigned char permisos){
     int cant_entradas_inodo, num_entrada_inodo;
     memset(entrada.nombre, 0, sizeof(entrada.nombre));
 
+    //cuando camino parcial es una /
     if (strcmp(camino_parcial, "/") == 0){
         struct superbloque SB;
         if (bread(posSB, &SB) == FALLO){
@@ -86,13 +87,15 @@ char reservar, unsigned char permisos){
         return EXITO;
     }
 
+    //extraemos el camino y controlamos el error
     if (extraer_camino(camino_parcial, inicial, final, &tipo) < 0){
         //fprintf(stderr, ROJO_T"buscar_entrada(): Error camino incorrecto\n"RESET);
         return ERROR_CAMINO_INCORRECTO;
     }
 
-    printf("[buscar_entrada()->inicial: %s, final: %s, reservar: %d]\n", inicial, final, reservar);
+    //printf("[buscar_entrada()->inicial: %s, final: %s, reservar: %d]\n", inicial, final, reservar);
 
+    //leemos el inodo y miramos que tenga permiso de lectura
     if (leer_inodo(*p_inodo_dir, &inodo_dir) == FALLO){
         return FALLO;
     }
@@ -116,6 +119,7 @@ char reservar, unsigned char permisos){
             return ERROR_PERMISO_LECTURA;
         }
 
+        //volvermos a llenar el buffer de 0s
         while(num_entrada_inodo < cant_entradas_inodo && strcmp(inicial, entrada.nombre) != 0){
             num_entrada_inodo++;
             memset(entrada.nombre, 0, sizeof(entrada.nombre));
@@ -125,43 +129,50 @@ char reservar, unsigned char permisos){
         }
 
     }
-
+    //si ya se han recorrido todas las entradas y no hemos encontrado la inicial
     if ((num_entrada_inodo == cant_entradas_inodo) && (strcmp(entrada.nombre, inicial) != 0)){
 
+        //casos según reservar
         switch (reservar){
-        case 0:
+        case 0: //consulta. no modificamos datos
             return ERROR_NO_EXISTE_ENTRADA_CONSULTA;
             break;
-        case 1:
+        case 1://escribir
         
+            //no se puede escribir en ficheros
             if (inodo_dir.tipo == 'f'){
                 return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
             }
 
+            //el inodo necesita permiso de escritura
             if ((inodo_dir.permisos & 2) != 2){
                 return ERROR_PERMISO_ESCRITURA;
             }else{
                 strcpy(entrada.nombre, inicial);
-                if (tipo == 'd'){
+                if (tipo == 'd'){//es un directorio
                     if (strcmp(final, "/") == 0){
+                        //reservamos un inodo para usarlo como directorio en entrada.inodo
                         entrada.ninodo = reservar_inodo('d', permisos);
-                        printf("[buscar_entrada() -> reservado_inodo: %d  tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
+                        //printf("[buscar_entrada() -> reservado_inodo: %d  tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
                     }else{
                         return ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO;
                     }
-                }else{
+                }else{//es un fichero
                     entrada.ninodo = reservar_inodo('f', permisos);
-                    printf("[buscar_entrada() -> reservado_inodo: %d tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
+                    //printf("[buscar_entrada() -> reservado_inodo: %d tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
                 }
 
-                fprintf(stderr, "[buscar_entrada() -> creada entrada: %s, %d]\n", inicial, entrada.ninodo);
+                //fprintf(stderr, "[buscar_entrada() -> creada entrada: %s, %d]\n", inicial, entrada.ninodo);
                 
+                //escribimos la entrada en el directorio padre y controlamos el error
+
                 int error = mi_write_f(*p_inodo_dir, &entrada, num_entrada_inodo * sizeof(struct entrada), sizeof(struct entrada));
 
+                //si hay error liberamos la entrada
                 if (error < 0){
                     if (entrada.ninodo != FALLO){
                         liberar_inodo(entrada.ninodo);
-                        fprintf(stderr, "[buscar_entrada() -> liberar inodo %i, reservado a %s]\n", num_entrada_inodo, inicial);
+                        //fprintf(stderr, "[buscar_entrada() -> liberar inodo %i, reservado a %s]\n", num_entrada_inodo, inicial);
                     }
                     return FALLO;
                 }
@@ -171,8 +182,10 @@ char reservar, unsigned char permisos){
 
     }
 
+    //si se cumplen las condiciones de final de camino
     if (!strcmp(final, "/") || !strcmp(final, "")){
 
+        //si no existe la entrada y reservar indica modo escritura
         if ((num_entrada_inodo < cant_entradas_inodo) && (reservar == 1)){
             return ERROR_ENTRADA_YA_EXISTENTE;
         }
@@ -473,60 +486,86 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     return bytes_leidos;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Obtiene la metainformacion del elemento del camino
+* Input:    camino: direccion del fichero o directorio
+*           p_stat: dirección de la metainformacion
+* Output:   p_inodo: puntero al inodo
+*           error.
+---------------------------------------------------------------------------------------------------------*/
+
 int mi_stat(const char *camino, struct STAT *p_stat){
 
+    //variable superbloque para leer la posicion del inodo raíz
     struct superbloque SB;
     bread(posSB, &SB);
+    //variables para buscar la entrada
     unsigned int p_inodo_dir, p_inodo;
     unsigned int p_entrada;
     p_inodo_dir = p_inodo = SB.posInodoRaiz;
+    //buscar entrada correspondiente, sin escribir y con permisos de lectura
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
 
+    //control del error
     if (error < 0){
         return error;
     }
 
+    //llamamos a la funcion de la capa de ficheros para obtener la metainformacion
     mi_stat_f(p_inodo, p_stat);
     return p_inodo;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función que crea el enlace entre una entrada de directo al inodo indicado por otra entrada de directorio
+* Input:    camino1: direccion del fichero 1.
+*           camino2: direccion del fichero donde es creado el enlace
+* Output:   FALLO o EXITO
+---------------------------------------------------------------------------------------------------------*/
+
 int mi_link(const char *camino1, const char *camino2){
 
-    
-
+    //variables para obtener ambas entradas y control de error
     unsigned int p_inodo_dir1, p_inodo1, p_entrada1 = 0;
     p_inodo_dir1 = p_inodo1 = 0;
     unsigned int p_inodo_dir2, p_inodo2, p_entrada2 = 0;
     p_inodo_dir2 = p_inodo2 = 0;
     int error;
 
+    //buscamos la primera entrada con permisos de lectura y no escritura
     error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
     if (error < 0){
         return error;
     }
 
+    //buscamos segunda entrada, con escritura
     error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (error < 0){
         return error;
     }
 
+    //leemos el contenido del inodo padre
     struct entrada entrada;
     if (mi_read_f(p_inodo_dir2, &entrada, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error mi_read_f"RESET);
         return FALLO;
     }
+    //creamos el link
     entrada.ninodo = p_inodo1;
 
+    //actualizamos los resultados
     if (mi_write_f(p_inodo_dir2, &entrada, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error mi_write_f"RESET);
         return FALLO;
     }
 
+    //liberamos el segundo inodo y controlamos el error
     if (liberar_inodo(p_inodo2) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error liberar_inodo"RESET);
         return FALLO;
     }
 
+    //leemos el inodo y aumentamos el numero de links
     struct inodo inodo;
     if (leer_inodo(p_inodo1, &inodo) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error leer_inodo"RESET);
