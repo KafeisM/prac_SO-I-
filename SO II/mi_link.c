@@ -8,7 +8,7 @@ int main(int argc, char const *argv[]){
         return FALLO;
     }
 
-    if (argv[2][stlen(argv[2])-1] == '/' && argv[3][strlen(argv[3])-1] == '/'){
+    if (argv[2][strlen(argv[2])-1] == '/' && argv[3][strlen(argv[3])-1] == '/'){
         fprintf(stderr, ROJO_T"Solo se permiten ficheros"RESET);
         return FALLO;
     }
