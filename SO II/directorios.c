@@ -349,7 +349,12 @@ int mi_dir(const char *camino, char *buffer){
     return nEntradas;
 }
 
-
+/*---------------------------------------------------------------------------------------------------------
+* Buscar la entrada *camino con buscar_entrada() para obtener el nº de inodo (p_inodo) y llamar a 
+* mi_chmod_f
+* Input:    camino: direccion del fichero/directorio .
+* Output:   FALLO o EXITO
+---------------------------------------------------------------------------------------------------------*/
 
 int mi_chmod(const char *camino, unsigned char permisos){
 
@@ -357,12 +362,14 @@ int mi_chmod(const char *camino, unsigned char permisos){
     unsigned int p_inodo = 0;
     unsigned int p_entrada = 0;
     int error;
+
+    //buscamos la entrada para obtener el inodo
     error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 6);
-   
     if (error < 0) {
         return error;
     }
 
+    //cambiamos los permisos del inodo
     if(mi_chmod_f(p_inodo,permisos)){
         return FALLO;
     }
@@ -370,6 +377,14 @@ int mi_chmod(const char *camino, unsigned char permisos){
     return EXITO;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función de para escribir contenido en un fichero.
+* Input:    camino: direccion del fichero .
+*           buf: buffer del contenido a escribir
+*           offset: posicion del offset
+*           nbytes: bytyes a escribir
+* Output:   FALLO o EXITO
+---------------------------------------------------------------------------------------------------------*/
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes){
     bool found = false;
     unsigned int p_inodo_dir = 0;
@@ -401,7 +416,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
             UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
             maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
 
-            fprintf(stderr, AZUL_T"[mi_write() → Actualizamos la caché de lectura]\n"RESET);
+            //fprintf(stderr, AZUL_T"[mi_write() → Actualizamos la caché de lectura]\n"RESET);
 
         }else{
             // si esta llena debemos remplazar el elemento mas antiguo (modelo FIFO)
@@ -415,7 +430,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
             strcpy(UltimasEntradas[CACHE - 1].camino, camino);
             UltimasEntradas[CACHE - 1].p_inodo = p_inodo;
 
-            fprintf(stderr, AZUL_T"[mi_write() → Actualizamos la caché de lectura]\n"RESET);
+            //fprintf(stderr, AZUL_T"[mi_write() → Actualizamos la caché de lectura]\n"RESET);
         }
     }
 
@@ -427,6 +442,14 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     return bytes_escritos;
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función de para leer contenido de un fichero.
+* Input:    camino: direccion del fichero .
+*           buf: buffer para posicionar el contenido leido
+*           offset: posicion del offset
+*           nbytes: bytyes a escribir
+* Output:   FALLO o EXITO
+---------------------------------------------------------------------------------------------------------*/
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes){
 
     bool found = false;
@@ -459,7 +482,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
             UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
             maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
 
-            fprintf(stderr, AZUL_T"[mi_read() → Actualizamos la caché de lectura]\n"RESET);
+            //fprintf(stderr, AZUL_T"[mi_read() → Actualizamos la caché de lectura]\n"RESET);
 
         }else{
             // si esta llena debemos remplazar el elemento mas antiguo (modelo FIFO)
@@ -473,7 +496,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
             strcpy(UltimasEntradas[CACHE - 1].camino, camino);
             UltimasEntradas[CACHE - 1].p_inodo = p_inodo;
 
-            fprintf(stderr, AZUL_T"[mi_read() → Actualizamos la caché de lectura]\n"RESET);
+            //fprintf(stderr, AZUL_T"[mi_read() → Actualizamos la caché de lectura]\n"RESET);
         }
         
     }
@@ -582,6 +605,12 @@ int mi_link(const char *camino1, const char *camino2){
 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función de la capa de directorios que borra la entrada de directorio especificaday , 
+* en caso de que fuera el último enlace existente, borrar el propio fichero/directorio.
+* Input:    camino: direccion del fichero/directorio .
+* Output:   FALLO o EXITO
+---------------------------------------------------------------------------------------------------------*/
 int mi_unlink(const char *camino){
 
     struct superbloque SB;
