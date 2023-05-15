@@ -549,7 +549,7 @@ int mi_unlink(const char *camino){
     p_inodo_dir = SB.posInodoRaiz;
     p_inodo = p_inodo_dir;
 
-    error = buscar_entrada(camino,p_inodo,p_inodo_dir,p_entrada,0,4);
+    error = buscar_entrada(camino,&p_inodo,&p_inodo_dir,&p_entrada,0,4);
     if(error < 0){
         mostrar_error_buscar_entrada(error);
         return FALLO;
