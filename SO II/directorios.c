@@ -227,17 +227,23 @@ void mostrar_error_buscar_entrada(int error){
     }
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función de la capa de directorios que crea un fichero/directorio y su entrada de directorio.
+* Input:    camino: direccion del fichero o directorio
+*           permisos: permisos que le tenemos que pasar a buscar_entrada
+* Output:   el error o EXITO
+---------------------------------------------------------------------------------------------------------*/
+
 int mi_creat(const char *camino, unsigned char permisos){
-    //crea fichero/directorio y su entrada de directorio
-    struct superbloque SB;
-    bread(posSB, &SB);
-    unsigned int p_inodo_dir;
-    unsigned int p_inodo;
-    p_inodo_dir = p_inodo = SB.posInodoRaiz;
+    
+    //ponemos las variables a 0
+    unsigned int p_inodo_dir = 0;
+    unsigned int p_inodo = 0;
     unsigned int p_entrada = 0;
 
+    //llamamos a buscar entrada con reservar a 1
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
-
+    //tratamos el error
     if(error < 0){
         return error;
     }
@@ -246,51 +252,65 @@ int mi_creat(const char *camino, unsigned char permisos){
 
 }
 
+/*---------------------------------------------------------------------------------------------------------
+* Función de la capa de directorios que pone el contenido del directorio en un buffer de memoria
+* Input:    camino: direccion del fichero o directorio
+*           buffer: metemos el contenido dentro de este buffer
+* Output:   numeroEntradas: numero de entradas
+*           o FALLO
+---------------------------------------------------------------------------------------------------------*/
+
 int mi_dir(const char *camino, char *buffer){
-    //pone el contenido del directorio en un buffer de memoria y devuelve el número de entadas
 
+    //definimos variables
     struct tm *tm;
-
     unsigned int p_inodo_dir = 0;
     unsigned int p_inodo = 0;
     unsigned int p_entrada = 0;
-    int error;
-    int nEntradas = 0;
+    int numeroEntradas = 0;
 
-    error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4); //Permisos para leer
-    if (error < 0){
+    //llamamos a buscar entrada con los permisos correspondientes para leer
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4); //Permisos para leer
+    if (error < 0){ //tratamos el error
         mostrar_error_buscar_entrada(error);
         return FALLO;
     }
 
+    //para obtener el inodo correspondiente
     struct inodo inodo;
     if (leer_inodo(p_inodo, &inodo) < 0){
         return FALLO;
     }
 
+    //comprobamos permisos
     if ((inodo.permisos & 4) != 4){
         return FALLO;
     }
 
-    char tiempo[100];       //Para el tiempo
-    char tamEnBytes[10]; //10 = valor maximo de un unsigned int
+    //definimos estos arrays para meter el tiempo y el tamaño de la entrada
+    char t[100];
+    char tamanyoBytes[10];
 
     //Buffer de salida
     struct entrada entradas[BLOCKSIZE / sizeof(struct entrada)];
     memset(&entradas, 0, sizeof(struct entrada));
 
-    nEntradas = inodo.tamEnBytesLog / sizeof(struct entrada);
+    //obtenemos el numero de entradas
+    numeroEntradas = inodo.tamEnBytesLog / sizeof(struct entrada);
 
+    //obtenemos el offset
     int offset = 0;
     offset += mi_read_f(p_inodo, entradas, offset, BLOCKSIZE);
 
-    for(int i = 0; i < nEntradas; i++){
+    //hacemos un for para todas las entradas
+    for(int i = 0; i < numeroEntradas; i++){
 
+        //obtenemos el inodo correspondiente
         if (leer_inodo(entradas[i % (BLOCKSIZE / sizeof(struct entrada))].ninodo, &inodo) == FALLO){
             return FALLO;
         }
 
-        //Tipo
+        //obtenemos tipo
         if (inodo.tipo == 'd'){
             strcat(buffer, "d");
 
@@ -299,7 +319,7 @@ int mi_dir(const char *camino, char *buffer){
         }
         strcat(buffer, "\t");
 
-        //Permisos
+        //obtenemos permisos
         if (inodo.permisos & 4){
         strcat(buffer, "r"); 
         }else{
@@ -319,34 +339,35 @@ int mi_dir(const char *camino, char *buffer){
         }
         strcat(buffer, "\t");
 
-        //Tiempo
+        //obtenemos el tiempo
         tm = localtime(&inodo.mtime);
-        sprintf(tiempo, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
-        strcat(buffer, tiempo);
+        sprintf(t, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
+        strcat(buffer, t);
         strcat(buffer, "\t");
 
-        //Tamaño
-        sprintf(tamEnBytes, "%d", inodo.tamEnBytesLog);
-        strcat(buffer, tamEnBytes);
+        //obtenemos el tamaño
+        sprintf(tamanyoBytes, "%d", inodo.tamEnBytesLog);
+        strcat(buffer, tamanyoBytes);
         strcat(buffer, "\t");
 
-        //Nombre
+        //obtenemos el nombre
         strcat(buffer, entradas[i % (BLOCKSIZE / sizeof(struct entrada))].nombre);
         while ((strlen(buffer) % TAMFILA) != 0){
             strcat(buffer, " ");
         }
 
-        //Siguiente
+        //pasamos a la siguiente entrada
         strcat(buffer, RESET);
         strcat(buffer, "\n");
 
+        //cambiamos el offset
         if (offset % (BLOCKSIZE / sizeof(struct entrada)) == 0){
             offset += mi_read_f(p_inodo, entradas, offset, BLOCKSIZE);
         }
 
     }
     
-    return nEntradas;
+    return numeroEntradas;
 }
 
 /*---------------------------------------------------------------------------------------------------------
