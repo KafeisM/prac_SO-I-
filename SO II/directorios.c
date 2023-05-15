@@ -32,7 +32,6 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
 
         //Miramos si es un directorio
         if (final[0] == '/'){
-            printf("Entro tete estae kmino me contamino minamino\n");
             strcpy(tipo, "d");
         }
     }else{
@@ -62,7 +61,7 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
  * Output: EXITO o codigo de error
  ---------------------------------------------------------------------------------------------------------*/
 
-int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo, unsigned int *p_inodo_dir, unsigned int *p_entrada,
+int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsigned int *p_inodo, unsigned int *p_entrada,
 char reservar, unsigned char permisos){
 
     //variables
@@ -87,10 +86,7 @@ char reservar, unsigned char permisos){
         return EXITO;
     }
 
-    memset(inicial, 0, sizeof(entrada.nombre));
-    memset(final, 0, strlen(camino_parcial));
-
-    if (extraer_camino(camino_parcial, inicial, final, &tipo) == FALLO){
+    if (extraer_camino(camino_parcial, inicial, final, &tipo) < 0){
         //fprintf(stderr, ROJO_T"buscar_entrada(): Error camino incorrecto\n"RESET);
         return ERROR_CAMINO_INCORRECTO;
     }
@@ -98,7 +94,7 @@ char reservar, unsigned char permisos){
     printf("[buscar_entrada()->inicial: %s, final: %s, reservar: %d]\n", inicial, final, reservar);
 
     if (leer_inodo(*p_inodo_dir, &inodo_dir) == FALLO){
-        return ERROR_PERMISO_LECTURA;
+        return FALLO;
     }
 
     if ((inodo_dir.permisos & 4) != 4){
@@ -106,8 +102,9 @@ char reservar, unsigned char permisos){
     }
 
     //buffer de lectura
-    struct entrada bufferLectura[BLOCKSIZE/sizeof(struct entrada)];
-    memset(bufferLectura, 0, (BLOCKSIZE/sizeof(struct entrada)*sizeof(struct entrada)));
+    //struct entrada bufferLectura[BLOCKSIZE/sizeof(struct entrada)];
+    //memset(bufferLectura, 0, (BLOCKSIZE/sizeof(struct entrada)*sizeof(struct entrada)));
+    memset(entrada.nombre, 0, sizeof(entrada.nombre));
 
     //cantidad de entradas del inodo y nº de entrada inicial
     cant_entradas_inodo = inodo_dir.tamEnBytesLog/sizeof(struct entrada);
@@ -121,6 +118,7 @@ char reservar, unsigned char permisos){
 
         while(num_entrada_inodo < cant_entradas_inodo && strcmp(inicial, entrada.nombre) != 0){
             num_entrada_inodo++;
+            memset(entrada.nombre, 0, sizeof(entrada.nombre));
             if (mi_read_f(*p_inodo_dir, &entrada, num_entrada_inodo*sizeof(struct entrada), sizeof(struct entrada)) < 0){
                 return ERROR_PERMISO_LECTURA;
             }
@@ -128,15 +126,14 @@ char reservar, unsigned char permisos){
 
     }
 
-    if ((inicial != bufferLectura[num_entrada_inodo%(BLOCKSIZE/sizeof(struct entrada))].nombre) && (num_entrada_inodo == cant_entradas_inodo)){
+    if ((num_entrada_inodo == cant_entradas_inodo) && (strcmp(entrada.nombre, inicial) != 0)){
 
         switch (reservar){
         case 0:
             return ERROR_NO_EXISTE_ENTRADA_CONSULTA;
             break;
         case 1:
-
-            printf(" final: %s ; tipo: %c\n", final,tipo);
+        
             if (inodo_dir.tipo == 'f'){
                 return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
             }
@@ -147,14 +144,13 @@ char reservar, unsigned char permisos){
                 strcpy(entrada.nombre, inicial);
                 if (tipo == 'd'){
                     if (strcmp(final, "/") == 0){
-                        printf("estoy aqui tete 1\n");
-                        entrada.ninodo = reservar_inodo('d', 6);
+                        entrada.ninodo = reservar_inodo('d', permisos);
                         printf("[buscar_entrada() -> reservado_inodo: %d  tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
                     }else{
                         return ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO;
                     }
                 }else{
-                    entrada.ninodo = reservar_inodo('f', 6);
+                    entrada.ninodo = reservar_inodo('f', permisos);
                     printf("[buscar_entrada() -> reservado_inodo: %d tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
                 }
 
@@ -162,16 +158,15 @@ char reservar, unsigned char permisos){
                 
                 int error = mi_write_f(*p_inodo_dir, &entrada, num_entrada_inodo * sizeof(struct entrada), sizeof(struct entrada));
 
-                if (error == FALLO){
-                    if (entrada.ninodo != FALLO){
+                if (error < 0){
+                    if (entrada.ninodo != -2){
                         liberar_inodo(entrada.ninodo);
                         fprintf(stderr, "[buscar_entrada() -> liberar inodo %i, reservado a %s]\n", num_entrada_inodo, inicial);
                     }
-                    return FALLO;
+                    return -2;
                 }
             }
-        default:
-            break;
+        
         }
 
     }
@@ -182,14 +177,15 @@ char reservar, unsigned char permisos){
             return ERROR_ENTRADA_YA_EXISTENTE;
         }
 
-        *p_inodo = num_entrada_inodo;
-        *p_entrada = entrada.ninodo;
+        *p_inodo = entrada.ninodo;
+        *p_entrada = num_entrada_inodo;
         return EXITO;
     }else{
         *p_inodo_dir = entrada.ninodo;
         return buscar_entrada(final, p_inodo_dir, p_inodo, p_entrada, reservar, permisos);
-    }
+    }   
 
+    return EXITO;
 }
 
 void mostrar_error_buscar_entrada(int error){

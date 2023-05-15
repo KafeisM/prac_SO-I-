@@ -3,7 +3,7 @@
 
 int main(int argc, char const *argv[]){
     
-    int error;
+    //int error;
 
     if (argc != 3){
         fprintf(stderr, ROJO_T "Sintaxis: ./mi_rm disco /ruta\n"RESET);

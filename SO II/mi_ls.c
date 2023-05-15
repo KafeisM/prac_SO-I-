@@ -27,7 +27,7 @@ int main(int argc, char **argv){
     }else{
         printf("Total: %d\n", total);
 
-        printf("Tipo\tPermisos\tmTime\t\t\tTamaño\tNombre\n");
+        printf("Tipo\tPermisos\tmTime\t\tTamaño\tNombre\n");
         printf("--------------------------------------------------------------------------------\n");
         printf("%s\n", buffer);
     }
