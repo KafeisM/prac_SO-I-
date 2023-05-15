@@ -15,7 +15,6 @@ int maxcaxhe = CACHE;
 ---------------------------------------------------------------------------------------------------------*/
 
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
-    bool dir = false;
 
     if (camino[0] != '/'){
         return FALLO;
@@ -33,15 +32,19 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
 
         //Miramos si es un directorio
         if (final[0] == '/'){
+            printf("Entro tete estae kmino me contamino minamino\n");
             strcpy(tipo, "d");
             dir = true;
         }
+    }else{
+        strcpy(inicial, (camino + 1));
+        strcpy(final, "");
     }
 
-    if (!dir){ // miramos si no es un directorio
+    /*if (!dir){ // miramos si no es un directorio
         strncpy(inicial, camino + 1, sizeof(char) * strlen(camino) - 1);
-        strcpy(final, "");
-        }
+        strcpy(tipo, "f");
+    }*/
 
     return EXITO;
 }
@@ -72,6 +75,7 @@ char reservar, unsigned char permisos){
     memset(final, 0, strlen(camino_parcial));
     char tipo;
     int cant_entradas_inodo, num_entrada_inodo;
+    memset(entrada.nombre, 0, sizeof(entrada.nombre));
 
     if (strcmp(camino_parcial, "/") == 0){
         struct superbloque SB;
@@ -84,6 +88,8 @@ char reservar, unsigned char permisos){
         return EXITO;
     }
 
+    memset(inicial, 0, sizeof(entrada.nombre));
+    memset(final, 0, strlen(camino_parcial));
 
     if (extraer_camino(camino_parcial, inicial, final, &tipo) == FALLO){
         //fprintf(stderr, ROJO_T"buscar_entrada(): Error camino incorrecto\n"RESET);
@@ -130,6 +136,8 @@ char reservar, unsigned char permisos){
             return ERROR_NO_EXISTE_ENTRADA_CONSULTA;
             break;
         case 1:
+
+            printf(" final: %s ; tipo: %c\n", final,tipo);
             if (inodo_dir.tipo == 'f'){
                 return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
             }
@@ -140,19 +148,22 @@ char reservar, unsigned char permisos){
                 strcpy(entrada.nombre, inicial);
                 if (tipo == 'd'){
                     if (strcmp(final, "/") == 0){
-                        entrada.ninodo = reservar_inodo(tipo, permisos);
+                        printf("estoy aqui tete 1\n");
+                        entrada.ninodo = reservar_inodo('d', 6);
                         printf("[buscar_entrada() -> reservado_inodo: %d  tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
                     }else{
                         return ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO;
                     }
                 }else{
-                    entrada.ninodo = reservar_inodo(tipo, permisos);
+                    entrada.ninodo = reservar_inodo('f', 6);
                     printf("[buscar_entrada() -> reservado_inodo: %d tipo: %c con permisos: %d para '%s']\n", entrada.ninodo, tipo, permisos, entrada.nombre);
                 }
 
                 fprintf(stderr, "[buscar_entrada() -> creada entrada: %s, %d]\n", inicial, entrada.ninodo);
+                
+                int error = mi_write_f(*p_inodo_dir, &entrada, num_entrada_inodo * sizeof(struct entrada), sizeof(struct entrada));
 
-                if (mi_write_f(*p_inodo_dir, &entrada, inodo_dir.tamEnBytesLog, sizeof(struct entrada)) == FALLO){
+                if (error == FALLO){
                     if (entrada.ninodo != FALLO){
                         liberar_inodo(entrada.ninodo);
                         fprintf(stderr, "[buscar_entrada() -> liberar inodo %i, reservado a %s]\n", num_entrada_inodo, inicial);
