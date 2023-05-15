@@ -34,7 +34,6 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo){
         if (final[0] == '/'){
             printf("Entro tete estae kmino me contamino minamino\n");
             strcpy(tipo, "d");
-            dir = true;
         }
     }else{
         strcpy(inicial, (camino + 1));
