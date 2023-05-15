@@ -29,9 +29,6 @@ echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_escribir  disco /fichero "estoy estupendamente" 256000\x1b[0m"
 ./mi_escribir  disco /fichero "estoy estupendamente" 256000
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /fichero #si no habéis implementado mi_ls para ficheros eliminar esta línea\x1b[0m"
-./mi_ls disco /fichero
-echo
 echo -e "\x1B[38;2;17;245;120m##############################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m$ ./mi_mkdir disco 6 /dir1/\x1b[0m"
 ./mi_mkdir disco 6 /dir1/

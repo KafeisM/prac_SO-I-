@@ -159,11 +159,11 @@ char reservar, unsigned char permisos){
                 int error = mi_write_f(*p_inodo_dir, &entrada, num_entrada_inodo * sizeof(struct entrada), sizeof(struct entrada));
 
                 if (error < 0){
-                    if (entrada.ninodo != -2){
+                    if (entrada.ninodo != FALLO){
                         liberar_inodo(entrada.ninodo);
                         fprintf(stderr, "[buscar_entrada() -> liberar inodo %i, reservado a %s]\n", num_entrada_inodo, inicial);
                     }
-                    return -2;
+                    return FALLO;
                 }
             }
         
@@ -492,16 +492,12 @@ int mi_stat(const char *camino, struct STAT *p_stat){
 
 int mi_link(const char *camino1, const char *camino2){
 
-    struct superbloque SB; 
-    if (bread(posSB, &SB) == FALLO){
-        fprintf(stderr, ROJO_T"mi_link(): error bread"RESET);
-        return FALLO;
-    }
+    
 
     unsigned int p_inodo_dir1, p_inodo1, p_entrada1 = 0;
-    p_inodo_dir1 = p_inodo1 = SB.posInodoRaiz;
+    p_inodo_dir1 = p_inodo1 = 0;
     unsigned int p_inodo_dir2, p_inodo2, p_entrada2 = 0;
-    p_inodo_dir2 = p_inodo2 = SB.posInodoRaiz;
+    p_inodo_dir2 = p_inodo2 = 0;
     int error;
 
     error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
@@ -509,7 +505,7 @@ int mi_link(const char *camino1, const char *camino2){
         return error;
     }
 
-    error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 0, 4);
+    error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (error < 0){
         return error;
     }
@@ -548,84 +544,75 @@ int mi_link(const char *camino1, const char *camino2){
 }
 
 int mi_unlink(const char *camino){
+
     struct superbloque SB;
     struct inodo inodoRM;
     struct inodo inodoDIR;
-
-    bread(posSB,&SB);
-    unsigned int p_inodo_dir = 0;
-    unsigned int p_inodo = 0;
+    unsigned int p_inodo_dir, p_inodo;
     unsigned int p_entrada = 0;
-    unsigned int num_entradas;
     int error;
 
-    p_inodo_dir = SB.posInodoRaiz;
-    p_inodo = p_inodo_dir;
+    if(bread(posSB, &SB) == FALLO){
+        fprintf(stderr, ROJO_T"mi_unlink: Error bread\n"RESET);
+    }
+    p_inodo_dir = p_inodo = SB.posInodoRaiz;
 
-    error = buscar_entrada(camino,&p_inodo,&p_inodo_dir,&p_entrada,0,4);
-    if(error < 0){
+    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4)) < 0){
         mostrar_error_buscar_entrada(error);
         return FALLO;
     }
 
-    //comprovamos que el inodo obtenido no es el del directorio raiz
-    if(SB.posInodoRaiz == p_inodo){
-        fprintf(stderr,ROJO_T"mi_unlink: El inodo es el inodo raiz\n"RESET);
+    if (SB.posInodoRaiz == p_inodo){
+        fprintf(stderr, ROJO_T"mi_unlink: El inodo es el inodo raiz\n"RESET);
         return FALLO;
     }
 
-    //leemos el inodo del ARCHIVO que queremos borrar
-    if(leer_inodo(p_inodo,&inodoRM) == FALLO){
-        return FALLO;
-    }
-
-    //si es un directorio y no esta vacio, no se puede borrar
-    if((inodoRM.tamEnBytesLog > 0) && (inodoRM.tipo == 'd' )){
-        fprintf(stderr,ROJO_T"mi_unlink: El directorio %s no está vacio\n"RESET,camino);
-    } 
-
-    //leemos el DIRECTORIO padre asociado
-    if(leer_inodo(p_inodo_dir,&inodoDIR) == FALLO){
+    
+    if (leer_inodo(p_inodo, &inodoRM) < 0){
         return FALLO;
     }
     
-    num_entradas = inodoDIR.tamEnBytesLog/sizeof(struct entrada); //numero de entradas que tiene un inodo
-
-    //miramos si la entrada a eliminar es la última
-    if(p_entrada == num_entradas-1){
-       //eliminar la ultima
-       if(mi_truncar_f(p_inodo_dir,sizeof(struct entrada) * (num_entradas -1) == FALLO)){
-            return FALLO;
-       }
-       inodoRM.nlinks--;
-    }else{
-        //si no es la ultima entrada, leemos la ultima y la reecolocamos en la posicion que vamos a eliminar
-        struct entrada entrada;
-        if(mi_read_f(p_inodo_dir,&entrada,sizeof(struct entrada)*(num_entradas-1),sizeof(struct entrada)) == FALLO){
-            return FALLO;
-        }
-
-        if(mi_write_f(p_inodo_dir,&entrada,sizeof(struct entrada) * (p_entrada),sizeof(struct entrada)) == FALLO){
-            return FALLO;
-        }
-
-        //como esta recolocado, podemos truncar al final y asi lo eliminamos como el caso anterior
-        if(mi_truncar_f(p_inodo_dir,sizeof(struct entrada) * (num_entradas -1) == FALLO)){
-            return FALLO;
-       }
-       inodoRM.nlinks--;
+    if ((inodoRM.tipo == 'd') && (inodoRM.tamEnBytesLog > 0)){
+        fprintf(stderr, ROJO_T"mi_unlink: El directorio '%s' no está vacío\n"RESET ,camino);
+        return FALLO;
     }
 
-    //miramos si le quedan enlazes
-    if(inodoRM.nlinks == 0){
-        //liberamos el inodo
-        if(liberar_inodo(p_inodo) == FALLO){
+    
+    if (leer_inodo(p_inodo_dir, &inodoDIR) < 0){
+        return FALLO;
+    }
+
+    int num_entrada = inodoDIR.tamEnBytesLog / sizeof(struct entrada);
+
+    if (p_entrada != num_entrada - 1){
+
+        struct entrada entrada;
+        if (mi_read_f(p_inodo_dir, &entrada, sizeof(struct entrada) * (num_entrada - 1), sizeof(struct entrada)) < 0){
+            return FALLO;
+        }
+
+        if (mi_write_f(p_inodo_dir, &entrada, sizeof(struct entrada) * (p_entrada), sizeof(struct entrada)) < 0){
+            return FALLO;
+        }
+
+    }
+
+    if (mi_truncar_f(p_inodo_dir, sizeof(struct entrada) * (num_entrada - 1)) < 0){
+        return FALLO;
+    }
+
+    inodoRM.nlinks--;
+
+
+    if (inodoRM.nlinks == 0){
+        
+        if (liberar_inodo(p_inodo) < 0){
             return FALLO;
         }
     }else{
-        //actualizamos el inodo
+
         inodoRM.ctime = time(NULL);
-        if(escribir_inodo(p_inodo,&inodoRM) == FALLO){
+        if (escribir_inodo(p_inodo, &inodoRM) < 0){
             return FALLO;
         }
     }

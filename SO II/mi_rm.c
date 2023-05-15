@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]){
         return FALLO;
     }   
     
-    if(mi_unlink(argv[2]) == FALLO){
+    if(mi_unlink(argv[2]) < 0){
         return FALLO;
     }
 

@@ -67,8 +67,8 @@ echo
 echo -e "\x1B[38;2;17;245;120m##############################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m                          2ª parte\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m##############################################################\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_rmdir disco /dir2/dir21/ #o mi_rm\x1b[0m"
-./mi_rmdir disco /dir2/dir21/ 
+echo -e "\x1B[38;2;17;245;120m$ ./mi_rm disco /dir2/dir21/ #o mi_rm\x1b[0m"
+./mi_rm disco /dir2/dir21/ 
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_rm disco /dir2/dir21/fic2\x1b[0m"
 ./mi_rm disco /dir2/dir21/fic2
@@ -79,8 +79,8 @@ echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_rm disco /dir2/dir21/fic2\x1b[0m"
 ./mi_rm disco /dir2/dir21/fic2
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_rmdir disco /dir2/dir21/ #o mi_rm\x1b[0m"
-./mi_rmdir disco /dir2/dir21/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_rm disco /dir2/dir21/ #o mi_rm\x1b[0m"
+./mi_rm disco /dir2/dir21/
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir2/dir21/\x1b[0m"
 ./mi_ls disco /dir2/dir21/
@@ -91,8 +91,8 @@ echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_rm disco /dir2/dir21/fic5\x1b[0m"
 ./mi_rm disco /dir2/dir21/fic5
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_rmdir disco /dir2/dir21/ #o mi_rm\x1b[0m"
-./mi_rmdir disco /dir2/dir21/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_rm disco /dir2/dir21/ #o mi_rm\x1b[0m"
+./mi_rm disco /dir2/dir21/
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir2/\x1b[0m"
 ./mi_ls disco /dir2/
@@ -128,8 +128,8 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /d1/\x1b[0m"
 echo
 echo -e "\x1B[38;2;17;245;120m##############################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120mEliminamos el subdirectorio sd3 de d1\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_rmdir disco /d1/sd3/\x1b[0m"
-./mi_rmdir disco /d1/sd3/
+echo -e "\x1B[38;2;17;245;120m$ ./mi_rm disco /d1/sd3/\x1b[0m"
+./mi_rm disco /d1/sd3/
 echo
 echo -e "\x1B[38;2;17;245;120mMostramos la metainformacion de d1 para ver que ahora tiene 1 bloque de datos\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m$ ./mi_stat disco /d1/\x1b[0m"

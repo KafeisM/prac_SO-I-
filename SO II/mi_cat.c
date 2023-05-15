@@ -5,12 +5,6 @@
 int main(int argc, char **argv){
 
     char *directorio = argv[1];
-    char *ruta = argv[2];
-    int longitud = strlen(argv[2]);
-    int bytes_leidos;
-    int tambuffer = BLOCKSIZE * 4;
-    char buf[tambuffer]; 
-    int offset = 0;
     
     if (argc != 3){
         fprintf(stderr, ROJO_T"Sintaxis: ./mi_cat <disco> </ruta_fichero>\n");
