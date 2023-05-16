@@ -1,3 +1,6 @@
+/*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
+
+
 #include "directorios.h"
 
 /*---------------------------------------------------------------------------------------------------------
