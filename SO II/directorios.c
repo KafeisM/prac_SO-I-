@@ -236,6 +236,8 @@ void mostrar_error_buscar_entrada(int error){
 
 int mi_creat(const char *camino, unsigned char permisos){
     
+
+    mi_waitSem();
     //ponemos las variables a 0
     unsigned int p_inodo_dir = 0;
     unsigned int p_inodo = 0;
@@ -245,8 +247,11 @@ int mi_creat(const char *camino, unsigned char permisos){
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
     //tratamos el error
     if(error < 0){
+        mi_signalSem();
         return error;
     }
+
+    mi_signalSem();
 
     return EXITO;
 
@@ -569,6 +574,8 @@ int mi_stat(const char *camino, struct STAT *p_stat){
 
 int mi_link(const char *camino1, const char *camino2){
 
+
+    mi_waitSem();
     //variables para obtener ambas entradas y control de error
     unsigned int p_inodo_dir1, p_inodo1, p_entrada1 = 0;
     p_inodo_dir1 = p_inodo1 = 0;
@@ -579,12 +586,14 @@ int mi_link(const char *camino1, const char *camino2){
     //buscamos la primera entrada con permisos de lectura y no escritura
     error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
     if (error < 0){
+        mi_signalSem();
         return error;
     }
 
     //buscamos segunda entrada, con escritura
     error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (error < 0){
+        mi_signalSem();
         return error;
     }
 
@@ -592,6 +601,7 @@ int mi_link(const char *camino1, const char *camino2){
     struct entrada entrada;
     if (mi_read_f(p_inodo_dir2, &entrada, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error mi_read_f"RESET);
+        mi_signalSem();
         return FALLO;
     }
     //creamos el link
@@ -600,12 +610,14 @@ int mi_link(const char *camino1, const char *camino2){
     //actualizamos los resultados
     if (mi_write_f(p_inodo_dir2, &entrada, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error mi_write_f"RESET);
+        mi_signalSem();
         return FALLO;
     }
 
     //liberamos el segundo inodo y controlamos el error
     if (liberar_inodo(p_inodo2) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error liberar_inodo"RESET);
+        mi_signalSem();
         return FALLO;
     }
 
@@ -613,12 +625,14 @@ int mi_link(const char *camino1, const char *camino2){
     struct inodo inodo;
     if (leer_inodo(p_inodo1, &inodo) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error leer_inodo"RESET);
+        mi_signalSem();
         return FALLO;
     }
     inodo.nlinks++;
     inodo.ctime = time(NULL);
     if (escribir_inodo(p_inodo1, &inodo) < 0){
         fprintf(stderr, ROJO_T"mi_link(): error escribir_inodo"RESET);
+        mi_signalSem();
         return FALLO;
     }
 
@@ -634,6 +648,8 @@ int mi_link(const char *camino1, const char *camino2){
 ---------------------------------------------------------------------------------------------------------*/
 int mi_unlink(const char *camino){
 
+    mi_waitSem();
+
     struct superbloque SB;
     struct inodo inodoRM;
     struct inodo inodoDIR;
@@ -648,11 +664,13 @@ int mi_unlink(const char *camino){
 
     if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4)) < 0){
         mostrar_error_buscar_entrada(error);
+        mi_signalSem();
         return FALLO;
     }
 
     if (SB.posInodoRaiz == p_inodo){
         fprintf(stderr, ROJO_T"mi_unlink: El inodo es el inodo raiz\n"RESET);
+        mi_signalSem();
         return FALLO;
     }
 
@@ -663,11 +681,13 @@ int mi_unlink(const char *camino){
     
     if ((inodoRM.tipo == 'd') && (inodoRM.tamEnBytesLog > 0)){
         fprintf(stderr, ROJO_T"mi_unlink: El directorio '%s' no está vacío\n"RESET ,camino);
+        mi_signalSem();
         return FALLO;
     }
 
     
     if (leer_inodo(p_inodo_dir, &inodoDIR) < 0){
+        mi_signalSem();
         return FALLO;
     }
 
@@ -677,16 +697,19 @@ int mi_unlink(const char *camino){
 
         struct entrada entrada;
         if (mi_read_f(p_inodo_dir, &entrada, sizeof(struct entrada) * (num_entrada - 1), sizeof(struct entrada)) < 0){
+            mi_signalSem();
             return FALLO;
         }
 
         if (mi_write_f(p_inodo_dir, &entrada, sizeof(struct entrada) * (p_entrada), sizeof(struct entrada)) < 0){
+            mi_signalSem();
             return FALLO;
         }
 
     }
 
     if (mi_truncar_f(p_inodo_dir, sizeof(struct entrada) * (num_entrada - 1)) < 0){
+        mi_signalSem();
         return FALLO;
     }
 
@@ -696,15 +719,17 @@ int mi_unlink(const char *camino){
     if (inodoRM.nlinks == 0){
         
         if (liberar_inodo(p_inodo) < 0){
+            mi_signalSem();
             return FALLO;
         }
     }else{
 
         inodoRM.ctime = time(NULL);
         if (escribir_inodo(p_inodo, &inodoRM) < 0){
+            mi_signalSem();
             return FALLO;
         }
     }
-
+    mi_signalSem();
     return EXITO;
 }

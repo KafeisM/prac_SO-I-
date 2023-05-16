@@ -1,8 +1,11 @@
 /*JOSEP GABRIEL FORNÉS REYNÉS, JORDI FLORIT ENSENYAT, PAU GIRÓN RODRÍGUEZ*/
 
 #include "bloques.h"
+#include "semaforo_mutex_posix.h"
 
 static int descriptor = 0;
+static sem_t *mutex;
+static unsigned int inside_sc=0;
 
 /*---------------------------------------------------------------------------------------------------------
 * Función para montar el dispositiivo virtual
@@ -11,6 +14,12 @@ static int descriptor = 0;
 ---------------------------------------------------------------------------------------------------------*/
 int bmount(const char *camino){
 
+    if (!mutex){
+        mutex = initSem();
+        if (mutex == SEM_FAILED){
+            return FALLO;
+        }
+    }
     umask(000);
     descriptor = open(camino,O_RDWR | O_CREAT,0666);    //abrimos fichero existente
     if (descriptor < 0){
@@ -28,6 +37,7 @@ int bmount(const char *camino){
 ---------------------------------------------------------------------------------------------------------*/
 int bumount(){
 
+    deleteSem();
     //Cerramos descriptor
     if (close(descriptor) < 0){
         fprintf(stderr, ROJO_T "bumount: Error desmontar dispositivo " RESET);
@@ -84,4 +94,18 @@ int bread(unsigned int nbloque, void *buf){
 
     return bytes_leidos;
 
+}
+
+void mi_waitSem(){
+    if (!inside_sc){
+        waitSem(mutex);
+    }
+    inside_sc++;
+}
+
+void mi_signalSem(){
+    inside_sc--;
+    if (!inside_sc){
+        signalSem(mutex);
+    }
 }

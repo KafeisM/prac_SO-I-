@@ -45,6 +45,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     // Miramos si lo que queremos escribir cabe todo en un mismo bloque
     if(primerBL == ultimoBL){
 
+        mi_waitSem();
         // Obtenemos el numero del bloque fisico
         nbfisico = traducir_bloque_inodo(&inodo, primerBL, 1);
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
@@ -66,6 +67,8 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             }
 
         }
+
+        mi_signalSem();
         // Los bytes leidos seran los mismos que los que nos pasan por parametro
         escritos = nbytes;
 
@@ -101,11 +104,13 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         //2. Bloques intermedios enteros
         for(int i = primerBL + 1; i < ultimoBL; i++){
 
+            mi_waitSem();
             // Obtenemos el numero del bloque fisico sobre cada iteracion
             nbfisico = traducir_bloque_inodo(&inodo, i, 1);
             // Miramos si hay bloque fisico, y si hay, entramos dentro del if
             if(nbfisico != FALLO){
                 
+                mi_signalSem();
                 // Escribimos el bloque correspondiente
                 if(bwrite(nbfisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE) == FALLO){
                     fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
@@ -113,17 +118,20 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
                 }
 
             }
+            mi_signalSem();
             // Los bytes leidos en esta parte van a ser la longitud del bloque entero
             escritos += BLOCKSIZE;
 
         }
 
+        mi_waitSem();
         //3. Ultimo bloque parcial
         // Obtenemos el numero del bloque fisico
         nbfisico = traducir_bloque_inodo(&inodo, ultimoBL, 1);
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
 
+            mi_signalSem();
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_write_f: Error bread\n" RESET);
@@ -140,10 +148,13 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             }
 
         }
+        mi_signalSem();
         // Los bytes escritos seran el desplazamiento final mas 1
         escritos += desp2 + 1;
     }
 
+
+    mi_waitSem();
     //Vamos a actualizar mtime y ctime
 
     // Miramos si vamos hemos escrito más alla del EOF
@@ -158,6 +169,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         fprintf(stderr, ROJO_T "mi_write_f: Error escribir_inodo\n" RESET);
         return escritos;
     }
+    mi_signalSem();
 
     // Si los bytes escritos no coinciden con los bytes que nos han pasado por parametro devuelve FALLO, 
     // sino devuelve el numero de bytes leidos
@@ -310,6 +322,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         leidos += desp2 + 1;
     }
 
+    mi_waitSem();
     //Vamos a actualizar atime
     
     //Modificamos atime
@@ -319,6 +332,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         fprintf(stderr, ROJO_T "mi_read_f: Error escribir_inodo\n" RESET);
         return leidos;
     }
+    mi_signalSem();
 
     // Si los bytes leidos no coinciden con los bytes que nos han pasado por parametro devuelve FALLO, 
     // sino devuelve el numero de bytes leidos
@@ -374,11 +388,13 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
 
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     
+    mi_waitSem();
     struct inodo inodos;
 
     //Leemos inodo
     if(leer_inodo(ninodo, &inodos) == FALLO){
         fprintf(stderr, ROJO_T "mi_chmod_f: Error leer_inodo\n" RESET);
+        mi_signalSem();
         return FALLO;
     }
 
@@ -388,9 +404,10 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     //Escribimos inodo
     if(escribir_inodo(ninodo, &inodos) == FALLO){
         fprintf(stderr, ROJO_T "mi_chmod_f: Error escribir_inodo\n" RESET);
+        mi_signalSem();
         return FALLO;
     }
-
+    mi_signalSem();
     return EXITO;
 }
 
