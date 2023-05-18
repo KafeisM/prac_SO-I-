@@ -14,6 +14,10 @@ static unsigned int inside_sc=0;
 ---------------------------------------------------------------------------------------------------------*/
 int bmount(const char *camino){
 
+    if (descriptor > 0){
+        close(descriptor);
+    }
+
     if (!mutex){
         mutex = initSem();
         if (mutex == SEM_FAILED){
@@ -36,6 +40,8 @@ int bmount(const char *camino){
 * Output:   FALLO o EXITO
 ---------------------------------------------------------------------------------------------------------*/
 int bumount(){
+
+    descriptor = close(descriptor);
 
     deleteSem();
     //Cerramos descriptor
