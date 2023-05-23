@@ -17,7 +17,7 @@
 
 #define TAMNOMBRE 60 //tamaño del nombre de directorio o fichero
 #define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
-#define CACHE 10
+#define CACHE 3
 
 struct entrada
 {
