@@ -3,7 +3,7 @@
 int main(int argc, char **argv){
 
    if (argc!=3) {
-      fprintf(stderr, ROJO_T "Sintaxis: ./prueba_cache_tabla <nombre_dispositivo> <texto>\n" RESET);
+      fprintf(stderr, ROJO_T"Sintaxis: ./prueba_cache_tabla <nombre_dispositivo> <texto>\n" RESET);
       exit(FALLO);
    }
     // Montar dispositivo virtual
@@ -19,11 +19,11 @@ int main(int argc, char **argv){
     // Crear ficheros
     for (int i=0; i<5; i++){
         mi_creat(rutas[i], 6);
-        fprintf(stderr, AZUL_T "[prueba cache ()→ creado %s]\n" RESET, rutas[i]);  
+        fprintf(stderr, GRIS_T"[prueba cache ()→ creado %s]\n" RESET, rutas[i]);  
     }
     //Escrituras
     for (int j=0; j<12; j++){
-        fprintf(stderr, AZUL_T "\n[prueba cache ()→ acceso a %s]\n" RESET, orden_acceso[j] );
+        fprintf(stderr, AZUL_T"\n[prueba cache ()→ acceso a %s]\n" RESET, orden_acceso[j] );
         mi_write(orden_acceso[j], buffer_texto, offset, nbytes);
     }  
 
