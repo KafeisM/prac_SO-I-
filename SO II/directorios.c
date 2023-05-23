@@ -442,7 +442,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
             UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
             maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
 
-            //fprintf(stderr, AZUL_T"[mi_write() → Actualizamos la caché de lectura]\n"RESET);
+            fprintf(stderr, AZUL_T"[mi_write() → Utilizamos la caché de lectura]\n"RESET);
 
         }else{
             // si esta llena debemos remplazar el elemento mas antiguo (modelo FIFO)
@@ -456,7 +456,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
             strcpy(UltimasEntradas[CACHE - 1].camino, camino);
             UltimasEntradas[CACHE - 1].p_inodo = p_inodo;
 
-            //fprintf(stderr, AZUL_T"[mi_write() → Actualizamos la caché de lectura]\n"RESET);
+            fprintf(stderr, AZUL_T"[mi_write() → Reemplazamos la caché de lectura]\n"RESET);
         }
     }
 
@@ -508,7 +508,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
             UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
             maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
 
-            //fprintf(stderr, AZUL_T"[mi_read() → Actualizamos la caché de lectura]\n"RESET);
+            fprintf(stderr, AZUL_T"[mi_read() → Utilizamos la caché de lectura]\n"RESET);
 
         }else{
             // si esta llena debemos remplazar el elemento mas antiguo (modelo FIFO)
@@ -522,7 +522,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
             strcpy(UltimasEntradas[CACHE - 1].camino, camino);
             UltimasEntradas[CACHE - 1].p_inodo = p_inodo;
 
-            //fprintf(stderr, AZUL_T"[mi_read() → Actualizamos la caché de lectura]\n"RESET);
+            fprintf(stderr, AZUL_T"[mi_read() → Reemplazamos la caché de lectura]\n"RESET);
         }
         
     }
