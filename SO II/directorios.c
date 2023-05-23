@@ -639,6 +639,8 @@ int mi_link(const char *camino1, const char *camino2){
         return FALLO;
     }
 
+    mi_signalSem();
+
     return EXITO;
 
 }
