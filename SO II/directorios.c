@@ -425,7 +425,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         if (strcmp(camino, UltimasEntradas[i].camino) == 0){ // Si la escritura es sobre el mismo inodo
             p_inodo = UltimasEntradas[i].p_inodo;
             found = true;
-            fprintf(stderr, GRIS_T"[mi_write() → Utilizamos la caché[%i]: %s]\n"RESET, CACHE - maxcaxhe, camino);
+            fprintf(stderr, GRIS_T"[mi_write() → Utilizamos la caché[%i]: %s]\n"RESET, i, camino);
             //fprintf(stderr, GRIS_T"[mi_write() → %s]\n"RESET, "found");
             break;
         }
@@ -443,9 +443,8 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
             // metemos en la cache el camino actual con su correspondiente inodo
             strcpy(UltimasEntradas[CACHE - maxcaxhe].camino, camino);
             UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
-            maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
-
             fprintf(stderr, GRIS_T"[mi_write() → Reemplazamos la caché[%i]: %s]\n"RESET, CACHE - maxcaxhe, camino);
+            maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
 
         }else{
             // si esta llena debemos remplazar el elemento mas antiguo (modelo FIFO)
