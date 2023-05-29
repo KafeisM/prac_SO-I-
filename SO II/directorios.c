@@ -4,6 +4,7 @@
 
 static struct UltimaEntrada UltimasEntradas[CACHE];
 int maxcaxhe = CACHE;
+unsigned int primer_camino_pos = 0;
 
 /*---------------------------------------------------------------------------------------------------------
 * Dada una cadena de (camino que empieze por '/') separa su contenido
@@ -418,6 +419,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     unsigned int p_entrada = 0;
     int error;
     int bytes_escritos;
+    
 
     // miramos en la cache para ver si la lectura es sobre un inodo que tenemos guardado
     for (int i = 0; i < (CACHE - 1); i++){
@@ -425,7 +427,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         if (strcmp(camino, UltimasEntradas[i].camino) == 0){ // Si la escritura es sobre el mismo inodo
             p_inodo = UltimasEntradas[i].p_inodo;
             found = true;
-            fprintf(stderr, GRIS_T"[mi_write() → Utilizamos la caché[%i]: %s]\n"RESET, i, camino);
+            fprintf(stderr, ROJO_T"[mi_write() → Utilizamos la caché[%i]: %s]\n"RESET, i, camino);
             //fprintf(stderr, GRIS_T"[mi_write() → %s]\n"RESET, "found");
             break;
         }
@@ -440,25 +442,25 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
 
         // miramos si la cache aun no está llena
         if (maxcaxhe > 0){
+            //si la caché está vacía el camino que introducimos es el primero
+            if (maxcaxhe == CACHE){
+                primer_camino_pos = 0;
+            }
             // metemos en la cache el camino actual con su correspondiente inodo
             strcpy(UltimasEntradas[CACHE - maxcaxhe].camino, camino);
             UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
-            fprintf(stderr, GRIS_T"[mi_write() → Reemplazamos la caché[%i]: %s]\n"RESET, CACHE - maxcaxhe, camino);
+            fprintf(stderr, GRIS_T"[mi_write() → 1 Reemplazamos la caché[%i]: %s]\n"RESET, CACHE - maxcaxhe, camino);
             maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
 
         }else{
             // si esta llena debemos remplazar el elemento mas antiguo (modelo FIFO)
-            for (int i = 0; i < CACHE - 1; i++){
-                // movemos todas las entradas hacia la izquierda (eliminado el mas aniguo y dejando espacio para la nueva entrada)
-                strcpy(UltimasEntradas[i].camino, UltimasEntradas[i + 1].camino);
-                UltimasEntradas[i].p_inodo = UltimasEntradas[i + 1].p_inodo;
-            }
 
             // añadimos la nueva entrada
-            strcpy(UltimasEntradas[CACHE - 1].camino, camino);
-            UltimasEntradas[CACHE - 1].p_inodo = p_inodo;
-
-            fprintf(stderr, GRIS_T"[mi_write() → Reemplazamos la caché[%i]: %s]\n"RESET, CACHE - maxcaxhe, camino);
+            strcpy(UltimasEntradas[primer_camino_pos].camino, camino);
+            UltimasEntradas[primer_camino_pos].p_inodo = p_inodo;
+            fprintf(stderr, GRIS_T"[mi_write() → 2 Reemplazamos la caché[%i]: %s]\n"RESET, primer_camino_pos, camino);
+            primer_camino_pos = (primer_camino_pos + 1)%3;
+            
         }
     }
 
