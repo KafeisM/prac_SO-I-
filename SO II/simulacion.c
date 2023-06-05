@@ -4,6 +4,15 @@
 
 int acabados = 0;
 
+void reaper(){
+    pid_t ended;
+    signal(SIGCHLD, reaper);
+    fprintf(stderr, AZUL_T"acabados: %i\n"RESET, acabados);
+    while ((ended = waitpid(-1, NULL, WNOHANG)) > 0){
+        acabados++;
+    }
+}
+
 int main(int argc, char const **argv){
 
     signal(SIGCHLD, reaper);
@@ -38,8 +47,10 @@ int main(int argc, char const **argv){
         return FALLO;
     }
 
+    pid_t pid;
+
     for (int proceso=1; proceso <= NUMPROCESOS; proceso++){
-        pid_t pid = fork();
+        pid = fork();
         if (pid == 0){ //si es el hijo
 
             bmount(argv[1]);
@@ -47,7 +58,7 @@ int main(int argc, char const **argv){
             sprintf(directorio, "%sproceso_PID%d/", buffer, getpid());
 
             if (mi_creat(directorio, 6) < 0){
-                fprintf(stderr, ROJO_T"te la chingaste cabron creat 1\n"RESET);
+                fprintf(stderr, ROJO_T"Error en mi_creat 1\n"RESET);
                 bumount();
                 exit(0);
             }
@@ -55,27 +66,27 @@ int main(int argc, char const **argv){
             char fichero[120];
             sprintf(fichero, "%sprueba.dat", directorio);
 
-            if (mi_creat(fichero, 2) < 0){
-                fprintf(stderr, ROJO_T"te la chingaste cabron creat 2\n"RESET);
+            if (mi_creat(fichero, 6) < 0){
+                fprintf(stderr, ROJO_T"Error en mi creat 2\n"RESET);
                 bumount();
                 exit(0);
             }
 
             srand(time(NULL) + getpid());
 
-            for (int nescritura=1; nescritura <= NUMESCRITURAS; nescritura++){
+            for (int nescritura=0; nescritura < NUMESCRITURAS; nescritura++){
                 
                 struct REGISTRO reg;
                 reg.fecha = time(NULL);
                 reg.pid = getpid();
-                reg.nEscritura = nescritura;
+                reg.nEscritura = nescritura+1;
                 reg.nRegistro = rand() % REGMAX;
 
                 if (mi_write(fichero, &reg, reg.nRegistro*sizeof(struct REGISTRO), sizeof(struct REGISTRO)) == 0){
-                    fprintf(stderr, ROJO_T"te la chingaste cabron\n"RESET);
+                    fprintf(stderr, ROJO_T"Error en mi_write\n"RESET);
                 }
 
-                fprintf(stderr, "[simulacion.c -> Escritura %i en %s]\n", nescritura, fichero);
+                //fprintf(stderr, "[simulacion.c -> Escritura %i en %s]\n", nescritura, fichero);
                 usleep(50000);
             }
 
@@ -95,18 +106,11 @@ int main(int argc, char const **argv){
         pause();
     }
 
-    if (bumount < 0){
+    if (bumount() < 0){
         fprintf(stderr, "Error al desmontar el dispositivo\n");
         exit(0);
     }
 
-}
+    return EXITO;
 
-void reaper(){
-    pid_t ended;
-    signal(SIGCHLD, reaper);
-    fprintf(stderr, AZUL_T"acabados: %i\n"RESET, acabados);
-    while ((ended = waitpid(-1, NULL, WNOHANG)) > 0){
-        acabados++;
-    }
 }

@@ -22,11 +22,12 @@ int main(int argc, char **argv){
 
   numeroEntradas = (stat.tamEnBytesLog / sizeof(struct entrada)); // obtenemos numero de entradas
   if (numeroEntradas != NUMPROCESOS){
+    fprintf(stderr, "Numero entradas: %i ,numProcesos: %d", numeroEntradas, NUMPROCESOS);
     fprintf(stderr, ROJO_T "Numero de entradas distinto a numero de procesos\n" RESET);
     return FALLO;
   }
 
-  fprintf("Numero de entradas: %d\n", numeroEntradas);
+  fprintf(stderr,"Numero de entradas: %i\n", numeroEntradas);
 
   char direccion_fichero[100];
   strcat(direccion_fichero, argv[2]);

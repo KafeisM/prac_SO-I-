@@ -248,6 +248,7 @@ int mi_creat(const char *camino, unsigned char permisos){
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
     //tratamos el error
     if(error < 0){
+        mostrar_error_buscar_entrada(error);
         mi_signalSem();
         return error;
     }
@@ -413,6 +414,7 @@ int mi_chmod(const char *camino, unsigned char permisos){
 * Output:   FALLO o EXITO
 ---------------------------------------------------------------------------------------------------------*/
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes){
+    mi_waitSem();
     bool found = false;
     unsigned int p_inodo_dir = 0;
     unsigned int p_inodo = 0;
@@ -427,7 +429,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
         if (strcmp(camino, UltimasEntradas[i].camino) == 0){ // Si la escritura es sobre el mismo inodo
             p_inodo = UltimasEntradas[i].p_inodo;
             found = true;
-            fprintf(stderr, ROJO_T"[mi_write() → Utilizamos la caché[%i]: %s]\n"RESET, i, camino);
+            //fprintf(stderr, ROJO_T"[mi_write() → Utilizamos la caché[%i]: %s]\n"RESET, i, camino);
             //fprintf(stderr, GRIS_T"[mi_write() → %s]\n"RESET, "found");
             break;
         }
@@ -437,6 +439,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     if (!found){
         error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
         if (error < 0){
+            mi_signalSem();
             return error;
         }
 
@@ -449,7 +452,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
             // metemos en la cache el camino actual con su correspondiente inodo
             strcpy(UltimasEntradas[CACHE - maxcaxhe].camino, camino);
             UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
-            fprintf(stderr, GRIS_T"[mi_write() → 1 Reemplazamos la caché[%i]: %s]\n"RESET, CACHE - maxcaxhe, camino);
+            //fprintf(stderr, GRIS_T"[mi_write() → 1 Reemplazamos la caché[%i]: %s]\n"RESET, CACHE - maxcaxhe, camino);
             maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
 
         }else{
@@ -458,7 +461,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
             // añadimos la nueva entrada
             strcpy(UltimasEntradas[primer_camino_pos].camino, camino);
             UltimasEntradas[primer_camino_pos].p_inodo = p_inodo;
-            fprintf(stderr, GRIS_T"[mi_write() → 2 Reemplazamos la caché[%i]: %s]\n"RESET, primer_camino_pos, camino);
+            //fprintf(stderr, GRIS_T"[mi_write() → 2 Reemplazamos la caché[%i]: %s]\n"RESET, primer_camino_pos, camino);
             primer_camino_pos = (primer_camino_pos + 1)%3;
             
         }
@@ -469,6 +472,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     if (bytes_escritos == FALLO){
         bytes_escritos = 0;
     }
+    mi_signalSem();
     return bytes_escritos;
 }
 
@@ -482,6 +486,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
 ---------------------------------------------------------------------------------------------------------*/
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes){
 
+    mi_waitSem();
     bool found = false;
     unsigned int p_inodo_dir = 0;
     unsigned int p_inodo = 0;
@@ -502,6 +507,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     if (!found){
         error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 2);
         if (error < 0){
+            mi_signalSem();
             return error;
         }
 
@@ -512,7 +518,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
             UltimasEntradas[CACHE - maxcaxhe].p_inodo = p_inodo;
             maxcaxhe = maxcaxhe - 1; // decrementamos el contador de elementos en la caché actual
 
-            fprintf(stderr, AZUL_T"[mi_read() → Utilizamos la caché de lectura]\n"RESET);
+            //fprintf(stderr, AZUL_T"[mi_read() → Utilizamos la caché de lectura]\n"RESET);
 
         }else{
             // si esta llena debemos remplazar el elemento mas antiguo (modelo FIFO)
@@ -526,7 +532,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
             strcpy(UltimasEntradas[CACHE - 1].camino, camino);
             UltimasEntradas[CACHE - 1].p_inodo = p_inodo;
 
-            fprintf(stderr, AZUL_T"[mi_read() → Reemplazamos la caché de lectura]\n"RESET);
+            //fprintf(stderr, AZUL_T"[mi_read() → Reemplazamos la caché de lectura]\n"RESET);
         }
         
     }
@@ -536,6 +542,7 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     if (bytes_leidos == FALLO){
         bytes_leidos = 0;
     }
+    mi_signalSem();
     return bytes_leidos;
 }
 
