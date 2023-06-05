@@ -43,7 +43,7 @@ int main(int argc, char const **argv){
     strcat(camino,"/");
     strcpy(buffer, camino);
 
-    if (mi_creat(camino,6) < 0){
+    if (mi_creat(camino,6) == FALLO){
         return FALLO;
     }
 
@@ -55,7 +55,7 @@ int main(int argc, char const **argv){
 
             bmount(argv[1]);
             char directorio[100];
-            sprintf(directorio, "%sproceso_PID%d/", buffer, getpid());
+            sprintf(directorio, "%sproceso_%d/", buffer, getpid());
 
             if (mi_creat(directorio, 6) < 0){
                 fprintf(stderr, ROJO_T"Error en mi_creat 1\n"RESET);
@@ -85,10 +85,6 @@ int main(int argc, char const **argv){
                 if (mi_write(fichero, &reg, reg.nRegistro*sizeof(struct REGISTRO), sizeof(struct REGISTRO)) == 0){
                     fprintf(stderr, ROJO_T"Error en mi_write\n"RESET);
                 }
-
-                //fprintf(stderr, "[simulacion.c -> Escritura %i en %s]\n", nescritura, fichero);
-                fprintf(stderr, AZUL_T"registro.fecha = %ld, registro.pid = %d, registro.nEscritura = %d, registro.nRegistro = %d,\n"
-                RESET,reg.fecha,reg.pid,reg.nEscritura,reg.nRegistro);
                 usleep(50000);
             }
 
