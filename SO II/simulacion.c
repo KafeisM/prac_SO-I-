@@ -7,7 +7,7 @@ int acabados = 0;
 void reaper(){
     pid_t ended;
     signal(SIGCHLD, reaper);
-    fprintf(stderr, AZUL_T"acabados: %i\n"RESET, acabados);
+    //fprintf(stderr, AZUL_T"acabados: %i\n"RESET, acabados);
     while ((ended = waitpid(-1, NULL, WNOHANG)) > 0){
         acabados++;
     }

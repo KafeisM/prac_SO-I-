@@ -19,6 +19,7 @@ int main(int argc, char **argv){
   }
 
   mi_stat(argv[2], &stat);
+  fprintf(stderr, "Directorio de simulación: %s\n",argv[2]);
 
   numeroEntradas = (stat.tamEnBytesLog / sizeof(struct entrada)); // obtenemos numero de entradas
   if (numeroEntradas != NUMPROCESOS){
@@ -30,10 +31,8 @@ int main(int argc, char **argv){
   fprintf(stderr,"Numero de entradas: %i\n", numeroEntradas);
 
   char direccion_fichero[100];
-  strcat(direccion_fichero, argv[2]);
-  strcat(direccion_fichero, "informe.txt");
+  sprintf(direccion_fichero, "%s%s", argv[2], "informe.txt");
 
-  printf("%s\n", direccion_fichero);
   if (mi_creat(direccion_fichero, 7) < 0){
     bumount();
     exit(0);
@@ -46,24 +45,26 @@ int main(int argc, char **argv){
     return FALLO;
   }
 
-  for(int i = 0; i < numeroEntradas; i++){
+  for(int nEntrada = 0; nEntrada < numeroEntradas; nEntrada++){
 
-    pid_t pid = atoi(strchr(entradas[i].nombre, '_') + 1);
+    //leer la entrada y extrear el pid correspondiente
+    pid_t pid = atoi(strchr(entradas[nEntrada].nombre, '_') + 1);
     struct INFORMACION informacion;
     informacion.pid = pid;
     informacion.nEscrituras = 0;
 
     char ficheroPrueba[128];
-    strcat(direccion_fichero, argv[2]);
-    strcat(direccion_fichero, entradas[i].nombre);
-    strcat(direccion_fichero, "informe.txt");
+    sprintf(ficheroPrueba, "%s%s/%s", argv[2],entradas[nEntrada].nombre,"prueba.dat");
 
-    int cantidad = 256;
+    //buffer de registros de escrituras
+    int cantidad = 256; //multiple de blocksize
     struct REGISTRO bEscrituras[cantidad];
     memset(bEscrituras, 0, sizeof(bEscrituras));
 
     int offset = 0;
-    while(mi_read(ficheroPrueba, bEscrituras, offset, sizeof(bEscrituras)) < 0){
+
+    //mirar si quedan escrituras en prueba.dat
+    while(mi_read(ficheroPrueba, bEscrituras, offset, sizeof(bEscrituras)) > 0){
 
       int numeroRegistro = 0;
 
@@ -80,29 +81,26 @@ int main(int argc, char **argv){
           }else{
 
             if ((difftime(bEscrituras[numeroRegistro].fecha, informacion.PrimeraEscritura.fecha)) <= 0 &&
-                bEscrituras[numeroRegistro].nEscritura < informacion.PrimeraEscritura.nEscritura){
-
+                bEscrituras[numeroRegistro].nEscritura < informacion.PrimeraEscritura.nEscritura)
+            {
               informacion.PrimeraEscritura = bEscrituras[numeroRegistro];
-
             }
 
             if ((difftime(bEscrituras[numeroRegistro].fecha, informacion.UltimaEscritura.fecha)) >= 0 &&
-                bEscrituras[numeroRegistro].nEscritura > informacion.UltimaEscritura.nEscritura){
-
+                bEscrituras[numeroRegistro].nEscritura > informacion.UltimaEscritura.nEscritura)
+            {
               informacion.UltimaEscritura = bEscrituras[numeroRegistro];
-
             }
 
-            if (bEscrituras[numeroRegistro].nRegistro < informacion.MenorPosicion.nRegistro){
-
+            if (bEscrituras[numeroRegistro].nRegistro < informacion.MenorPosicion.nRegistro)
+            {
               informacion.MenorPosicion = bEscrituras[numeroRegistro];
-
             }
 
-            if (bEscrituras[numeroRegistro].nRegistro > informacion.MayorPosicion.nRegistro){
+            if (bEscrituras[numeroRegistro].nRegistro > informacion.MayorPosicion.nRegistro)
+            {
 
               informacion.MayorPosicion = bEscrituras[numeroRegistro];
-
             }
 
             informacion.nEscrituras++;
@@ -116,7 +114,7 @@ int main(int argc, char **argv){
       offset += sizeof(bEscrituras);
     }
 
-    fprintf(stderr, "[%i) %i escrituras validadas en %s]\n", numeroEntradas + 1, informacion.nEscrituras, ficheroPrueba);
+    fprintf(stderr, "[%i) %i escrituras validadas en %s]\n", nEntrada + 1, informacion.nEscrituras, ficheroPrueba);
 
     //Añadir la información del struct info al fichero informe.txt por el final
     char tiempoPrimero[100];
