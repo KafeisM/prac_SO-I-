@@ -87,6 +87,8 @@ int main(int argc, char const **argv){
                 }
 
                 //fprintf(stderr, "[simulacion.c -> Escritura %i en %s]\n", nescritura, fichero);
+                fprintf(stderr, AZUL_T"registro.fecha = %ld, registro.pid = %d, registro.nEscritura = %d, registro.nRegistro = %d,\n"
+                RESET,reg.fecha,reg.pid,reg.nEscritura,reg.nRegistro);
                 usleep(50000);
             }
 

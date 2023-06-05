@@ -7,6 +7,7 @@ int main(int argc, char **argv){
   int numeroEntradas = 0;
   int error = 0;
   int numeroBytes = 0;
+  int nEntrada = 0;
 
   if (argc != 3){
     fprintf(stderr, ROJO_T "Sintaxis: ./verificacion <nombre_dispositivo> <directorio_simulación>\n" RESET);
@@ -28,7 +29,7 @@ int main(int argc, char **argv){
     return FALLO;
   }
 
-  fprintf(stderr,"Numero de entradas: %i\n", numeroEntradas);
+  
 
   char direccion_fichero[100];
   sprintf(direccion_fichero, "%s%s", argv[2], "informe.txt");
@@ -45,7 +46,9 @@ int main(int argc, char **argv){
     return FALLO;
   }
 
-  for(int nEntrada = 0; nEntrada < numeroEntradas; nEntrada++){
+  fprintf(stderr,"Numero de entradas: %i\n", numeroEntradas);
+
+  for(nEntrada = 0; nEntrada < numeroEntradas; nEntrada++){
 
     //leer la entrada y extrear el pid correspondiente
     pid_t pid = atoi(strchr(entradas[nEntrada].nombre, '_') + 1);
@@ -57,7 +60,7 @@ int main(int argc, char **argv){
     sprintf(ficheroPrueba, "%s%s/%s", argv[2],entradas[nEntrada].nombre,"prueba.dat");
 
     //buffer de registros de escrituras
-    int cantidad = 256; //multiple de blocksize
+    int cantidad = 256*24; //multiple de blocksize
     struct REGISTRO bEscrituras[cantidad];
     memset(bEscrituras, 0, sizeof(bEscrituras));
 
@@ -78,6 +81,7 @@ int main(int argc, char **argv){
             informacion.PrimeraEscritura = bEscrituras[numeroRegistro];
             informacion.UltimaEscritura = bEscrituras[numeroRegistro];
             informacion.nEscrituras++;
+            //fprintf(stderr, "nEscrituras: %i\n",informacion.nEscrituras);
           }else{
 
             if ((difftime(bEscrituras[numeroRegistro].fecha, informacion.PrimeraEscritura.fecha)) <= 0 &&
@@ -103,7 +107,9 @@ int main(int argc, char **argv){
               informacion.MayorPosicion = bEscrituras[numeroRegistro];
             }
 
+            
             informacion.nEscrituras++;
+            //fprintf(stderr, "nEscrituras: %i\n",informacion.nEscrituras);
 
           }
 

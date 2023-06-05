@@ -11,7 +11,7 @@
 * Output:   cantidad de bytes leídos realmente.
 ---------------------------------------------------------------------------------------------------------*/
 
-int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes)
+int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes)
 {
     struct inodo inodo;
 
@@ -165,8 +165,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     }
 }
 
-int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
+int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
 
+    mi_waitSem();
     struct inodo inodo;
     int escritos = 0;
     unsigned int primerBL;
@@ -179,12 +180,14 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
     // Leemos inodo
     if(leer_inodo(ninodo, &inodo) == FALLO){
         fprintf(stderr, ROJO_T "mi_write_f: Error leer_inodo\n" RESET);
+        mi_signalSem();
         return escritos;
     }
 
     //Miramos si los permisos corresponden a los de escribir
     if ((inodo.permisos & 2) != 2){
         fprintf(stderr, ROJO_T "No hay permisos de escritura\n" RESET);
+        mi_signalSem();
         return escritos;
     }
 
@@ -199,16 +202,17 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
     // Miramos si lo que queremos escribir cabe todo en un mismo bloque
     if(primerBL == ultimoBL){
 
-        mi_waitSem();
+        //mi_waitSem();
         // Obtenemos el numero del bloque fisico
         nbfisico = traducir_bloque_inodo(&inodo, primerBL, 1);
-        mi_signalSem();
+        //mi_signalSem();
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
             
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_write_f: Error bread\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
 
@@ -218,6 +222,7 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
             // Escribimos el bloque fisico
             if(bwrite(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
             
@@ -233,15 +238,16 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
 
         //1. Primer bloque parcial escrito
         // Obtenemos el numero del bloque fisico
-        mi_waitSem();
+        //mi_waitSem();
         nbfisico = traducir_bloque_inodo(&inodo, primerBL, 1);
-        mi_signalSem();
+        //mi_signalSem();
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
             
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_write_f: Error bread\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
 
@@ -251,6 +257,7 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
             // Escribimos el bloque fisico
             if(bwrite(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
             
@@ -262,10 +269,10 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
         //2. Bloques intermedios enteros
         for(int i = primerBL + 1; i < ultimoBL; i++){
 
-            mi_waitSem();
+            //mi_waitSem();
             // Obtenemos el numero del bloque fisico sobre cada iteracion
             nbfisico = traducir_bloque_inodo(&inodo, i, 1);
-            mi_signalSem();
+            //mi_signalSem();
             // Miramos si hay bloque fisico, y si hay, entramos dentro del if
             if(nbfisico != FALLO){
                 
@@ -273,6 +280,7 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
                 // Escribimos el bloque correspondiente
                 if(bwrite(nbfisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE) == FALLO){
                     fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
+                    mi_signalSem();
                     return FALLO;
                 }
                 
@@ -284,11 +292,11 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
 
         }
 
-        mi_waitSem();
+        //mi_waitSem();
         //3. Ultimo bloque parcial
         // Obtenemos el numero del bloque fisico
         nbfisico = traducir_bloque_inodo(&inodo, ultimoBL, 1);
-        mi_signalSem();
+        //mi_signalSem();
         // Miramos si hay bloque fisico, y si hay, entramos dentro del if
         if(nbfisico != FALLO){
 
@@ -296,6 +304,7 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_write_f: Error bread\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
 
@@ -305,6 +314,7 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
             // Escribimos el bloque fisico
             if(bwrite(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_write_f: Error bwrite\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
 
@@ -314,7 +324,7 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
     }
 
 
-    mi_waitSem();
+    //mi_waitSem();
     //Vamos a actualizar mtime y ctime
 
     // Miramos si vamos hemos escrito más alla del EOF
@@ -331,14 +341,16 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
         mi_signalSem();
         return escritos;
     }
-    mi_signalSem();
+    //mi_signalSem();
 
     // Si los bytes escritos no coinciden con los bytes que nos han pasado por parametro devuelve FALLO, 
     // sino devuelve el numero de bytes leidos
     if(escritos != nbytes){
         fprintf(stderr, ROJO_T "mi_read_f: Error escritos\n" RESET);
+        mi_signalSem();
         return FALLO;
     }else {
+        mi_signalSem();
         return nbytes;
     }
 
@@ -357,6 +369,7 @@ int mi_write_f2(unsigned int ninodo, const void *buf_original, unsigned int offs
 
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes){
 
+    mi_waitSem();
     struct inodo inodo;
     int leidos = 0;
     unsigned int primerBL;
@@ -369,18 +382,21 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     // Leemos inodo
     if(leer_inodo(ninodo, &inodo) == FALLO){
         fprintf(stderr, ROJO_T "mi_read_f: Error leer_inodo\n" RESET);
+        mi_signalSem();
         return leidos;
     }
 
     //Miramos si los permisos corresponden a los de leer
     if ((inodo.permisos & 4) != 4){
         fprintf(stderr, ROJO_T "No hay permisos de lectura\n" RESET);
+        mi_signalSem();
         return leidos;
     }
 
     //Miramos si el offset supera el EOF
     if(offset >= inodo.tamEnBytesLog){
         leidos = 0; //No podemos leer nada
+        mi_signalSem();
         return leidos;
     }
 
@@ -409,6 +425,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_read_f: Error bread\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
 
@@ -431,6 +448,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_read_f: Error bread\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
 
@@ -452,6 +470,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
                 // Leemos el bloque fisico
                 if(bread(nbfisico, buf_bloque) == FALLO){
                     fprintf(stderr, ROJO_T "mi_read_f: Error bread\n" RESET);
+                    mi_signalSem();
                     return FALLO;
                 }
 
@@ -473,6 +492,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             // Leemos el bloque fisico
             if(bread(nbfisico, buf_bloque) == FALLO){
                 fprintf(stderr, ROJO_T "mi_read_f: Error bread\n" RESET);
+                mi_signalSem();
                 return FALLO;
             }
 
@@ -491,6 +511,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     inodo.atime = time(NULL);
     //Lo volvemos a escribir
     if(escribir_inodo(ninodo, &inodo) == FALLO){
+        mi_signalSem();
         fprintf(stderr, ROJO_T "mi_read_f: Error escribir_inodo\n" RESET);
         return leidos;
     }
@@ -500,11 +521,14 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     // sino devuelve el numero de bytes leidos
     if(leidos != nbytes){
         fprintf(stderr, ROJO_T "mi_read_f: Error leidos\n" RESET);
+        mi_signalSem();
         return FALLO;
     }else {
+        mi_signalSem();
         return nbytes;
     }
 
+    mi_signalSem();
     return EXITO;
 
 }

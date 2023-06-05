@@ -472,6 +472,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
     if (bytes_escritos == FALLO){
         bytes_escritos = 0;
     }
+    //fprintf(stderr, "mi_write: FINISHED\n");
     mi_signalSem();
     return bytes_escritos;
 }
